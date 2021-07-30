@@ -18,7 +18,7 @@ export default ({setDataArr, setIsLoading, setCsvLoaded}) => {
 
   return (
     <>
-      <h5>Click or Drag Upload</h5>
+      <h5>2. Click or Drag Upload CSV</h5>
       <CSVReader
         onDrop={handleOnDrop}
         onError={handleOnError}
