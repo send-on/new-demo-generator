@@ -18,7 +18,7 @@ export default ({setDataArr, setIsLoading, setCsvLoaded}) => {
 
   return (
     <>
-      <h5>2. Click or Drag Upload CSV</h5>
+      <h5>2. Click or Drag Upload <a style={{color:"white"}} href="https://docs.google.com/spreadsheets/d/1jXUA_clzEbEX5xMLGGhFsJDgRau6RnpKYAlBbZYJy6I/edit?usp=sharing">CSV</a></h5>
       <CSVReader
         onDrop={handleOnDrop}
         onError={handleOnError}
