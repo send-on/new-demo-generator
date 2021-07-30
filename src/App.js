@@ -1,3 +1,11 @@
+// to do: accept arrays
+// link traits properties. - recall 
+// [address,1]: []
+// address:[]
+// [address,2]:[]
+// [{“value”: “San Francisco”, “type”: “string”, weight: 90}, {“value”: “Oakland”, “type”: “string”, weight: 10}]
+// [{“value”: “{name: stuff}”, “type”: “object”, weight: 90}]
+
 import React, { useState } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
@@ -48,7 +56,7 @@ const createProps = (e) => {
   return properties;
 }
 
-const launcher = async (dataArr, userList, u_i, e_i, firedEvents=[], setIsLoading=false, analytics, setCounter, counter) => {
+const launcher = async (dataArr, userList, u_i, e_i, firedEvents=[], setIsLoading=false, analytics, setCounter, counter, setUserCounter) => {
   // reset ajs on new user
   setIsLoading(true);
   if (e_i === 0) {
@@ -87,15 +95,19 @@ const launcher = async (dataArr, userList, u_i, e_i, firedEvents=[], setIsLoadin
     });
   }
   counter++;
+
+  if (u_i%10 === 0) setUserCounter(userList.length - u_i)
+  
   // next event
   if (dataArr[e_i+1]) {    
     if (counter%100 === 0) setCounter(counter);
-    setTimeout(()=>launcher(dataArr, userList, u_i, e_i+1,firedEvents, setIsLoading, analytics, setCounter, counter), 10);
+    setTimeout(()=>launcher(dataArr, userList, u_i, e_i+1,firedEvents, setIsLoading, analytics, setCounter, counter, setUserCounter), 10);
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
-    setTimeout(()=>launcher(dataArr, userList, u_i+1, 1,[], setIsLoading, analytics, setCounter, counter), 10);
+    setTimeout(()=>launcher(dataArr, userList, u_i+1, 1,[], setIsLoading, analytics, setCounter, counter, setUserCounter), 10);
   } else {
     setCounter(counter);
+    setUserCounter(userList.length-1- u_i)
     setIsLoading(false);
     return "finished";
   }
@@ -108,6 +120,7 @@ const App = () => {
   const [writeKey, setWriteKey] = useState('');
   const [counter, setCounter] = useState(0);
   const [numOfUsers, setNumOfUsers] = useState(1);
+  const [userCounter, setUserCounter] = useState(0);
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -134,7 +147,7 @@ const App = () => {
         {!isLoading ? 
         <a 
           className="highlight button1" 
-          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-numOfUsers-1, 1, [], setIsLoading, analytics, setCounter, 0, numOfUsers)}} 
+          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-numOfUsers-1, 2, [], setIsLoading, analytics, setCounter, 0, setUserCounter)}} 
         >
           3. Activate Lasers
         </a> 
@@ -142,6 +155,7 @@ const App = () => {
         <a className="button1">WORKING</a> 
         }  
         <h5>{counter}</h5> Events Fired
+        <h5>{userCounter}</h5> Users Remaining
       </header>     
     </div>
   );

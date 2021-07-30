@@ -24,6 +24,7 @@ export default ({setDataArr, setIsLoading, setCsvLoaded}) => {
         onError={handleOnError}
         addRemoveButton
         onRemoveFile={handleOnRemoveFile}
+        skipEmptyLines={false}
       >
         <span>Drop CSV file here or click to upload.</span>
       </CSVReader>
