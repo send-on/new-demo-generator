@@ -2,11 +2,12 @@ import React, { useState } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
-import CSVReader2 from './parser.js';
+import CSVReader from './parser.js';
 import moment from 'moment';
 import {writeKey} from './config.js'
 const unixDay = 86400;
 const unixHour = 3600;
+const firstProp = 8
 
 const analytics = new Analytics();
 const integrationSettings = {
@@ -37,11 +38,11 @@ const userList = [{
 ]
 
 // Helper functions
-function getRandomInt(max) {
+const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
 }
 
-const firstProp = 8
+
 
 const sanitize = (s) => {
   if (s.includes(false)) return false;
@@ -49,85 +50,92 @@ const sanitize = (s) => {
   s = s.replace('\"', "");
   s = s.replace("[", "");
   s = s.replace("]", "");
+  s = s.replace('"', "");
   s = s.trim();
   return s
 }
 
 const createProps = (e) => {
-  let propsObject = e.splice(firstProp)
+  let propsObject = e.slice(firstProp)
+  
   propsObject = propsObject.filter(function(el) { return el; });
   const properties = {}
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
     temp[1] = temp[1].split(',')
     let randomValue = sanitize(temp[1][getRandomInt(temp[1].length)])
-    // randomValue = sanitize(randomValue)
     properties[temp[0]] = randomValue
   }
   return properties;
 }
 
-// "timestamp": "2021-07-29T23:04:33.133Z",
-
-const launcher = (schemaObject, userList, u_i, e_i, firedEvents) => {
+const launcher = (dataArr, userList, u_i, e_i, firedEvents=[], setIsLoading=false) => {
   // reset ajs on new user
+  setIsLoading(true);
   if (e_i === 0) {
     analytics.reset();
     analytics.setAnonymousId(userList[u_i].anonymousId)
   }
-  // handle time set time, index 6 is days_ago, index 7 is hours
+  // Handle time set time, index 6 is days_ago, index 7 is hours
   let timestamp = moment().unix()
-  console.log(schemaObject)
-  if (schemaObject[e_i][6]) {
-    timestamp = timestamp - schemaObject[e_i][6]*unixDay
-    if (schemaObject[e_i][7]) {
-      timestamp = timestamp - Math.floor((Math.random() * (parseFloat(schemaObject[e_i][7]))*unixHour))
+  if (dataArr[e_i][6]) {
+    timestamp = timestamp - dataArr[e_i][6]*unixDay
+    if (dataArr[e_i][7]) {
+      timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][7]))*unixHour))
     }
   }
   timestamp = moment(timestamp, "X").format();
 
   
-  if (schemaObject[e_i][1] === "identify") {
-    let properties = createProps(schemaObject[e_i]);
-    Object.assign(properties, userList[u_i])
+  if (dataArr[e_i][1] === "identify") {
+    let properties = createProps(dataArr[e_i]);
+    Object.assign(properties, userList[u_i]);
+    delete properties.user_id;
+    delete properties.anonymousId;
     analytics.identify(userList[u_i].user_id, properties, {timestamp:timestamp})
-    firedEvents.push(parseInt(schemaObject[e_i][0]))
+    firedEvents.push(parseInt(dataArr[e_i][0]))
   }
-  if (schemaObject[e_i][1] === "track") {
-    let properties = createProps(schemaObject[e_i]);
-    analytics.track(schemaObject[e_i][2], properties, {
+  if (dataArr[e_i][1] === "track") {
+    let properties = createProps(dataArr[e_i]);
+    analytics.track(dataArr[e_i][2], properties, {
       anonymousId: userList[u_i].anonymousId,
       timestamp:timestamp
     })
-    firedEvents.push(parseInt(schemaObject[e_i][0]))
+    firedEvents.push(parseInt(dataArr[e_i][0]))
   }
   // next event
-  if (schemaObject[e_i+1]) {
-    launcher(schemaObject, userList, u_i, e_i+1,firedEvents)
+  if (dataArr[e_i+1]) {
+    launcher(dataArr, userList, u_i, e_i+1,firedEvents, setIsLoading)
   } else if (userList[u_i+1]) {
-    launcher(schemaObject, userList, u_i+1, 1,[])
+    launcher(dataArr, userList, u_i+1, 1,[], setIsLoading)
   } else {
     return "finished"
   }
 }
 
-// launcher(schemaObject, userList, 0, 0, [])
-
-function App() {
-  const [dataArr, setDataArr] = useState([])
+const App = () => {
+  const [dataArr, setDataArr] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [csvLoaded, setCsvLoaded] = useState(false);
   
   return (
     <div className="App">
       <header className="App-header">
-        <CSVReader2 
+        <CSVReader 
           setDataArr={setDataArr}
+          setIsLoading={setIsLoading}
+          setCsvLoaded={setCsvLoaded}
         />
-        
-        <a href="button1" onClick={()=>launcher(dataArr, userList, 0, 1, [])} className="button1">
+        {!isLoading ? 
+        <a 
+          className="highlight button1" 
+          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, 0, 1, [], setIsLoading)}} 
+        >
           Activate Lasers
-        </a>
-
-          
+        </a> 
+        :
+        <a className="button1"  >DONE</a> 
+        }  
       </header>
       
     </div>

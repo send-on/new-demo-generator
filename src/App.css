@@ -12,7 +12,7 @@
   text-align:center;
   transition: all 0.2s;
 }
-.button1:hover {
+.highlight.button1:hover {
   color:#000000;
   background-color:#FFFFFF;
 }

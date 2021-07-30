@@ -1,6 +1,9 @@
 import { CSVReader } from 'react-papaparse';
-export default function CSVReader2({setDataArr}){
+
+export default ({setDataArr, setIsLoading, setCsvLoaded}) => {
   const handleOnDrop = (data) => {
+    setIsLoading(false)
+    setCsvLoaded(true)
     let arr = data.map(obj => obj.data)
     setDataArr(arr)
   };
@@ -8,19 +11,19 @@ export default function CSVReader2({setDataArr}){
     console.log(err);
   };
   const handleOnRemoveFile = (data) => {
+    setIsLoading(false)
+    setCsvLoaded(false)
     console.log(data);
   };
 
-  
   return (
     <>
-      <h5>Click and Drag Upload</h5>
+      <h5>Click or Drag Upload</h5>
       <CSVReader
         onDrop={handleOnDrop}
         onError={handleOnError}
         addRemoveButton
         onRemoveFile={handleOnRemoveFile}
-        config={{}}
       >
         <span>Drop CSV file here or click to upload.</span>
       </CSVReader>
