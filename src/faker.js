@@ -5,7 +5,7 @@ function generateUsers() {
 
   let users = []
 
-  for (let id=1; id <= 1000; id++) {
+  for (let id=1; id <= 10000; id++) {
 
     let firstName = faker.name.firstName();
     let lastName = faker.name.lastName();

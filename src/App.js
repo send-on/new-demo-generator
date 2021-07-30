@@ -107,6 +107,7 @@ const App = () => {
   const [csvLoaded, setCsvLoaded] = useState(false);
   const [writeKey, setWriteKey] = useState('');
   const [counter, setCounter] = useState(0);
+  const [numOfUsers, setNumOfUsers] = useState(1);
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -124,6 +125,7 @@ const App = () => {
       <header className="App-header">
         <h5>1. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} />
+      <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
         <CSVReader 
           setDataArr={setDataArr}
           setIsLoading={setIsLoading}
@@ -132,7 +134,7 @@ const App = () => {
         {!isLoading ? 
         <a 
           className="highlight button1" 
-          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-2, 1, [], setIsLoading, analytics, setCounter, 0)}} 
+          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-numOfUsers-1, 1, [], setIsLoading, analytics, setCounter, 0, numOfUsers)}} 
         >
           3. Activate Lasers
         </a> 
