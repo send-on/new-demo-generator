@@ -90,6 +90,7 @@ const launcher = async (dataArr, userList, u_i, e_i, firedEvents=[], setIsLoadin
     setTimeout(()=>launcher(dataArr, userList, u_i+1, 1,[], setIsLoading, analytics, setCounter, counter), 10)
   } else {
     setCounter(counter);
+    setIsLoading(false);
     return "finished"
   }
 }
@@ -129,12 +130,12 @@ const App = () => {
         {!isLoading ? 
         <a 
           className="highlight button1" 
-          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-1, 1, [], setIsLoading, analytics, setCounter, 0)}} 
+          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-1000, 1, [], setIsLoading, analytics, setCounter, 0)}} 
         >
           3. Activate Lasers
         </a> 
         :
-        <a className="button1">DONE</a> 
+        <a className="button1">WORKING</a> 
         }  
         <h5>{counter}</h5> Events Fired
       </header>     
