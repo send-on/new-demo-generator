@@ -21,7 +21,5 @@ price:[12.49, 14.50]
 Array designates randomness - The event generator will randomly pick ONE element in the array. 
 
 ## TODOs
-1. Dropoffs, Repeats, amd Dependencies for events.  Currently these columns don't do anything.
-2. Set the number of users (such as 1 for testing).
-3. Customize the number of unique users from 0-10K
-4. localStorage saving of write keys. 
+1. localStorage saving of write keys. 
+2. Add more error checking.
