@@ -1,20 +1,17 @@
-// to do: accept arrays
-// link traits properties. - recall 
-// [address,1]: []
-// address:[]
-// [address,2]:[]
-// [{“value”: “San Francisco”, “type”: “string”, weight: 90}, {“value”: “Oakland”, “type”: “string”, weight: 10}]
-// [{“value”: “{name: stuff}”, “type”: “object”, weight: 90}]
-
 import React, { useState } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './parser.js';
 import moment from 'moment';
+// import { random } from 'faker';
+
+// Constants - DO NOT CHANGE
 const unixDay = 86400;
 const unixHour = 3600;
-const firstProp = 8
+const firstProp = 8;
+const dependencyElement = 3;
+const dropoffElement = 5;
 const userList = require('./users.json')
 
 // Helper functions
@@ -40,71 +37,148 @@ const sanitize = (s) => {
   return s
 }
 
-const createProps = (e) => {
+const createProps = (e, firedEvents) => {
   // remove non property/traits from array
+  let recallNum = parseInt(e[dependencyElement]);
   let propsObject = e.slice(firstProp);
   propsObject = propsObject.filter(function(el) { return el; });
   const properties = {};
+  // check for *, if exist, copy from previous event
+  console.log(firedEvents);
 
   // create properties object, randomize array element selection per iteration, sanitize 
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
-    temp[1] = temp[1].split(',')
-    let randomValue = sanitize(temp[1][getRandomInt(temp[1].length)]);
-    properties[temp[0]] = randomValue;
+    // check for * recall
+    if (temp[1].includes("*")) {
+      properties[temp[0]] = firedEvents[recallNum][temp[0]]
+    } else {
+      temp[1] = temp[1].split(',')
+      // if val[0] is array
+      if (temp[0].includes("[")) {
+        // Create tuple from key [prop, 2]
+        let tuple = [
+          sanitize(temp[0].split(',')[0]),
+          sanitize(temp[0].split(',')[1])
+        ]
+        let randomValue = [];
+        // Push in random value i times, pop out element when chosen
+        for (let i = 0; i < tuple[1]; i++) {
+          let randomInt = getRandomInt(temp[1].length)
+          randomValue.push(sanitize(temp[1][randomInt]));
+          temp[1].splice(randomInt,1);
+        }
+        properties[tuple[0]] = randomValue;
+      } else { 
+        // randomly choose element in array
+        let randomValue = sanitize(temp[1][getRandomInt(temp[1].length)]);
+        properties[temp[0]] = randomValue;
+      }
+    }
   }
   return properties;
 }
 
-const launcher = async (dataArr, userList, u_i, e_i, firedEvents=[], setIsLoading=false, analytics, setCounter, counter, setUserCounter) => {
+const checkDependency = (dependentOn, firedEvents={}) => (
+  (dependentOn in firedEvents ? true : false)
+)
+
+const shouldDrop = (dropoff) => (
+  (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true
+)
+
+const launcher = async (
+  dataArr, 
+  userList, 
+  u_i, 
+  e_i, 
+  firedEvents={}, 
+  setIsLoading=false, 
+  analytics, 
+  setCounter, 
+  counter, 
+  setUserCounter
+  ) => {
   // reset ajs on new user
   setIsLoading(true);
   if (e_i === 0) {
     analytics.reset();
     analytics.setAnonymousId(userList[u_i].anonymousId);
   }
-  // Handle time set time, index 6 is days_ago, index 7 is hours
-  let timestamp = moment().unix();
-  if (dataArr[e_i][6]) {
-    timestamp = timestamp - dataArr[e_i][6]*unixDay;
-    if (dataArr[e_i][7]) {
-      timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][7]))*unixHour));
+  // Check for dropoff
+  if (shouldDrop(dataArr[e_i][dropoffElement])) {
+    // Check for dependency 
+    if (!dataArr[e_i][dependencyElement] || (dataArr[e_i][dependencyElement] < 1)) {
+      dataArr[e_i][dependencyElement] = 1
+    } 
+    if (checkDependency(dataArr[e_i][dependencyElement], firedEvents) || e_i === 2) {
+      // Handle time set time, index 6 is days_ago, index 7 is hours
+      let timestamp = moment().unix();
+      if (dataArr[e_i][6]) {
+        timestamp = timestamp - dataArr[e_i][6]*unixDay;
+        if (dataArr[e_i][7]) {
+          timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][7]))*unixHour));
+        }
+      }
+      timestamp = moment(timestamp, "X").format();
+
+      // Identify
+      if (dataArr[e_i][1] === "identify") {
+        let properties = createProps(dataArr[e_i], firedEvents);
+        Object.assign(properties, userList[u_i]);
+        delete properties.user_id;
+        delete properties.anonymousId;
+        firedEvents[parseInt(dataArr[e_i][0])] = properties
+        await analytics.identify(userList[u_i].user_id, properties, 
+          {timestamp:timestamp}
+        );
+      }
+
+      // Track
+      if (dataArr[e_i][1] === "track") {
+        let properties = createProps(dataArr[e_i], firedEvents);
+        firedEvents[parseInt(dataArr[e_i][0])] = properties
+        await analytics.track(dataArr[e_i][2], properties, {
+          anonymousId: userList[u_i].anonymousId,
+          timestamp:timestamp
+        });
+      }
     }
   }
-  timestamp = moment(timestamp, "X").format();
-
-  // Identify
-  if (dataArr[e_i][1] === "identify") {
-    let properties = createProps(dataArr[e_i]);
-    Object.assign(properties, userList[u_i]);
-    delete properties.user_id;
-    delete properties.anonymousId;
-    firedEvents.push(parseInt(dataArr[e_i][0]));
-    await analytics.identify(userList[u_i].user_id, properties, 
-      {timestamp:timestamp}
-    );
-  }
-
-  // Track
-  if (dataArr[e_i][1] === "track") {
-    let properties = createProps(dataArr[e_i]);
-    firedEvents.push(parseInt(dataArr[e_i][0]));
-    await analytics.track(dataArr[e_i][2], properties, {
-      anonymousId: userList[u_i].anonymousId,
-      timestamp:timestamp
-    });
-  }
-  counter++;
-
-  if (u_i%10 === 0) setUserCounter(userList.length - u_i)
   
+  // set event and user counters
+  counter++;
+  if (u_i%10 === 0) setUserCounter(userList.length - u_i)
+
   // next event
   if (dataArr[e_i+1]) {    
     if (counter%100 === 0) setCounter(counter);
-    setTimeout(()=>launcher(dataArr, userList, u_i, e_i+1,firedEvents, setIsLoading, analytics, setCounter, counter, setUserCounter), 10);
+    setTimeout(()=>launcher(
+      dataArr, 
+      userList, 
+      u_i, 
+      e_i+1,
+      firedEvents, 
+      setIsLoading, 
+      analytics, 
+      setCounter, 
+      counter, 
+      setUserCounter
+      ), 10);
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
-    setTimeout(()=>launcher(dataArr, userList, u_i+1, 1,[], setIsLoading, analytics, setCounter, counter, setUserCounter), 10);
+    setTimeout(()=>launcher(
+      dataArr, 
+      userList, 
+      u_i+1, 
+      1,
+      {}, 
+      setIsLoading, 
+      analytics, 
+      setCounter, 
+      counter, 
+      setUserCounter
+      ), 10);
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i)
@@ -147,15 +221,28 @@ const App = () => {
         {!isLoading ? 
         <a 
           className="highlight button1" 
-          onClick={()=>{if (csvLoaded)launcher(dataArr, userList, userList.length-numOfUsers-1, 2, [], setIsLoading, analytics, setCounter, 0, setUserCounter)}} 
+          onClick={()=>{
+            if (csvLoaded) launcher(dataArr, 
+              userList, 
+              userList.length-numOfUsers, 
+              2, 
+              {}, 
+              setIsLoading, 
+              analytics, 
+              setCounter, 
+              0, 
+              setUserCounter
+              )
+            }
+          } 
         >
           3. Activate Lasers
         </a> 
         :
         <a className="button1">WORKING</a> 
         }  
-        <h5>{counter}</h5> Events Fired
-        <h5>{userCounter}</h5> Users Remaining
+        <h4>{counter}</h4> Events Fired
+        <h4>{userCounter}</h4> Users Remaining
       </header>     
     </div>
   );

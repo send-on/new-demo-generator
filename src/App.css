@@ -2,7 +2,7 @@
   display:inline-block;
   padding:0.35em 1.2em;
   border:0.1em solid #FFFFFF;
-  margin:4em 0.3em 0.3em 0;
+  margin:3em 0.3em 0.3em 0;
   border-radius:0.12em;
   box-sizing: border-box;
   text-decoration:none;
@@ -27,7 +27,12 @@
 h5 {
   margin-top: 3em;
   margin-bottom: 0.5em;
+}
 
+h4 {
+  
+  margin-top: 1em;
+  margin-bottom: 0.5em;
 }
 input[type=text], select {
   min-width: 400px;
@@ -54,14 +59,6 @@ input[type=submit] {
 input[type=submit]:hover {
   background-color: #45a049;
 }
-
-/* div {
-  border-radius: 5px;
-  background-color: #f2f2f2;
-  padding: 20px;
-} */
-
-
 
 .App {
   text-align: center;
