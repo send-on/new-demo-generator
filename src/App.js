@@ -43,15 +43,14 @@ const createProps = (e, firedEvents) => {
   let propsObject = e.slice(firstProp);
   propsObject = propsObject.filter(function(el) { return el; });
   const properties = {};
-  // check for *, if exist, copy from previous event
-  console.log(firedEvents);
-
   // create properties object, randomize array element selection per iteration, sanitize 
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
     // check for * recall
     if (temp[1].includes("*")) {
-      properties[temp[0]] = firedEvents[recallNum][temp[0]]
+      if (firedEvents[recallNum][temp[0]]) {
+        properties[temp[0]] = firedEvents[recallNum][temp[0]]
+      }
     } else {
       temp[1] = temp[1].split(',')
       // if val[0] is array
@@ -62,7 +61,8 @@ const createProps = (e, firedEvents) => {
           sanitize(temp[0].split(',')[1])
         ]
         let randomValue = [];
-        // Push in random value i times, pop out element when chosen
+        // Push in random value i times, pop out element when chosen (block if too many)
+        if (tuple[1] > temp[1].length) tuple[1] = temp[1].length;
         for (let i = 0; i < tuple[1]; i++) {
           let randomInt = getRandomInt(temp[1].length)
           randomValue.push(sanitize(temp[1][randomInt]));

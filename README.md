@@ -6,11 +6,10 @@ Disclaimer:  This tool is NOT meant to be used in production or with production 
 ## Instructions
 1. Make a copy of thie [Schema Template][https://docs.google.com/spreadsheets/d/1jXUA_clzEbEX5xMLGGhFsJDgRau6RnpKYAlBbZYJy6I/edit?usp=sharing]
 2. Add your custom events. 
-3. Download the Google Sheet as a CSV
-4. Load the webapp and enter your source write key, drop in your CSV and hit the button. 
+3. Download the Google Sheet as a CSV.
+4. Load the webapp and enter your source write key, number of users, drop in your CSV and hit the button. 
 
-## Notes
-- The current status will create 1000 unique profiles to walk through the event journey.  This will be configurable in the future. 
+## Usage Notes
 - Do not change the position of the template.  You can add as many properties/traits as you want in the latter columns. 
 - Track event properties and Identify event traits must be in object format without curly brackets:  
 
