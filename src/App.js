@@ -101,7 +101,7 @@ const launcher = async (
   ) => {
   // reset ajs on new user
   setIsLoading(true);
-  if (e_i === 0) {
+  if (e_i < 3) {
     analytics.reset();
     analytics.setAnonymousId(userList[u_i].anonymousId);
   }
@@ -121,7 +121,7 @@ const launcher = async (
         }
       }
       timestamp = moment(timestamp, "X").format();
-
+      counter++;
       // Identify
       if (dataArr[e_i][1] === "identify") {
         let properties = createProps(dataArr[e_i], firedEvents);
@@ -147,7 +147,7 @@ const launcher = async (
   }
   
   // set event and user counters
-  counter++;
+  
   if (u_i%10 === 0) setUserCounter(userList.length - u_i)
 
   // next event
