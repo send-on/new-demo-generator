@@ -29,16 +29,6 @@ Track events MUST have a value.  Identify events can be blank and if there is a 
 
 <br>
 
-### Repeats
-Events will repeat based on the number set here.  To fire multiple events, use the syntax `[x,y]` the event will fire a random number of times in range between `x` and `y`.  
-
-Events will have different time stamps if you set an Hour Randomizer. 
-
-% Chance of happening will drop the entire set if dropped.
-
-
-<br>
-
 ### Dependency
 Connect events together such that the subsequent event does not fire if the prior event does not.  For example, an "Email Opened" event should not fire if "Email Sent" was not fired. 
 
