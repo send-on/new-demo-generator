@@ -6,7 +6,7 @@ This is a simple web application used to pump custom events into your Segment wo
 <br><br>
 
 ## Instructions
-1. Make a copy of this [Schema Template](https://docs.google.com/spreadsheets/d/1jXUA_clzEbEX5xMLGGhFsJDgRau6RnpKYAlBbZYJy6I/edit?usp=sharing).
+1. Make a copy of this [Schema Template](https://docs.google.com/spreadsheets/d/1rJKXxgiD8P_tswyaLEKNH5TXlpDZeYat0YL6IHWMk6s/edit?usp=sharing).
 2. Add your custom events. 
 3. Download the Google Sheet as a **CSV**.
 4. Load the webapp and enter your source write key, number of users, drop in your CSV and hit the button. 
