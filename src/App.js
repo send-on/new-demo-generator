@@ -95,7 +95,8 @@ const launcher = async (
   analytics, 
   setCounter, 
   counter, 
-  setUserCounter
+  setUserCounter, 
+  setStatus
   ) => {
   // reset ajs on new user
   setIsLoading(true);
@@ -162,7 +163,8 @@ const launcher = async (
       analytics, 
       setCounter, 
       counter, 
-      setUserCounter
+      setUserCounter, 
+      setStatus
       ), 10);
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
@@ -176,12 +178,14 @@ const launcher = async (
       analytics, 
       setCounter, 
       counter, 
-      setUserCounter
+      setUserCounter, 
+      setStatus
       ), 10);
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i)
     setIsLoading(false);
+    setStatus("DONE")
     return "finished";
   }
 }
@@ -195,6 +199,7 @@ const App = () => {
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
+  const [status, setStatus] = useState("NOT READY: GENERATE USERS")
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -207,7 +212,8 @@ const App = () => {
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
 
-  const lockUserList = (numOfUsers, setUserList) => {
+  const lockUserList = (numOfUsers, setUserList, setStatus) => {
+    setStatus("3. ACTIVATE LASERS")
     setUserList(generateUsers(numOfUsers));
     return
   }
@@ -220,9 +226,9 @@ const App = () => {
       <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
       {console.log(userList.length)}
       {userList.length > 0 ? 
-      <a onClick={()=>lockUserList(numOfUsers, setUserList)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
+      <a onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
       : 
-      <a onClick={()=>lockUserList(numOfUsers, setUserList)} className="button1">Generate Users</a>
+      <a onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
       }
         <CSVReader 
           setDataArr={setDataArr}
@@ -242,15 +248,16 @@ const App = () => {
               analytics, 
               setCounter, 
               0, 
-              setUserCounter
+              setUserCounter, 
+              setStatus
               )
             }
           } 
         >
-          3. Activate Lasers
+          {status}
         </a> 
         :
-        <a className="button1">DONE / NOT READY</a> 
+        <a className="button1">{status}</a> 
         }  
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining
@@ -260,6 +267,3 @@ const App = () => {
 }
 
 export default App;
-
-
-
