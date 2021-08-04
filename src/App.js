@@ -4,15 +4,15 @@ import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './parser.js';
 import moment from 'moment';
-// import { random } from 'faker';
+import { generateUsers } from './faker.js'
 
 // Constants - DO NOT CHANGE
 const unixDay = 86400;
-const unixHour = 3600;
-const firstProp = 8;
+const firstEvent = 2;
+const firstProp = 7;
 const dependencyElement = 3;
-const dropoffElement = 5;
-const userList = require('./users.json')
+const dropoffElement = 4;
+// const userList = require('./users.json');
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -47,10 +47,8 @@ const createProps = (e, firedEvents) => {
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
     // check for * recall
-    if (temp[1].includes("*")) {
-      if (firedEvents[recallNum][temp[0]]) {
-        properties[temp[0]] = firedEvents[recallNum][temp[0]]
-      }
+    if (temp[1].includes("*") && firedEvents[recallNum][temp[0]]) {
+      properties[temp[0]] = firedEvents[recallNum][temp[0]]
     } else {
       temp[1] = temp[1].split(',')
       // if val[0] is array
@@ -88,11 +86,11 @@ const shouldDrop = (dropoff) => (
 )
 
 const launcher = async (
-  dataArr, 
+  dataArr, // data schema
   userList, 
-  u_i, 
-  e_i, 
-  firedEvents={}, 
+  u_i, // index for user
+  e_i, // index for event
+  firedEvents={0:true}, // object of events fired
   setIsLoading=false, 
   analytics, 
   setCounter, 
@@ -109,15 +107,16 @@ const launcher = async (
   if (shouldDrop(dataArr[e_i][dropoffElement])) {
     // Check for dependency 
     if (!dataArr[e_i][dependencyElement] || (dataArr[e_i][dependencyElement] < 1)) {
-      dataArr[e_i][dependencyElement] = 1
+      // if no dependency exists, set dependency to 1
+      dataArr[e_i][dependencyElement] = 0
     } 
-    if (checkDependency(dataArr[e_i][dependencyElement], firedEvents) || e_i === 2) {
+    if (checkDependency(dataArr[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
       // Handle time set time, index 6 is days_ago, index 7 is hours
       let timestamp = moment().unix();
       if (dataArr[e_i][6]) {
         timestamp = timestamp - dataArr[e_i][6]*unixDay;
         if (dataArr[e_i][7]) {
-          timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][7]))*unixHour));
+          timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][7]))*unixDay));
         }
       }
       timestamp = moment(timestamp, "X").format();
@@ -172,7 +171,7 @@ const launcher = async (
       userList, 
       u_i+1, 
       1,
-      {}, 
+      {0:true}, 
       setIsLoading, 
       analytics, 
       setCounter, 
@@ -194,6 +193,7 @@ const App = () => {
   const [writeKey, setWriteKey] = useState('');
   const [counter, setCounter] = useState(0);
   const [numOfUsers, setNumOfUsers] = useState(1);
+  const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
 
   const analytics = new Analytics();
@@ -207,18 +207,29 @@ const App = () => {
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
 
+  const lockUserList = (numOfUsers, setUserList) => {
+    setUserList(generateUsers(numOfUsers));
+    return
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <h5>1. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
-      <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} />
+      <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
       <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
+      {console.log(userList.length)}
+      {userList.length > 0 ? 
+      <a onClick={()=>lockUserList(numOfUsers, setUserList)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
+      : 
+      <a onClick={()=>lockUserList(numOfUsers, setUserList)} className="button1">Generate Users</a>
+      }
         <CSVReader 
           setDataArr={setDataArr}
           setIsLoading={setIsLoading}
           setCsvLoaded={setCsvLoaded}
         />
-        {!isLoading ? 
+        {!isLoading && (userList.length > 0) ? 
         <a 
           className="highlight button1" 
           onClick={()=>{
@@ -226,7 +237,7 @@ const App = () => {
               userList, 
               userList.length-numOfUsers, 
               2, 
-              {}, 
+              {0:true}, 
               setIsLoading, 
               analytics, 
               setCounter, 
@@ -239,7 +250,7 @@ const App = () => {
           3. Activate Lasers
         </a> 
         :
-        <a className="button1">WORKING</a> 
+        <a className="button1">DONE / NOT READY</a> 
         }  
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining

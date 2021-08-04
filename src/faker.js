@@ -1,11 +1,8 @@
 const faker = require('faker');
-const fs = require('fs')
 
-function generateUsers() {
-
+export const generateUsers = (numOfUsers) => {
   let users = []
-
-  for (let id=1; id <= 10000; id++) {
+  for (let id=1; id <= numOfUsers; id++) {
 
     let firstName = faker.name.firstName();
     let lastName = faker.name.lastName();
@@ -23,7 +20,3 @@ function generateUsers() {
 
   return users 
 }
-
-let dataObj = generateUsers();
-
-fs.writeFileSync('users.json', JSON.stringify(dataObj, null, '\t'));
