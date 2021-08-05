@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-// const userList = require('./users.json');
+const version = 1.1;
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -224,9 +224,9 @@ const App = () => {
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
       <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
       {userList.length > 0 ? 
-      <a onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
+      <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
       : 
-      <a onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
+      <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
       }
         <CSVReader 
           setDataArr={setDataArr}
@@ -234,7 +234,7 @@ const App = () => {
           setCsvLoaded={setCsvLoaded}
         />
         {!isLoading && (userList.length > 0) ? 
-        <a 
+        <a href="/#"
           className="highlight button1" 
           onClick={()=>{
             if (csvLoaded) launcher(dataArr, 
@@ -255,14 +255,14 @@ const App = () => {
           {status}
         </a> 
         :
-        <a className="button1">{status}</a> 
+        <a href="/#" className="button1">{status}</a> 
         }  
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining
         <div></div>
         <h6>
-          <a href="https://docs.google.com/spreadsheets/d/13XXBkNGFTms5o-6A3A3vqmIoVBUqkxSgvj9ghTTYGdI/edit?usp=sharing" target="_blank">v1.0 - Template</a><br></br><br></br>
-          <a href="https://github.com/send-on/new-demo-generator" target="_blank">README</a>
+          <a rel="noreferrer" href="https://docs.google.com/spreadsheets/d/13XXBkNGFTms5o-6A3A3vqmIoVBUqkxSgvj9ghTTYGdI/edit?usp=sharing" target="_blank">v{version} - Template</a><br></br><br></br>
+          <a rel="noreferrer" href="https://github.com/send-on/new-demo-generator" target="_blank">README</a>
         </h6>
         
       </header>     
