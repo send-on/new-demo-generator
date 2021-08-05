@@ -12,6 +12,8 @@ const firstEvent = 2;
 const firstProp = 7;
 const dependencyElement = 3;
 const dropoffElement = 4;
+const dayElement = 5;
+const randomizeElement = 6;
 // const userList = require('./users.json');
 
 // Helper functions
@@ -47,8 +49,8 @@ const createProps = (e, firedEvents) => {
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
     // check for * recall
-    if (temp[1].includes("*") && firedEvents[recallNum][temp[0]]) {
-      properties[temp[0]] = firedEvents[recallNum][temp[0]]
+    if (temp[1].includes("*") && (firedEvents[recallNum])) {
+      if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
     } else {
       temp[1] = temp[1].split(',')
       // if val[0] is array
@@ -114,13 +116,10 @@ const launcher = async (
     if (checkDependency(dataArr[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
       // Handle time set time, index 6 is days_ago, index 7 is hours
       let timestamp = moment().unix();
-      if (dataArr[e_i][6]) {
-        timestamp = timestamp - dataArr[e_i][6]*unixDay;
-        if (dataArr[e_i][7]) {
-          timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][7]))*unixDay));
-        }
-      }
+      if (dataArr[e_i][dayElement]) timestamp = timestamp - dataArr[e_i][dayElement]*unixDay
+      if (dataArr[e_i][randomizeElement]) timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][randomizeElement]))*unixDay));
       timestamp = moment(timestamp, "X").format();
+
       counter++;
       // Identify
       if (dataArr[e_i][1] === "identify") {
@@ -185,7 +184,7 @@ const launcher = async (
     setCounter(counter);
     setUserCounter(userList.length-1- u_i)
     setIsLoading(false);
-    setStatus("DONE")
+    setStatus("DONE, Fire Again?")
     return "finished";
   }
 }
@@ -224,7 +223,6 @@ const App = () => {
         <h5>1. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
       <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
-      {console.log(userList.length)}
       {userList.length > 0 ? 
       <a onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
       : 
@@ -261,6 +259,12 @@ const App = () => {
         }  
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining
+        <div></div>
+        <h6>
+          <a href="https://docs.google.com/spreadsheets/d/13XXBkNGFTms5o-6A3A3vqmIoVBUqkxSgvj9ghTTYGdI/edit?usp=sharing" target="_blank">v1.0 - Template</a><br></br><br></br>
+          <a href="https://github.com/send-on/new-demo-generator" target="_blank">README</a>
+        </h6>
+        
       </header>     
     </div>
   );
