@@ -15,7 +15,6 @@ const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
 const version = 1.1;
-
 // Helper functions
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
