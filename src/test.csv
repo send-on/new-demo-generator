@@ -1,0 +1,58 @@
+Event ID,Event Type,Event Name,Dependency,% Chance of Happening,Days Ago,Days Randomizer,"Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+","Property or Trait
+"
+,Must be track or identify (for now),"""s are not required",Which event ID must have fired for this user to fire this event,"90 is 90% of chance of event firing for a given user
+BLANK assumes 100",Number of days (from now) for timestamp.  Decimals ok,Subracts a random timestamp between [0 to x] Days.  Decimals ok,"SEE README:
+https://github.com/send-on/new-demo-generator","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional","1.  key:value
+2. key[val1, val2, ..] (randomly picks)
+""s are optional"
+1,identify,,,100,,,"buyer: [true, false]","seller: [true, false]",,,,,,,,,,,,,
+2,track,Page Viewed,,100,10,0.5,"title: [Home Page, FAQ Page, Property Page, Stessa, About Us]","platform: [""Android"", ""iOS"", ""Web""]","utm_source: [""Facebook"", ""Instagram"", ""Google"", ""Facebook"", ""Twitter"", ""Snapchat""]","utm_medium: [""Social"", ""Paid"", ""Email"", ""Affiliates"", ""referral"", ""cpc"", ""Social""]","utm_campaign: [""fb_spring"",""null"",""google_campaign_1"",""fb_campaign_1"",""google_campaign_2"",""fb_campaign_2""]",,,,,,,,,,
+3,track,Page Viewed,,100,8,0.5,"title: [Home Page, FAQ Page, Property Page, Stessa, About Us]","platform: [""Android"", ""iOS"", ""Web""]","utm_source: [""Facebook"", ""Instagram"", ""Google"", ""Facebook"", ""Twitter"", ""Snapchat""]","utm_medium: [""Social"", ""Paid"", ""Email"", ""Affiliates"", ""referral"", ""cpc"", ""Social""]","utm_campaign: [""fb_spring"",""null"",""google_campaign_1"",""fb_campaign_1"",""google_campaign_2"",""fb_campaign_2""]",,,,,,,,,,
+4,track,Listing Viewed,,80,6,0.5,"address:[100 Van Ness,255 King St.,123 Spooner St, 34 Bargemon Ave, 123 Butler Street]","city:[San Francisco,Newport Beach,Long Beach, San Ramon, Oakland]","zip:[91240,99813, 91405]","price: [100500, 650000, 800000, 1500000, 550000, 450000, 325000]",,,,,,,,,,,
+5,track,Offer Placed,4,70,5,0.1,address: *,city: *,zip: *,price: *,,,,,,,,,,,
+6,track,Property Bought,5,50,4,0.5,address: *,city: *,zip: *,price: *,,,,,,,,,,,
+7,track,Property Listed,,25,6,0.1,"address:[100 Van Ness,255 King St.,123 Spooner St, 34 Bargemon Ave, 123 Butler Street]","city:[San Francisco,Newport Beach,Long Beach, San Ramon, Oakland]","zip:[91240,99813, 91405]","price: [100500, 650000, 800000, 1500000, 550000, 450000, 325000]",,,,,,,,,,,
+8,track,Property Sold,7,25,5,0.1,address: *,city: *,zip: *,price: *,,,,,,,,,,,
+9,track,Email Sent,,100,7,0.5,"campaign_id: [ """", ""ad_campaign_1"", """", ""ad_campaign_2"", ""mobile_campaign_1"", ""mobile_campaign_2"", ""email_campaign_1"", ""email_campaign_2""]","link_id: [101, 102, 103, 104, 105]",,,,,,,,,,,,,
+10,track,Email Opened,9,80,6,0.5,campaign_id: *,link_id: *,,,,,,,,,,,,,
+11,track,Email Link Clicked,10,50,5.9,0.1,campaign_id: *,link_id: *,,,,,,,,,,,,,
