@@ -4,7 +4,7 @@ import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './parser.js';
 import moment from 'moment';
-import { generateUsers } from './faker.js'
+import { generateUsers, generateRandomValue } from './faker.js'
 
 // Constants - DO NOT CHANGE
 const unixDay = 86400;
@@ -51,6 +51,10 @@ const createProps = (e, firedEvents) => {
     // check for * recall
     if (temp[1].includes("*") && (firedEvents[recallNum])) {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
+    } else if (temp[1].includes('##')) {
+      properties[temp[0]] = generateRandomValue(1);
+    } else if (temp[1].includes ('#')) {
+      properties[temp[0]] = generateRandomValue(0);
     } else {
       temp[1] = temp[1].split(',')
       // if val[0] is array

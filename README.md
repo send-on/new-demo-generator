@@ -24,7 +24,7 @@ This is a simple web application used to pump custom events into your Segment wo
 ## FEATURES
 
 ### Event Type
-Must be identify or track.  Page and group calls will be supported in the future. 
+Must be identify, track or page.  Group calls will be supported in the future. 
 
 <br>
 
@@ -77,6 +77,15 @@ To fire properties with array values, use format `[property, 2]:[val1, val2, val
 > price:[12.49, 14.50] `// number type`
 > 
 > [brand, 2]:[Nike, Adidas, Under Armour] `// output is price:["Adidas", "Nike"],  will randomly pick 2`
+
+<br>
+
+
+### Creating Random IDs for Traits and Properties 
+
+Setting a property to `#` or `##` will set the property to a random short or long ID respectively. 
+
+If you set `property: #`, it will generate a random short ID while `property: ##` will set it as a long ID with multiple hyphens. This is useful if you want to add ios.idfa or android.id of a random value, simply set `ios.idfa: ##`.  Another use case is setting `link_id: #` or `checkout_id: #` to have it be a short code. 
 
 <br>
 

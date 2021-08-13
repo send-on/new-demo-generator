@@ -20,3 +20,12 @@ export const generateUsers = (numOfUsers) => {
 
   return users 
 }
+
+export const generateRandomValue = (int) => {
+  // 0 = #, short form. 
+  // 1 = ##, long form. 
+  let value = faker.datatype.uuid();
+  if (int === 0) value = value.split("-")[0]
+
+  return value
+}
