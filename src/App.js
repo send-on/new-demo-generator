@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-const version = 1.1;
+const version = 1.2;
 
 // Helper functions
 const getRandomInt = (max) => {
