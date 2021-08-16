@@ -9,9 +9,9 @@ This is a simple web application used to pump custom events into your Segment wo
 1. Make a copy of this [Schema Template](https://docs.google.com/spreadsheets/d/13XXBkNGFTms5o-6A3A3vqmIoVBUqkxSgvj9ghTTYGdI/edit?usp=sharing).
 2. Add your custom events. 
 3. Download the Google Sheet as a **CSV**.
-4. Load the webapp and enter your source write key and number of users.  Press Generate
-5. Click Load Properties into Personas Memory. 
-6. Upload your CSV and hit the button. 
+4. Load the webapp and enter "number of users", hit generate users.  
+5. Enter your Segment source write key. 
+5. Upload your CSV and hit the button. 
 
 
 <br>

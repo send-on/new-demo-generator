@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-const version = 1.3;
+const version = 1.31;
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -91,9 +91,7 @@ const shouldDrop = (dropoff) => (
   (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true
 )
 
-const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, propStatus, setPropStatus, setIsLoading) => {
-  setIsLoading(true);
-  if (propStatus === "3. Load Properties Into Personas Memory") setPropStatus("Loading into Memory...")
+const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus) => {
   if (dataArr[e_i][1] === "identify") {
     let properties = createProps(dataArr[e_i], firedEvents);
     firedEvents[parseInt(dataArr[e_i][0])] = properties
@@ -115,9 +113,8 @@ const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, propStatus, setPro
       e_i+1,
       firedEvents,
       analytics, 
-      propStatus, 
-      setPropStatus, 
-      setIsLoading
+      setIsLoading,
+      setStatus
     ), 10)
   } else if (u_i < 10) {
     setTimeout(()=>loadProps(
@@ -126,13 +123,12 @@ const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, propStatus, setPro
       1,
       firedEvents,
       analytics, 
-      propStatus, 
-      setPropStatus, 
-      setIsLoading
+      setIsLoading,
+      setStatus
     ), 10)
   } else {
-    setIsLoading(false)
-    setPropStatus("Properties Loaded, Click to Add More")
+    setIsLoading(false);
+    setStatus("DONE, Fire Again?");
   }
 }
 
@@ -150,6 +146,7 @@ const launcher = async (
   setStatus
   ) => {
   // reset ajs on new user
+  setStatus("Working...")
   setIsLoading(true);
   if (e_i < 3) {
     analytics.reset();
@@ -195,7 +192,6 @@ const launcher = async (
   }
   
   // set event and user counters
-  
   if (u_i%10 === 0) setUserCounter(userList.length - u_i)
 
   // next event
@@ -232,8 +228,8 @@ const launcher = async (
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i)
-    setIsLoading(false);
-    setStatus("DONE, Fire Again?")
+    setStatus("Finishing Up ...")
+    loadProps(dataArr, 0, 2, {0:true}, analytics, setIsLoading, setStatus);
     return "finished";
   }
 }
@@ -247,8 +243,7 @@ const App = () => {
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
-  const [status, setStatus] = useState("NOT READY: GENERATE USERS")
-  const [propStatus, setPropStatus] = useState("3. Load Properties Into Personas Memory")
+  const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV")
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -262,7 +257,6 @@ const App = () => {
   analytics.initialize(integrationSettings);
 
   const lockUserList = (numOfUsers, setUserList, setStatus) => {
-    setStatus("4. ACTIVATE LASERS")
     setUserList(generateUsers(numOfUsers));
     return
   }
@@ -270,31 +264,30 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h5>1. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
-      <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
+        <h5>1. Enter How many Users to Generate</h5>
+      
       <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
+
+      
       {userList.length > 0 ? 
       <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set, Click to Regenerate`}</a>
       : 
       <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
       }
+      <div className="note">Note: Each time you click will generate a new set of users. To re-use the same user set for multiple sources or data sets, do not repeat this step moving forward"</div>
+
+      <h5>2. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
+      <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
         <CSVReader 
           setDataArr={setDataArr}
           setIsLoading={setIsLoading}
           setCsvLoaded={setCsvLoaded}
+          setStatus={setStatus}
         />
 
-        {!isLoading ? 
-        <a href="/#" onClick={()=>loadProps(dataArr, 0, 2, {0:true}, analytics, propStatus, setPropStatus, setIsLoading)} className="button1">{propStatus}</a>
-        :
-        <a href="/#" className="button1">{propStatus}</a>
-        }
-
-
-        
-
+        <h5>4. Fire Events</h5>
         {!isLoading && (userList.length > 0) ? 
-        <a href="/#"
+        <a href="#!"
           className="highlight button1" 
           onClick={()=>{
             if (csvLoaded) launcher(dataArr, 
@@ -315,7 +308,7 @@ const App = () => {
           {status}
         </a> 
         :
-        <a href="/#" className="button1">{status}</a> 
+        <a href="#!" className="button1">{status}</a> 
         }  
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining
