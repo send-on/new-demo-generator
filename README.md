@@ -10,7 +10,9 @@ This is a simple web application used to pump custom events into your Segment wo
 2. Add your custom events. 
 3. Download the Google Sheet as a **CSV**.
 4. Load the webapp and enter your source write key and number of users.  Press Generate
-5. Upload your CSV and hit the button. 
+5. Click Load Properties into Personas Memory. 
+6. Upload your CSV and hit the button. 
+
 
 <br>
 

@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-const version = 1.2;
+const version = 1.3;
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -90,6 +90,51 @@ const checkDependency = (dependentOn, firedEvents={}) => (
 const shouldDrop = (dropoff) => (
   (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true
 )
+
+const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, propStatus, setPropStatus, setIsLoading) => {
+  setIsLoading(true);
+  if (propStatus === "3. Load Properties Into Personas Memory") setPropStatus("Loading into Memory...")
+  if (dataArr[e_i][1] === "identify") {
+    let properties = createProps(dataArr[e_i], firedEvents);
+    firedEvents[parseInt(dataArr[e_i][0])] = properties
+    analytics.identify('Dummy User', properties);
+  }
+
+  if (dataArr[e_i][1] === "track") {
+    let properties = createProps(dataArr[e_i], firedEvents);
+    firedEvents[parseInt(dataArr[e_i][0])] = properties
+    analytics.track(dataArr[e_i][2], properties, {
+      anonymousId: "Dummy User",
+    });
+  } 
+  // next event
+  if (dataArr[e_i+1]) {
+    setTimeout(()=>loadProps(
+      dataArr,
+      u_i,
+      e_i+1,
+      firedEvents,
+      analytics, 
+      propStatus, 
+      setPropStatus, 
+      setIsLoading
+    ), 10)
+  } else if (u_i < 10) {
+    setTimeout(()=>loadProps(
+      dataArr,
+      u_i+1,
+      1,
+      firedEvents,
+      analytics, 
+      propStatus, 
+      setPropStatus, 
+      setIsLoading
+    ), 10)
+  } else {
+    setIsLoading(false)
+    setPropStatus("Properties Loaded, Click to Add More")
+  }
+}
 
 const launcher = async (
   dataArr, // data schema
@@ -203,6 +248,7 @@ const App = () => {
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
   const [status, setStatus] = useState("NOT READY: GENERATE USERS")
+  const [propStatus, setPropStatus] = useState("3. Load Properties Into Personas Memory")
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -216,7 +262,7 @@ const App = () => {
   analytics.initialize(integrationSettings);
 
   const lockUserList = (numOfUsers, setUserList, setStatus) => {
-    setStatus("3. ACTIVATE LASERS")
+    setStatus("4. ACTIVATE LASERS")
     setUserList(generateUsers(numOfUsers));
     return
   }
@@ -228,7 +274,7 @@ const App = () => {
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
       <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
       {userList.length > 0 ? 
-      <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set`}</a>
+      <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set, Click to Regenerate`}</a>
       : 
       <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
       }
@@ -237,6 +283,16 @@ const App = () => {
           setIsLoading={setIsLoading}
           setCsvLoaded={setCsvLoaded}
         />
+
+        {!isLoading ? 
+        <a href="/#" onClick={()=>loadProps(dataArr, 0, 2, {0:true}, analytics, propStatus, setPropStatus, setIsLoading)} className="button1">{propStatus}</a>
+        :
+        <a href="/#" className="button1">{propStatus}</a>
+        }
+
+
+        
+
         {!isLoading && (userList.length > 0) ? 
         <a href="/#"
           className="highlight button1" 
