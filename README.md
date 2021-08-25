@@ -78,7 +78,7 @@ To fire properties with array values, use format `[property, 2]:[val1, val2, val
 > 
 > price:[12.49, 14.50] `// number type`
 > 
-> [brand, 2]:[Nike, Adidas, Under Armour] `// output is price:["Adidas", "Nike"],  will randomly pick 2`
+> [brand, 2]:[Nike, Adidas, Under Armour] `// output is brand:["Adidas", "Nike"],  will randomly pick 2`
 
 <br>
 

@@ -91,18 +91,19 @@ const shouldDrop = (dropoff) => (
   (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true
 )
 
-const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus) => {
+const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
+  
   if (dataArr[e_i][1] === "identify") {
     let properties = createProps(dataArr[e_i], firedEvents);
     firedEvents[parseInt(dataArr[e_i][0])] = properties
-    analytics.identify('Dummy User', properties);
+    analytics.identify(anonId, properties);
   }
 
   if (dataArr[e_i][1] === "track") {
     let properties = createProps(dataArr[e_i], firedEvents);
     firedEvents[parseInt(dataArr[e_i][0])] = properties
     analytics.track(dataArr[e_i][2], properties, {
-      anonymousId: "Dummy User",
+      anonymousId: anonId,
     });
   } 
   // next event
@@ -114,7 +115,8 @@ const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setS
       firedEvents,
       analytics, 
       setIsLoading,
-      setStatus
+      setStatus, 
+      anonId
     ), 10)
   } else if (u_i < 10) {
     setTimeout(()=>loadProps(
@@ -124,7 +126,8 @@ const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setS
       firedEvents,
       analytics, 
       setIsLoading,
-      setStatus
+      setStatus, 
+      anonId
     ), 10)
   } else {
     setIsLoading(false);
@@ -229,7 +232,8 @@ const launcher = async (
     setCounter(counter);
     setUserCounter(userList.length-1- u_i)
     setStatus("Finishing Up ...")
-    loadProps(dataArr, 0, 2, {0:true}, analytics, setIsLoading, setStatus);
+    let anonId = generateRandomValue(1); 
+    loadProps(dataArr, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
     return "finished";
   }
 }
@@ -266,7 +270,7 @@ const App = () => {
       <header className="App-header">
         <h5>1. Enter How many Users to Generate</h5>
       
-      <input className="inputbox" type="text" placeholder="Number of Users (0 to 10000)" onChange={e => setNumOfUsers(e.target.value)} />
+      <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
 
       
       {userList.length > 0 ? 
@@ -274,7 +278,7 @@ const App = () => {
       : 
       <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
       }
-      <div className="note">Note: Each time you click will generate a new set of users. To re-use the same user set for multiple sources or data sets, do not repeat this step moving forward"</div>
+      <div className="note">Note: Each time you click will generate a new set of users. To re-use the same user set for multiple sources or data sets, do not repeat this step moving forward</div>
 
       <h5>2. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
