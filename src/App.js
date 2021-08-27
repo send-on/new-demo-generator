@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-const version = 1.31;
+const version = 1.32;
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -98,6 +98,11 @@ const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setS
     firedEvents[parseInt(dataArr[e_i][0])] = properties
     analytics.identify(anonId, properties);
   }
+  if (dataArr[e_i][1] === "page") {
+    let properties = createProps(dataArr[e_i], firedEvents);
+    firedEvents[parseInt(dataArr[e_i][0])] = properties
+    analytics.page(dataArr[e_i][2], properties);
+  }
 
   if (dataArr[e_i][1] === "track") {
     let properties = createProps(dataArr[e_i], firedEvents);
@@ -179,6 +184,20 @@ const launcher = async (
         firedEvents[parseInt(dataArr[e_i][0])] = properties
         await analytics.identify(userList[u_i].user_id, properties, 
           {timestamp:timestamp}
+        );
+      }
+
+      if (dataArr[e_i][1] === "page") {
+        let properties = createProps(dataArr[e_i], firedEvents);
+        Object.assign(properties, userList[u_i]);
+        delete properties.user_id;
+        delete properties.anonymousId;
+        firedEvents[parseInt(dataArr[e_i][0])] = properties
+        await analytics.page(dataArr[e_i][2], properties, 
+          {
+            anonymousId: userList[u_i].anonymousId,
+            timestamp:timestamp
+          }
         );
       }
 
