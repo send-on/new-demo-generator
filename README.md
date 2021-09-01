@@ -51,11 +51,11 @@ This is the inverse of a "Dropoff".  100 ensures the event will fire while 25 im
 
 <br>
 
-### Timestamps (Days Ago and Hour Randomizer)
+### Timestamps (Days Ago and Days Randomizer)
 
  **Days Ago** will enable you to set the timestamp of the event.  Days ago will set the timestamp of the event to be x days in the past.  Decimals are OK (i.e. 4.5 days ago).
 
- **Hour Randomizer** will randomize the timestamp to ensure no event has the same timestamp.  The final timestamp is calculated by `Days Ago - random(0 -> hourRandomizer)`.  In other words, Hour Randomizer will subtract a random time from the time stamp.  
+ **Day Randomizer** will randomize the timestamp to ensure no event has the same timestamp.  The final timestamp is calculated by `Days Ago - random(0 -> dayRandomizer)`.  In other words, Hour Randomizer will subtract a random time from the time stamp.  
 
  To ensure sequential events are in order, you can set the Days Ago of events to be 0.1 apart and set the randomizer to 1. 
 

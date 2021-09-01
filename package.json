@@ -1,6 +1,7 @@
 {
   "name": "new-demo-generator",
-  "version": "0.1.0",
+  "homepage": "http://send-on.github.io/new-demo-generator",
+  "version": "1.32",
   "private": true,
   "dependencies": {
     "@segment/analytics.js-core": "^4.1.11",
@@ -23,7 +24,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
