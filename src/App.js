@@ -39,15 +39,44 @@ const sanitize = (s) => {
   return s
 }
 
+const checkIsArrayAndHasEvent = (recallArr, firedEvents) => {
+  let isArrayAndHasEvent = false
+  if (Array.isArray(recallArr)) {
+    recallArr.forEach(e => {
+      if (firedEvents[e]) isArrayAndHasEvent = e
+    })
+  } 
+  return isArrayAndHasEvent
+}
+
+const createMultipleProperty = (arr, firedEvents, newProp) => {
+
+  
+}
+
 const createProps = (e, firedEvents) => {
+  // check if array
+  // if array, spit out recallNum from func
+  // if not, set recallNum directly. 
+  // if value has {}
+  // trigger multiple workflow below
+
+  // set recallNum for single value
+  let recallNum = parseInt(e[dependencyElement])
+  let recallCell = JSON.parse(e[dependencyElement])
+  // set recallNum to existing value based on dependency
+  if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
+  
+  
+  
   // remove non property/traits from array
-  let recallNum = parseInt(e[dependencyElement]);
   let propsObject = e.slice(firstProp);
   propsObject = propsObject.filter(function(el) { return el; });
   const properties = {};
   // create properties object, randomize array element selection per iteration, sanitize 
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
+
     // check for * recall
     if (temp[1].includes("*") && (firedEvents[recallNum])) {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
@@ -83,16 +112,23 @@ const createProps = (e, firedEvents) => {
   return properties;
 }
 
-const checkDependency = (dependentOn, firedEvents={}) => (
-  (dependentOn in firedEvents ? true : false)
-)
+const checkDependency = (dependentOn, firedEvents={}) => {
+  // console.log(dependentOn + " is " + typeof(dependentOn))
+  let parsedDependentOn = JSON.parse(dependentOn)
+  if (Array.isArray(parsedDependentOn)) { 
+    return checkIsArrayAndHasEvent(parsedDependentOn, firedEvents)
+  } else {
+    // console.log(`dependentOn is a ${typeof(dependentOn)} and is ${dependentOn}`)
+    return (dependentOn in firedEvents ? true : false)
+  }
+}
 
-const shouldDrop = (dropoff) => (
-  (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true
-)
+const shouldDrop = (dropoff) => {
+  return (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true;
+}
+  
 
 const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
-  
   if (dataArr[e_i][1] === "identify") {
     let properties = createProps(dataArr[e_i], firedEvents);
     firedEvents[parseInt(dataArr[e_i][0])] = properties
@@ -164,8 +200,8 @@ const launcher = async (
   if (shouldDrop(dataArr[e_i][dropoffElement])) {
     // Check for dependency 
     if (!dataArr[e_i][dependencyElement] || (dataArr[e_i][dependencyElement] < 1)) {
-      // if no dependency exists, set dependency to 1
-      dataArr[e_i][dependencyElement] = 0
+      // if no dependency exists, set dependency to 0
+      dataArr[e_i][dependencyElement] = "0";
     } 
     if (checkDependency(dataArr[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
       // Handle time set time, index 6 is days_ago, index 7 is hours
@@ -238,7 +274,7 @@ const launcher = async (
       dataArr, 
       userList, 
       u_i+1, 
-      1,
+      2,
       {0:true}, 
       setIsLoading, 
       analytics, 
@@ -313,15 +349,16 @@ const App = () => {
         <a href="#!"
           className="highlight button1" 
           onClick={()=>{
-            if (csvLoaded) launcher(dataArr, 
-              userList, 
-              userList.length-numOfUsers, 
-              2, 
-              {0:true}, 
+            if (csvLoaded) launcher(
+              dataArr, // array of events
+              userList, // array of all users
+              userList.length-numOfUsers, // user position index
+              2, // event position index
+              {"0":true},  // firedEvents
               setIsLoading, 
               analytics, 
               setCounter, 
-              0, 
+              0,  //event counter
               setUserCounter, 
               setStatus
               )
