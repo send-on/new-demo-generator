@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-const version = 1.32;
+const version = 1.4;
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -33,6 +33,8 @@ const sanitize = (s) => {
   s = s.replace('\"', "");
   s = s.replace("[", "");
   s = s.replace("]", "");
+  s = s.replace("{", "");
+  s = s.replace("}", "");
   s = s.replace('"', "");
   s = s.trim();
   if (isNumeric(s)) return parseFloat(s);
@@ -49,26 +51,42 @@ const checkIsArrayAndHasEvent = (recallArr, firedEvents) => {
   return isArrayAndHasEvent
 }
 
-const createMultipleProperty = (arr, firedEvents, newProp) => {
+const removeMissingEvents = (newRecallCell, firedEvents) => {
+  let newArr = []; 
+  for (let i = 0; i < newRecallCell.length; i++) {
+    if (firedEvents[newRecallCell[i]]) newArr.push(newRecallCell[i])
+  }
+  return newArr;
+}
 
-  
+const createMultipleProperty = (val, firedEvents, recallCell ) => {
+  let newRecallCell = recallCell.map(e => JSON.stringify(e));
+  let outputArr = [];
+  let sourceArr = val.split(",");
+  sourceArr = sourceArr.map(e => sanitize(e))
+  newRecallCell = removeMissingEvents(newRecallCell, firedEvents)
+  for (let i = 0; i < newRecallCell.length; i++) {
+    let tempObj = {};
+    for (let y = 0; y < sourceArr.length; y++) {
+      tempObj[sourceArr[y]] = firedEvents[newRecallCell[i]][sourceArr[y]]
+    }
+    outputArr.push(tempObj);
+  }
+  return outputArr
 }
 
 const createProps = (e, firedEvents) => {
-  // check if array
-  // if array, spit out recallNum from func
-  // if not, set recallNum directly. 
-  // if value has {}
-  // trigger multiple workflow below
-
   // set recallNum for single value
-  let recallNum = parseInt(e[dependencyElement])
-  let recallCell = JSON.parse(e[dependencyElement])
+  let recallNum = "0"
+  let recallCell = "0"
+  if (e[dependencyElement]) {
+    recallNum = parseInt(e[dependencyElement])
+    recallCell = JSON.parse(e[dependencyElement])
+  } 
+  
   // set recallNum to existing value based on dependency
   if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
-  
-  
-  
+
   // remove non property/traits from array
   let propsObject = e.slice(firstProp);
   propsObject = propsObject.filter(function(el) { return el; });
@@ -76,10 +94,11 @@ const createProps = (e, firedEvents) => {
   // create properties object, randomize array element selection per iteration, sanitize 
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
-
     // check for * recall
     if (temp[1].includes("*") && (firedEvents[recallNum])) {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
+    } else if (temp[1].includes("{") || temp[1].includes("{")) {
+      properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
     } else if (temp[1].includes('##')) {
       properties[temp[0]] = generateRandomValue(1);
     } else if (temp[1].includes ('#')) {
@@ -113,12 +132,10 @@ const createProps = (e, firedEvents) => {
 }
 
 const checkDependency = (dependentOn, firedEvents={}) => {
-  // console.log(dependentOn + " is " + typeof(dependentOn))
   let parsedDependentOn = JSON.parse(dependentOn)
   if (Array.isArray(parsedDependentOn)) { 
     return checkIsArrayAndHasEvent(parsedDependentOn, firedEvents)
   } else {
-    // console.log(`dependentOn is a ${typeof(dependentOn)} and is ${dependentOn}`)
     return (dependentOn in firedEvents ? true : false)
   }
 }
