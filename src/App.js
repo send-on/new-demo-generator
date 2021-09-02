@@ -97,7 +97,7 @@ const createProps = (e, firedEvents) => {
     // check for * recall
     if (temp[1].includes("*") && (firedEvents[recallNum])) {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
-    } else if (temp[1].includes("{") || temp[1].includes("{")) {
+    } else if (temp[1].includes("{") && Array.isArray(recallCell)) {
       properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
     } else if (temp[1].includes('##')) {
       properties[temp[0]] = generateRandomValue(1);
