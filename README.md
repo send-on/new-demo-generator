@@ -66,11 +66,12 @@ This is the inverse of a "Dropoff".  100 ensures the event will fire while 25 im
 <br>
 
 ### Properties and Traits
-Track event properties and Identify event traits must be in object format **WITHOUT curly brackets**. 
+
+You may insert as many properties or traits as desired. 
 
 In order to randomly pick one property, set the value as an array. 
 
-To fire properties with array values, use format `[property, 2]:[val1, val2, val3]`.  This will pick 2 random values from the array set, if you set the integer above the number of values, it will send all values but not go above the number of elements in the array. 
+See below for details.
 
 > **Acceptable Properties**:
 > 
@@ -115,7 +116,7 @@ In order to do this, set the subsequent event's dependency to the first event.  
 
 <br>
 
-### Multiple Property Inheritence (2+ events > 1 event)
+### Multiple Property Inheritance (2+ events > 1 event)
 
 This feature allows one event to inherit multiple properties from multiple events. 
 
