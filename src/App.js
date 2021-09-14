@@ -391,7 +391,7 @@ const App = () => {
         <h4>{userCounter}</h4> Users Remaining
         <div></div>
         <h6>
-          <a rel="noreferrer" href="https://docs.google.com/spreadsheets/d/13XXBkNGFTms5o-6A3A3vqmIoVBUqkxSgvj9ghTTYGdI/edit?usp=sharing" target="_blank">v{version} - Template</a><br></br><br></br>
+          <a rel="noreferrer" href="https://docs.google.com/spreadsheets/d/1QpgfIq1VgGBy9iMNekSR80J2JHCmDaAPwEUH8_NDWcA/edit#gid=934482474" target="_blank">v{version} - Template</a><br></br><br></br>
           <a rel="noreferrer" href="https://github.com/send-on/new-demo-generator" target="_blank">README</a>
         </h6>
         
