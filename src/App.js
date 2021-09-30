@@ -384,8 +384,11 @@ const App = () => {
       </div>
       <div className="note">Note: You can save your user list, import another list, or make changes directly.  Don't forget the commas and click Save after! </div>
 
-      <h5>2. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
-      <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
+      <h5>2. Enter Source 
+        <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
+        </h5>
+      
+      <input autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
         <CSVReader 
           setDataArr={setDataArr}
           setIsLoading={setIsLoading}
