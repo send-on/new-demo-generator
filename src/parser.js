@@ -21,7 +21,7 @@ export default ({setDataArr, setIsLoading, setCsvLoaded, setStatus}) => {
   return (
     <>
       <h5>3. Click or Drag Upload <a style={{color:"white"}} href="https://docs.google.com/spreadsheets/d/1jXUA_clzEbEX5xMLGGhFsJDgRau6RnpKYAlBbZYJy6I/edit?usp=sharing">CSV</a></h5>
-      <div className="note" style={{"marginBottom": "2em"}}>(HINT - you can drag the file directly from the downloads bar at the bottom of Chrome after download)</div>
+      <div className="note" style={{"marginBottom": "1em"}}>(HINT - you can drag the file directly from the downloads bar at the bottom of Chrome after download)</div>
       <CSVReader
         onDrop={handleOnDrop}
         onError={handleOnError}

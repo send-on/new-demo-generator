@@ -14,7 +14,7 @@ const dependencyElement = 3;
 const dropoffElement = 4;
 const dayElement = 5;
 const randomizeElement = 6;
-const version = 1.4;
+const version = 1.5;
 
 // Helper functions
 const getRandomInt = (max) => {
@@ -349,6 +349,7 @@ const App = () => {
       setUserButtonStatus("Click to Save Changes")
       setUserList([])
     } else {
+      setUserButtonStatus("Saved!")
       setUserList(generateUsers(numOfUsers));
     }    
     return
@@ -356,7 +357,6 @@ const App = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log("parsed ",JSON.parse(e.target.userList.value))
     setUserList(JSON.parse(e.target.userList.value))
     setUserButtonStatus("Saved!")
   }
@@ -373,13 +373,8 @@ const App = () => {
         <button onClick={()=>lockUserList(numOfUsers, setUserList, setStatus, userList, setUserButtonStatus)} className="button">Generate Users</button>
         }
       </div>
-      
 
-      
-      
-      <div className="note">Note: Each time you click will generate a new set of users. To re-use the same user set for multiple sources or data sets, do not repeat this step moving forward</div>
-
-      <div style={{marginTop: "1em", width: "100%"}}>
+      <div style={{marginTop: "0.5em", width: "100%"}}>
         <UserForm 
         userList={userList} 
         onSubmit={onSubmit} 
@@ -387,6 +382,7 @@ const App = () => {
         setUserButtonStatus={setUserButtonStatus} 
         /> 
       </div>
+      <div className="note">Note: You can save your user list, import another list, or make changes directly.  Don't forget the commas and click Save after! </div>
 
       <h5>2. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
@@ -396,10 +392,10 @@ const App = () => {
           setCsvLoaded={setCsvLoaded}
           setStatus={setStatus}
         />
-
+        <div>
         <h5>4. Fire Events</h5>
         {!isLoading && (userList.length > 0) ? 
-        <a href="#!"
+        <button 
           className="highlight button1" 
           onClick={()=>{
             if (csvLoaded) launcher(
@@ -419,10 +415,11 @@ const App = () => {
           } 
         >
           {status}
-        </a> 
+        </button> 
         :
-        <a href="#!" className="button1">{status}</a> 
+        <button className="button1">{status}</button> 
         }  
+        </div>
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining
         <div></div>

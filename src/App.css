@@ -1,19 +1,24 @@
 .userinput {
   width: 40%;
   height: 20em;
+  margin-bottom: 0.5em;
 }
 
 .button1 {
   display:inline-block;
-  padding:0.35em 1.2em;
+  width: 25em;
+  height: 2.5em;
+  font-size: 26px;
+  /* padding:0.35em 1.2em; */
+  padding-top: 2px;
   border:0.1em solid #FFFFFF;
   background-color: #282C34;
-  margin:0.5em 0.3em 0.3em 0;
+  margin:0em 2em 0em 2em;
   border-radius:0.12em;
   box-sizing: border-box;
   text-decoration:none;
   font-family:'Roboto',sans-serif;
-  font-weight:300;
+  font-weight:400;
   color:#FFFFFF;
   text-align:center;
   transition: all 0.2s;
@@ -29,7 +34,7 @@
   padding-top: 2px;
   border:0.1em solid #FFFFFF;
   background-color: #282C34;
-  margin:0em 0.3em 0em 2em;
+  margin:0em 2em 0em 2em;
   border-radius:0.12em;
   box-sizing: border-box;
   text-decoration:none;
@@ -47,11 +52,12 @@
 
 .note {
   font-size: 16px;
+  margin-top: 0.5em;
 
 }
-a:link {color: #FFFFFF;}
-a:visited {color: #FFFFFF;}
-a:hover {color: #ffcc00;}
+.button1:link {color: #FFFFFF;}
+.button1:visited {color: #FFFFFF;}
+.button1:hover {color: #ffcc00;}
 
 h6 {
   margin-top: 0.75em;
