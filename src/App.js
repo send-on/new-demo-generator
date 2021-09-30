@@ -207,7 +207,7 @@ const launcher = async (
   setStatus
   ) => {
   // reset ajs on new user
-  setStatus("Working...")
+  setStatus("Working...");
   setIsLoading(true);
   if (e_i < 3) {
     analytics.reset();
@@ -313,9 +313,9 @@ const launcher = async (
 const UserForm = ({userList, onSubmit, userButtonStatus, setUserButtonStatus}) => {   
   return (
     <form style={{width: "100%"}} onSubmit={onSubmit} key={userList}>
-        <textarea onChange={()=>setUserButtonStatus("Override User List")} className="userinput" type="text" name="userList" defaultValue={JSON.stringify(userList, null, 2)} />
+        <textarea onChange={()=>setUserButtonStatus("Click to Save Changes")} className="userinput" type="text" name="userList" defaultValue={JSON.stringify(userList, null, 2)} />
         <div>
-          <button className="userButton">Override User List</button>
+          <button className="button">{userButtonStatus}</button>
         </div>
     </form>
   )
@@ -331,7 +331,7 @@ const App = () => {
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
   const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV");
-  const [userButtonStatus, setUserButtonStatus] = useState("Override User List");
+  const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -344,42 +344,48 @@ const App = () => {
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
 
-  const lockUserList = (numOfUsers, setUserList, setStatus) => {
-    setUserList(generateUsers(numOfUsers));
+  const lockUserList = (numOfUsers, setUserList, setStatus, userList, setUserButtonStatus) => {
+    if (userList.length > 0) { 
+      setUserButtonStatus("Click to Save Changes")
+      setUserList([])
+    } else {
+      setUserList(generateUsers(numOfUsers));
+    }    
     return
   }
-
-  
 
   const onSubmit = (e) => {
     e.preventDefault();
     console.log("parsed ",JSON.parse(e.target.userList.value))
     setUserList(JSON.parse(e.target.userList.value))
+    setUserButtonStatus("Saved!")
   }
 
   return (
     <div className="App">
       <header className="App-header">
         <h5>1. Enter How many Users to Generate</h5>
+      <div className="stepComponent">
+        <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
+        {userList.length > 0 ? 
+        <button onClick={()=>lockUserList(numOfUsers, setUserList, setStatus, userList, setUserButtonStatus)} className="button">{`Users Set, Click to Reset`}</button>
+        : 
+        <button onClick={()=>lockUserList(numOfUsers, setUserList, setStatus, userList, setUserButtonStatus)} className="button">Generate Users</button>
+        }
+      </div>
       
-      <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
 
       
-      {userList.length > 0 ? 
-      <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">{`DONE -> ${userList.length} Users Set, Click to Regenerate`}</a>
-      : 
-      <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
-      }
+      
       <div className="note">Note: Each time you click will generate a new set of users. To re-use the same user set for multiple sources or data sets, do not repeat this step moving forward</div>
 
       <div style={{marginTop: "1em", width: "100%"}}>
-        {(userList.length > 0) ? <UserForm 
+        <UserForm 
         userList={userList} 
         onSubmit={onSubmit} 
         userButtonStatus={userButtonStatus} 
         setUserButtonStatus={setUserButtonStatus} 
         /> 
-        : ""}
       </div>
 
       <h5>2. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>

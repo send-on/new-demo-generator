@@ -20,12 +20,16 @@
   cursor: pointer;
 }
 
-.userButton {
+.button {
   display:inline-block;
+  width: 20em;
+  height: 2em;
+  font-size: 22px;
   padding:0.35em 1.2em;
+  padding-top: 2px;
   border:0.1em solid #FFFFFF;
   background-color: #282C34;
-  margin:0.5em 0.3em 0.3em 0;
+  margin:0em 0.3em 0em 2em;
   border-radius:0.12em;
   box-sizing: border-box;
   text-decoration:none;
@@ -37,9 +41,9 @@
   cursor: pointer;
 }
 
-.userButton:link {color: #FFFFFF;}
-.userButton:visited {color: #FFFFFF;}
-.userButton:hover {color: #ffcc00;}
+.button:link {color: #FFFFFF;}
+.button:visited {color: #FFFFFF;}
+.button:hover {color: #ffcc00;}
 
 .note {
   font-size: 16px;
@@ -75,8 +79,8 @@ h4 {
 }
 input[type=text], select {
   min-width: 400px;
-  padding: 12px 20px;
-  margin: 8px 0;
+  padding: 12px 20px 12px 20px;
+  margin: 8px 0 8px 0;
   display: inline-block;
   border: 1px solid #ccc;
   border-radius: 4px;
