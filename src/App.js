@@ -310,6 +310,17 @@ const launcher = async (
   }
 }
 
+const UserForm = ({userList, onSubmit, userButtonStatus, setUserButtonStatus}) => {   
+  return (
+    <form style={{width: "100%"}} onSubmit={onSubmit} key={userList}>
+        <textarea onChange={()=>setUserButtonStatus("Override User List")} className="userinput" type="text" name="userList" defaultValue={JSON.stringify(userList, null, 2)} />
+        <div>
+          <button className="userButton">Override User List</button>
+        </div>
+    </form>
+  )
+}
+
 const App = () => {
   const [dataArr, setDataArr] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -319,7 +330,8 @@ const App = () => {
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
-  const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV")
+  const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV");
+  const [userButtonStatus, setUserButtonStatus] = useState("Override User List");
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -337,6 +349,14 @@ const App = () => {
     return
   }
 
+  
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    console.log("parsed ",JSON.parse(e.target.userList.value))
+    setUserList(JSON.parse(e.target.userList.value))
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -351,6 +371,16 @@ const App = () => {
       <a href="/#" onClick={()=>lockUserList(numOfUsers, setUserList, setStatus)} className="button1">Generate Users</a>
       }
       <div className="note">Note: Each time you click will generate a new set of users. To re-use the same user set for multiple sources or data sets, do not repeat this step moving forward</div>
+
+      <div style={{marginTop: "1em", width: "100%"}}>
+        {(userList.length > 0) ? <UserForm 
+        userList={userList} 
+        onSubmit={onSubmit} 
+        userButtonStatus={userButtonStatus} 
+        setUserButtonStatus={setUserButtonStatus} 
+        /> 
+        : ""}
+      </div>
 
       <h5>2. Enter Source <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a></h5>
       <input className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 

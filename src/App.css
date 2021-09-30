@@ -1,7 +1,13 @@
+.userinput {
+  width: 40%;
+  height: 20em;
+}
+
 .button1 {
   display:inline-block;
   padding:0.35em 1.2em;
   border:0.1em solid #FFFFFF;
+  background-color: #282C34;
   margin:0.5em 0.3em 0.3em 0;
   border-radius:0.12em;
   box-sizing: border-box;
@@ -13,6 +19,27 @@
   transition: all 0.2s;
   cursor: pointer;
 }
+
+.userButton {
+  display:inline-block;
+  padding:0.35em 1.2em;
+  border:0.1em solid #FFFFFF;
+  background-color: #282C34;
+  margin:0.5em 0.3em 0.3em 0;
+  border-radius:0.12em;
+  box-sizing: border-box;
+  text-decoration:none;
+  font-family:'Roboto',sans-serif;
+  font-weight:300;
+  color:#FFFFFF;
+  text-align:center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.userButton:link {color: #FFFFFF;}
+.userButton:visited {color: #FFFFFF;}
+.userButton:hover {color: #ffcc00;}
 
 .note {
   font-size: 16px;
