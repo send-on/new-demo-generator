@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
-import CSVReader from './parser';
+import CSVReader from './Parser';
 import moment from 'moment';
 import { generateUsers, generateRandomValue } from './util/faker'
 import {
@@ -25,7 +25,7 @@ import UserForm from './components/UserForm';
 // setEvent instead of setCounter, setUserCounter
 
 const launcher = async (
-  dataArr, // data schema
+  eventList, // data schema
   userList, 
   u_i, // index for user
   e_i, // index for event
@@ -45,39 +45,39 @@ const launcher = async (
     analytics.setAnonymousId(userList[u_i].anonymousId);
   }
   // Check for dropoff
-  if (shouldDropEvent(dataArr[e_i][dropoffElement])) {
+  if (shouldDropEvent(eventList[e_i][dropoffElement])) {
     // Check for dependency 
-    if (!dataArr[e_i][dependencyElement] || (dataArr[e_i][dependencyElement] < 1)) {
+    if (!eventList[e_i][dependencyElement] || (eventList[e_i][dependencyElement] < 1)) {
       // if no dependency exists, set dependency to 0
-      dataArr[e_i][dependencyElement] = "0";
+      eventList[e_i][dependencyElement] = "0";
     } 
-    if (checkDependency(dataArr[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
+    if (checkDependency(eventList[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
       // Handle time set time, index 6 is days_ago, index 7 is hours
       let timestamp = moment().unix();
-      if (dataArr[e_i][dayElement]) timestamp = timestamp - dataArr[e_i][dayElement]*unixDay
-      if (dataArr[e_i][randomizeElement]) timestamp = timestamp - Math.floor((Math.random() * (parseFloat(dataArr[e_i][randomizeElement]))*unixDay));
+      if (eventList[e_i][dayElement]) timestamp = timestamp - eventList[e_i][dayElement]*unixDay
+      if (eventList[e_i][randomizeElement]) timestamp = timestamp - Math.floor((Math.random() * (parseFloat(eventList[e_i][randomizeElement]))*unixDay));
       timestamp = moment(timestamp, "X").format();
 
       counter++;
       // Identify
-      if (dataArr[e_i][1] === "identify") {
-        let properties = createEventProps(dataArr[e_i], firedEvents);
+      if (eventList[e_i][1] === "identify") {
+        let properties = createEventProps(eventList[e_i], firedEvents);
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
-        firedEvents[parseInt(dataArr[e_i][0])] = properties
+        firedEvents[parseInt(eventList[e_i][0])] = properties
         await analytics.identify(userList[u_i].user_id, properties, 
           {timestamp:timestamp}
         );
       }
 
-      if (dataArr[e_i][1] === "page") {
-        let properties = createEventProps(dataArr[e_i], firedEvents);
+      if (eventList[e_i][1] === "page") {
+        let properties = createEventProps(eventList[e_i], firedEvents);
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
-        firedEvents[parseInt(dataArr[e_i][0])] = properties
-        await analytics.page(dataArr[e_i][2], properties, 
+        firedEvents[parseInt(eventList[e_i][0])] = properties
+        await analytics.page(eventList[e_i][2], properties, 
           {
             anonymousId: userList[u_i].anonymousId,
             timestamp:timestamp
@@ -86,10 +86,10 @@ const launcher = async (
       }
 
       // Track
-      if (dataArr[e_i][1] === "track") {
-        let properties = createEventProps(dataArr[e_i], firedEvents);
-        firedEvents[parseInt(dataArr[e_i][0])] = properties
-        await analytics.track(dataArr[e_i][2], properties, {
+      if (eventList[e_i][1] === "track") {
+        let properties = createEventProps(eventList[e_i], firedEvents);
+        firedEvents[parseInt(eventList[e_i][0])] = properties
+        await analytics.track(eventList[e_i][2], properties, {
           anonymousId: userList[u_i].anonymousId,
           timestamp:timestamp
         });
@@ -101,10 +101,10 @@ const launcher = async (
   if (u_i%10 === 0) setUserCounter(userList.length - u_i)
 
   // next event
-  if (dataArr[e_i+1]) {    
+  if (eventList[e_i+1]) {    
     if (counter%100 === 0) setCounter(counter);
     setTimeout(()=>launcher(
-      dataArr, 
+      eventList, 
       userList, 
       u_i, 
       e_i+1,
@@ -119,7 +119,7 @@ const launcher = async (
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
     setTimeout(()=>launcher(
-      dataArr, 
+      eventList, 
       userList, 
       u_i+1, 
       2,
@@ -136,7 +136,7 @@ const launcher = async (
     setUserCounter(userList.length-1- u_i);
     setStatus("Finishing Up ...");
     let anonId = generateRandomValue(1); 
-    loadEventProps(dataArr, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
+    loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
     return "finished";
   }
 }
@@ -144,7 +144,7 @@ const launcher = async (
 
 
 const App = () => {
-  const [dataArr, setDataArr] = useState([]);
+  const [eventList, setEventList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [csvLoaded, setCsvLoaded] = useState(false);
   const [writeKey, setWriteKey] = useState('');
@@ -219,7 +219,7 @@ const App = () => {
         </form>
 
         <CSVReader 
-          setDataArr={setDataArr}
+          setEventList={setEventList}
           setIsLoading={setIsLoading}
           setCsvLoaded={setCsvLoaded}
           setStatus={setStatus}
@@ -231,7 +231,7 @@ const App = () => {
           className="highlight button1" 
           onClick={()=>{
             if (csvLoaded) launcher(
-              dataArr, // array of events
+              eventList, // array of events
               userList, // array of all users
               userList.length-numOfUsers, // user position index
               2, // event position index

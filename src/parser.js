@@ -1,12 +1,12 @@
 import { CSVReader } from 'react-papaparse';
 import './App.css';
 
-export default ({setDataArr, setIsLoading, setCsvLoaded, setStatus}) => {
+export default ({setEventList, setIsLoading, setCsvLoaded, setStatus}) => {
   const handleOnDrop = (data) => {
     setIsLoading(false)
     setCsvLoaded(true)
     let arr = data.map(obj => obj.data)
-    setDataArr(arr)
+    setEventList(arr)
     setStatus("FIRE EVENTS")
   };
   const handleOnError = (err, file, inputElem, reason) => {

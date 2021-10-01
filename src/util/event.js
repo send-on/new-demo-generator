@@ -109,29 +109,29 @@ export const shouldDropEvent = (dropoff) => {
 }
   
 
-export const loadEventProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
-  if (dataArr[e_i][1] === "identify") {
-    let properties = createEventProps(dataArr[e_i], firedEvents);
-    firedEvents[parseInt(dataArr[e_i][0])] = properties
+export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
+  if (eventList[e_i][1] === "identify") {
+    let properties = createEventProps(eventList[e_i], firedEvents);
+    firedEvents[parseInt(eventList[e_i][0])] = properties
     analytics.identify(anonId, properties);
   }
-  if (dataArr[e_i][1] === "page") {
-    let properties = createEventProps(dataArr[e_i], firedEvents);
-    firedEvents[parseInt(dataArr[e_i][0])] = properties
-    analytics.page(dataArr[e_i][2], properties);
+  if (eventList[e_i][1] === "page") {
+    let properties = createEventProps(eventList[e_i], firedEvents);
+    firedEvents[parseInt(eventList[e_i][0])] = properties
+    analytics.page(eventList[e_i][2], properties);
   }
 
-  if (dataArr[e_i][1] === "track") {
-    let properties = createEventProps(dataArr[e_i], firedEvents);
-    firedEvents[parseInt(dataArr[e_i][0])] = properties
-    analytics.track(dataArr[e_i][2], properties, {
+  if (eventList[e_i][1] === "track") {
+    let properties = createEventProps(eventList[e_i], firedEvents);
+    firedEvents[parseInt(eventList[e_i][0])] = properties
+    analytics.track(eventList[e_i][2], properties, {
       anonymousId: anonId,
     });
   } 
   // next event
-  if (dataArr[e_i+1]) {
+  if (eventList[e_i+1]) {
     setTimeout(()=>loadEventProps(
-      dataArr,
+      eventList,
       u_i,
       e_i+1,
       firedEvents,
@@ -142,7 +142,7 @@ export const loadEventProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsL
     ), 10)
   } else if (u_i < 10) {
     setTimeout(()=>loadEventProps(
-      dataArr,
+      eventList,
       u_i+1,
       1,
       firedEvents,
