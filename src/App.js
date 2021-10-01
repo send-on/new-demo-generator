@@ -4,6 +4,7 @@ import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './Parser';
 import moment from 'moment';
+import { toaster } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import {
   unixDay,
@@ -65,7 +66,7 @@ const launcher = async (
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
-        firedEvents[parseInt(eventList[e_i][0])] = properties
+        firedEvents[parseInt(eventList[e_i][0])] = properties;
         await analytics.identify(userList[u_i].user_id, properties, 
           {timestamp:timestamp}
         );
@@ -137,11 +138,10 @@ const launcher = async (
     setStatus("Finishing Up ...");
     let anonId = generateRandomValue(1); 
     loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
+
     return "finished";
   }
 }
-
-
 
 const App = () => {
   const [eventList, setEventList] = useState([]);
@@ -166,7 +166,7 @@ const App = () => {
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
 
-  const lockUserList = (numOfUsers, setUserList, setStatus, userList, setUserButtonStatus) => {
+  const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
       setUserList([])
@@ -181,10 +181,11 @@ const App = () => {
     e.preventDefault();
     try {
       setUserList(JSON.parse(e.target.userList.value));
+      toaster.success("Changes to user list saved!")
       setUserButtonStatus("Saved!")
     }
     catch(e) {
-      console.log(e.message);
+      toaster.danger(e.message);
     }
   }
 
@@ -195,9 +196,9 @@ const App = () => {
       <div className="stepComponent">
         <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
         {userList.length > 0 ? 
-        <button onClick={()=>lockUserList(numOfUsers, setUserList, setStatus, userList, setUserButtonStatus)} className="button">{`Users Set, Click to Reset`}</button>
+        <button onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} className="button">{`Users Set, Click to Reset`}</button>
         : 
-        <button onClick={()=>lockUserList(numOfUsers, setUserList, setStatus, userList, setUserButtonStatus)} className="button">Generate Users</button>
+        <button onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} className="button">Generate Users</button>
         }
       </div>
 
@@ -225,7 +226,7 @@ const App = () => {
           setStatus={setStatus}
         />
         <div>
-        <h5>4. Fire Events</h5>
+        <h5>4. Fire Events (Turn Off Adblock)</h5>
         {!isLoading && (userList.length > 0) ? 
         <button 
           className="highlight button1" 

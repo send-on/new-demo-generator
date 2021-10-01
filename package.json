@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "evergreen-ui": "^6.5.0",
     "faker": "^5.5.3",
     "fs": "^0.0.1-security",
     "moment": "^2.29.1",

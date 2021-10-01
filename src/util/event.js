@@ -1,4 +1,5 @@
 import { getRandomInt, sanitize } from './common.js'
+import { toaster } from 'evergreen-ui'
 import {
   firstProp,
   dependencyElement,
@@ -154,5 +155,6 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
   } else {
     setIsLoading(false);
     setStatus("DONE, Fire Again?");
+    toaster.success("All events fired!")
   }
 }
