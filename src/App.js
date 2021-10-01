@@ -2,196 +2,27 @@ import React, { useState } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
-import CSVReader from './parser.js';
+import CSVReader from './parser';
 import moment from 'moment';
-import { generateUsers, generateRandomValue } from './faker.js'
+import { generateUsers, generateRandomValue } from './util/faker'
+import {
+  unixDay,
+  firstEvent,
+  dependencyElement,
+  dropoffElement,
+  dayElement,
+  randomizeElement,
+  version
+} from './constants/config'
+import {
+  createEventProps,
+  checkDependency,
+  shouldDropEvent,
+  loadEventProps, 
+} from './util/event'
+import UserForm from './components/UserForm';
 
-// Constants - DO NOT CHANGE
-const unixDay = 86400;
-const firstEvent = 2;
-const firstProp = 7;
-const dependencyElement = 3;
-const dropoffElement = 4;
-const dayElement = 5;
-const randomizeElement = 6;
-const version = 1.5;
-
-// Helper functions
-const getRandomInt = (max) => {
-  return Math.floor(Math.random() * max);
-}
-
-const isNumeric = (str) => {
-  if (typeof str != "string") return false 
-  return !isNaN(str) && 
-         !isNaN(parseFloat(str)) 
-}
-
-const sanitize = (s) => {
-  if (s.includes(false)) return false;
-  if (s.includes(true)) return true;
-  s = s.replace('\"', "");
-  s = s.replace("[", "");
-  s = s.replace("]", "");
-  s = s.replace("{", "");
-  s = s.replace("}", "");
-  s = s.replace('"', "");
-  s = s.trim();
-  if (isNumeric(s)) return parseFloat(s);
-  return s
-}
-
-const checkIsArrayAndHasEvent = (recallArr, firedEvents) => {
-  let isArrayAndHasEvent = false
-  if (Array.isArray(recallArr)) {
-    recallArr.forEach(e => {
-      if (firedEvents[e]) isArrayAndHasEvent = e
-    })
-  } 
-  return isArrayAndHasEvent
-}
-
-const removeMissingEvents = (newRecallCell, firedEvents) => {
-  let newArr = []; 
-  for (let i = 0; i < newRecallCell.length; i++) {
-    if (firedEvents[newRecallCell[i]]) newArr.push(newRecallCell[i])
-  }
-  return newArr;
-}
-
-const createMultipleProperty = (val, firedEvents, recallCell ) => {
-  let newRecallCell = recallCell.map(e => JSON.stringify(e));
-  let outputArr = [];
-  let sourceArr = val.split(",");
-  sourceArr = sourceArr.map(e => sanitize(e))
-  newRecallCell = removeMissingEvents(newRecallCell, firedEvents)
-  for (let i = 0; i < newRecallCell.length; i++) {
-    let tempObj = {};
-    for (let y = 0; y < sourceArr.length; y++) {
-      tempObj[sourceArr[y]] = firedEvents[newRecallCell[i]][sourceArr[y]]
-    }
-    outputArr.push(tempObj);
-  }
-  return outputArr
-}
-
-const createProps = (e, firedEvents) => {
-  // set recallNum for single value
-  let recallNum = "0"
-  let recallCell = "0"
-  if (e[dependencyElement]) {
-    recallNum = parseInt(e[dependencyElement])
-    recallCell = JSON.parse(e[dependencyElement])
-  } 
-  
-  // set recallNum to existing value based on dependency
-  if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
-
-  // remove non property/traits from array
-  let propsObject = e.slice(firstProp);
-  propsObject = propsObject.filter(function(el) { return el; });
-  const properties = {};
-  // create properties object, randomize array element selection per iteration, sanitize 
-  for (let i = 0; i < propsObject.length; i++) {
-    let temp = propsObject[i].split([":"]);
-    // check for * recall
-    if (temp[1].includes("*") && (firedEvents[recallNum])) {
-      if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
-    } else if (temp[1].includes("{") && Array.isArray(recallCell)) {
-      properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
-    } else if (temp[1].includes('##')) {
-      properties[temp[0]] = generateRandomValue(1);
-    } else if (temp[1].includes ('#')) {
-      properties[temp[0]] = generateRandomValue(0);
-    } else {
-      temp[1] = temp[1].split(',')
-      // if val[0] is array
-      if (temp[0].includes("[")) {
-        // Create tuple from key [prop, 2]
-        let tuple = [
-          sanitize(temp[0].split(',')[0]),
-          sanitize(temp[0].split(',')[1])
-        ]
-        let randomValue = [];
-        // Push in random value i times, pop out element when chosen (block if too many)
-        if (tuple[1] > temp[1].length) tuple[1] = temp[1].length;
-        for (let i = 0; i < tuple[1]; i++) {
-          let randomInt = getRandomInt(temp[1].length)
-          randomValue.push(sanitize(temp[1][randomInt]));
-          temp[1].splice(randomInt,1);
-        }
-        properties[tuple[0]] = randomValue;
-      } else { 
-        // randomly choose element in array
-        let randomValue = sanitize(temp[1][getRandomInt(temp[1].length)]);
-        properties[temp[0]] = randomValue;
-      }
-    }
-  }
-  return properties;
-}
-
-const checkDependency = (dependentOn, firedEvents={}) => {
-  let parsedDependentOn = JSON.parse(dependentOn)
-  if (Array.isArray(parsedDependentOn)) { 
-    return checkIsArrayAndHasEvent(parsedDependentOn, firedEvents)
-  } else {
-    return (dependentOn in firedEvents ? true : false)
-  }
-}
-
-const shouldDrop = (dropoff) => {
-  return (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true;
-}
-  
-
-const loadProps = (dataArr, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
-  if (dataArr[e_i][1] === "identify") {
-    let properties = createProps(dataArr[e_i], firedEvents);
-    firedEvents[parseInt(dataArr[e_i][0])] = properties
-    analytics.identify(anonId, properties);
-  }
-  if (dataArr[e_i][1] === "page") {
-    let properties = createProps(dataArr[e_i], firedEvents);
-    firedEvents[parseInt(dataArr[e_i][0])] = properties
-    analytics.page(dataArr[e_i][2], properties);
-  }
-
-  if (dataArr[e_i][1] === "track") {
-    let properties = createProps(dataArr[e_i], firedEvents);
-    firedEvents[parseInt(dataArr[e_i][0])] = properties
-    analytics.track(dataArr[e_i][2], properties, {
-      anonymousId: anonId,
-    });
-  } 
-  // next event
-  if (dataArr[e_i+1]) {
-    setTimeout(()=>loadProps(
-      dataArr,
-      u_i,
-      e_i+1,
-      firedEvents,
-      analytics, 
-      setIsLoading,
-      setStatus, 
-      anonId
-    ), 10)
-  } else if (u_i < 10) {
-    setTimeout(()=>loadProps(
-      dataArr,
-      u_i+1,
-      1,
-      firedEvents,
-      analytics, 
-      setIsLoading,
-      setStatus, 
-      anonId
-    ), 10)
-  } else {
-    setIsLoading(false);
-    setStatus("DONE, Fire Again?");
-  }
-}
+// setEvent instead of setCounter, setUserCounter
 
 const launcher = async (
   dataArr, // data schema
@@ -199,7 +30,7 @@ const launcher = async (
   u_i, // index for user
   e_i, // index for event
   firedEvents={0:true}, // object of events fired
-  setIsLoading=false, 
+  setIsLoading, 
   analytics, 
   setCounter, 
   counter, 
@@ -214,7 +45,7 @@ const launcher = async (
     analytics.setAnonymousId(userList[u_i].anonymousId);
   }
   // Check for dropoff
-  if (shouldDrop(dataArr[e_i][dropoffElement])) {
+  if (shouldDropEvent(dataArr[e_i][dropoffElement])) {
     // Check for dependency 
     if (!dataArr[e_i][dependencyElement] || (dataArr[e_i][dependencyElement] < 1)) {
       // if no dependency exists, set dependency to 0
@@ -230,7 +61,7 @@ const launcher = async (
       counter++;
       // Identify
       if (dataArr[e_i][1] === "identify") {
-        let properties = createProps(dataArr[e_i], firedEvents);
+        let properties = createEventProps(dataArr[e_i], firedEvents);
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
@@ -241,7 +72,7 @@ const launcher = async (
       }
 
       if (dataArr[e_i][1] === "page") {
-        let properties = createProps(dataArr[e_i], firedEvents);
+        let properties = createEventProps(dataArr[e_i], firedEvents);
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
@@ -256,7 +87,7 @@ const launcher = async (
 
       // Track
       if (dataArr[e_i][1] === "track") {
-        let properties = createProps(dataArr[e_i], firedEvents);
+        let properties = createEventProps(dataArr[e_i], firedEvents);
         firedEvents[parseInt(dataArr[e_i][0])] = properties
         await analytics.track(dataArr[e_i][2], properties, {
           anonymousId: userList[u_i].anonymousId,
@@ -302,24 +133,15 @@ const launcher = async (
       ), 10);
   } else {
     setCounter(counter);
-    setUserCounter(userList.length-1- u_i)
-    setStatus("Finishing Up ...")
+    setUserCounter(userList.length-1- u_i);
+    setStatus("Finishing Up ...");
     let anonId = generateRandomValue(1); 
-    loadProps(dataArr, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
+    loadEventProps(dataArr, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
     return "finished";
   }
 }
 
-const UserForm = ({userList, onSubmit, userButtonStatus, setUserButtonStatus}) => {   
-  return (
-    <form style={{width: "100%"}} onSubmit={onSubmit} key={userList}>
-        <textarea onChange={()=>setUserButtonStatus("Click to Save Changes")} className="userinput" type="text" name="userList" defaultValue={JSON.stringify(userList, null, 2)} />
-        <div>
-          <button className="button">{userButtonStatus}</button>
-        </div>
-    </form>
-  )
-}
+
 
 const App = () => {
   const [dataArr, setDataArr] = useState([]);
@@ -357,8 +179,13 @@ const App = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    setUserList(JSON.parse(e.target.userList.value))
-    setUserButtonStatus("Saved!")
+    try {
+      setUserList(JSON.parse(e.target.userList.value));
+      setUserButtonStatus("Saved!")
+    }
+    catch(e) {
+      console.log(e.message);
+    }
   }
 
   return (
@@ -387,8 +214,10 @@ const App = () => {
       <h5>2. Enter Source 
         <a style={{color:"white"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
         </h5>
-      
-      <input autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
+        <form>
+          <input name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
+        </form>
+
         <CSVReader 
           setDataArr={setDataArr}
           setIsLoading={setIsLoading}
