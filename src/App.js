@@ -136,7 +136,7 @@ const launcher = async (
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
     setStatus("Finishing Up ...");
-    let anonId = generateRandomValue(1); 
+    let anonId = generateRandomValue("##"); 
     loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
 
     return "finished";

@@ -64,10 +64,9 @@ export const createEventProps = (e, firedEvents) => {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
     } else if (temp[1].includes("{") && Array.isArray(recallCell)) {
       properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
-    } else if (temp[1].includes('##')) {
-      properties[temp[0]] = generateRandomValue(1);
-    } else if (temp[1].includes ('#')) {
-      properties[temp[0]] = generateRandomValue(0);
+    } else if (temp[1].includes('#')) {
+      properties[temp[0]] = generateRandomValue(temp[1]);
+      if (generateRandomValue(temp[1]) === "") toaster.warning(`Random value error on "${temp[1]}" - Invalid Phrase`)
     } else {
       temp[1] = temp[1].split(',')
       // if val[0] is array

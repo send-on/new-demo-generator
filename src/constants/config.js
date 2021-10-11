@@ -8,4 +8,4 @@ export const dependencyElement = 3;
 export const dropoffElement = 4;
 export const dayElement = 5;
 export const randomizeElement = 6;
-export const version = 1.51;
+export const version = 1.6;
