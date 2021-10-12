@@ -35,16 +35,13 @@ export const generateRandomValue = (string) => {
   // backwards compatibility
   let value = "";
   if (!string.includes("#")) return value;
-  console.log(string);
   if (string.trim() == "##") {
     value = faker.datatype.uuid();
-    console.log("value", value)
     return value;
   }
   if (string.trim() == "#") {
     value = faker.datatype.uuid();
     value = value.split("-")[0]
-    console.log("value", value)
     return value;
   } 
   
