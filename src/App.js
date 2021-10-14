@@ -174,7 +174,22 @@ const App = () => {
       setUserButtonStatus("Saved!")
       setUserList(generateUsers(numOfUsers));
     }    
+    toaster.success("Successfully Generated User List!")
     return
+  }
+
+  const regenerateAnonymousId = (userList, setUserList) => {
+    let temp = userList;
+    for (let i = 0; i < temp.length; i++) {
+      temp[i].anonymousId = generateRandomValue("##");
+    }
+    if (userButtonStatus === "Saved! ") {
+      setUserButtonStatus("Saved!")
+    } else {
+      setUserButtonStatus("Saved! ")
+    }
+    toaster.success("Anonymous IDs Regenerated!")
+    setUserList(temp);
   }
 
   const onSubmit = (e) => {
@@ -200,11 +215,12 @@ const App = () => {
         : 
         <button onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} className="button">Generate Users</button>
         }
+        <button style={{marginLeft: "-1em"}}onClick={()=>regenerateAnonymousId(userList, setUserList)} className="button">Regenerate Anonymous ID</button>
       </div>
 
       <div style={{marginTop: "0.5em", width: "100%"}}>
         <UserForm 
-        userList={userList} 
+        userList={JSON.stringify(userList, null, 2)} 
         onSubmit={onSubmit} 
         userButtonStatus={userButtonStatus} 
         setUserButtonStatus={setUserButtonStatus} 
