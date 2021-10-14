@@ -192,7 +192,7 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h5>1. Enter How many Users to Generate</h5>
+        <h5>1. Enter Number of Users to Generate or Import List</h5>
       <div className="stepComponent">
         <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
         {userList.length > 0 ? 
@@ -234,7 +234,7 @@ const App = () => {
             if (csvLoaded) launcher(
               eventList, // array of events
               userList, // array of all users
-              userList.length-numOfUsers, // user position index
+              0, // user position index
               2, // event position index
               {"0":true},  // firedEvents
               setIsLoading, 

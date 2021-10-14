@@ -63,8 +63,8 @@ export const generateRandomValue = (string) => {
   // Commerce
   if (type === "color") value = faker.commerce.color();
   if (type === "department") value = faker.commerce.department();
-  if (type === "price") value = formatter.format(faker.commerce.price()/4.00);
-  if (type === "price_high") value = formatter.format(faker.commerce.price());
+  if (type === "price") value = parseFloat(formatter.format(faker.commerce.price()/4.00).substring(1));
+  if (type === "price_high") value = parseFloat(formatter.format(faker.commerce.price()).substring(1));
   if (type === "material") value = faker.commerce.material();
   if (type === "product_description") value = faker.commerce.productDescription();
 
