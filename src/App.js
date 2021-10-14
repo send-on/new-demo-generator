@@ -170,11 +170,13 @@ const App = () => {
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
       setUserList([])
+      toaster.success("User List Reset")
     } else {
       setUserButtonStatus("Saved!")
       setUserList(generateUsers(numOfUsers));
+      toaster.success("Successfully Generated User List!")
     }    
-    toaster.success("Successfully Generated User List!")
+    
     return
   }
 

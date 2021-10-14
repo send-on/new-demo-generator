@@ -1,6 +1,6 @@
 {
   "name": "new-demo-generator",
-  "version": "1.6",
+  "version": "1.7",
   "private": true,
   "dependencies": {
     "@segment/analytics.js-core": "^4.1.11",
