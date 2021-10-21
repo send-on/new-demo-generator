@@ -22,6 +22,7 @@ import {
   createTimestamp
 } from './util/event'
 import UserForm from './components/UserForm';
+import Notepad from './components/Notepad';
 
 // setEvent instead of setCounter, setUserCounter
 
@@ -145,6 +146,7 @@ const App = () => {
   const [userCounter, setUserCounter] = useState(0);
   const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
+  const [isNotepadOpen, setIsNotepadOpen] = useState(true);
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -197,6 +199,8 @@ const App = () => {
     }
   }
 
+  
+
   return (
     <div className="App">
       <header className="App-header">
@@ -227,6 +231,8 @@ const App = () => {
         <form>
           <input name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
         </form>
+        {isNotepadOpen ? <Notepad /> : <div></div>}
+        
 
         <CSVReader 
           setEventList={setEventList}

@@ -2,7 +2,18 @@
   width: 40%;
   height: 20em;
   margin-bottom: 0.5em;
+  min-width: 400px;
 }
+
+.inputbox {
+  min-width: 400px;
+}
+
+.notepad {
+  min-width: 350px;
+  
+}
+
 
 .button1 {
   display:inline-block;
@@ -46,6 +57,31 @@
   cursor: pointer;
 }
 
+.smallbutton {
+  display:inline-block;
+  width: 5em;
+  height: 2em;
+  font-size: 22px;
+  padding:0.35em 1.2em;
+  padding-top: 2px;
+  border:0.1em solid #FFFFFF;
+  background-color: #282C34;
+  margin:0em 2em 0em 2em;
+  border-radius:0.12em;
+  box-sizing: border-box;
+  text-decoration:none;
+  font-family:'Roboto',sans-serif;
+  font-weight:300;
+  color:#FFFFFF;
+  text-align:center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.smallbutton:link {color: #FFFFFF;}
+.smallbutton:visited {color: #FFFFFF;}
+.smallbutton:hover {color: #ffcc00;}
+
 .button:link {color: #FFFFFF;}
 .button:visited {color: #FFFFFF;}
 .button:hover {color: #ffcc00;}
@@ -84,7 +120,7 @@ h4 {
   margin-bottom: 0.5em;
 }
 input[type=text], select {
-  min-width: 400px;
+  /* min-width: 400px; */
   padding: 12px 20px 12px 20px;
   margin: 8px 0 8px 0;
   display: inline-block;
