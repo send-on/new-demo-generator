@@ -3,7 +3,6 @@ import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './Parser';
-import moment from 'moment';
 import { toaster } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import {
@@ -20,6 +19,7 @@ import {
   checkDependency,
   shouldDropEvent,
   loadEventProps, 
+  createTimestamp
 } from './util/event'
 import UserForm from './components/UserForm';
 
@@ -53,16 +53,13 @@ const launcher = async (
       eventList[e_i][dependencyElement] = "0";
     } 
     if (checkDependency(eventList[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
-      // Handle time set time, index 6 is days_ago, index 7 is hours
-      let timestamp = moment().unix();
-      if (eventList[e_i][dayElement]) timestamp = timestamp - eventList[e_i][dayElement]*unixDay
-      if (eventList[e_i][randomizeElement]) timestamp = timestamp - Math.floor((Math.random() * (parseFloat(eventList[e_i][randomizeElement]))*unixDay));
-      timestamp = moment(timestamp, "X").format();
-
+      let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
+      // handle recall time
+      let properties = createEventProps(eventList[e_i], firedEvents);
+      properties.timestampUnix = createTimestamp(eventList[e_i], firedEvents)[1]
       counter++;
       // Identify
       if (eventList[e_i][1] === "identify") {
-        let properties = createEventProps(eventList[e_i], firedEvents);
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
@@ -73,7 +70,6 @@ const launcher = async (
       }
 
       if (eventList[e_i][1] === "page") {
-        let properties = createEventProps(eventList[e_i], firedEvents);
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
@@ -88,7 +84,6 @@ const launcher = async (
 
       // Track
       if (eventList[e_i][1] === "track") {
-        let properties = createEventProps(eventList[e_i], firedEvents);
         firedEvents[parseInt(eventList[e_i][0])] = properties
         await analytics.track(eventList[e_i][2], properties, {
           anonymousId: userList[u_i].anonymousId,

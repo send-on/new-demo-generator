@@ -1,10 +1,14 @@
-import { getRandomInt, sanitize } from './common.js'
-import { toaster } from 'evergreen-ui'
+import { getRandomInt, sanitize } from './common.js';
+import { toaster } from 'evergreen-ui';
 import {
   firstProp,
   dependencyElement,
-} from '../constants/config.js'
-import {  generateRandomValue } from './faker'
+  dayElement,
+  unixDay, 
+  randomizeElement
+} from '../constants/config.js';
+import {  generateRandomValue } from './faker';
+import moment from 'moment';
 
 export const checkIsArrayAndHasEvent = (recallArr, firedEvents) => {
   let isArrayAndHasEvent = false
@@ -38,6 +42,31 @@ export const createMultipleProperty = (val, firedEvents, recallCell ) => {
     outputArr.push(tempObj);
   }
   return outputArr
+}
+
+export const createTimestamp = (e, firedEvents) => {
+  // if recall exists
+  let timestamp = "";
+  let timestampUnix = 0;
+  if (e[dayElement].includes("#")) {
+    let recallNum = "0"
+    let recallCell = "0"
+    if (e[dependencyElement]) {
+      recallNum = parseInt(e[dependencyElement])
+      recallCell = JSON.parse(e[dependencyElement])
+    } 
+    if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
+    timestampUnix = firedEvents[recallNum]["timestampUnix"] 
+    timestampUnix = timestampUnix + (parseFloat(e[dayElement].substring(1)) * unixDay)
+    if (e[randomizeElement]) timestampUnix = timestampUnix + Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay));
+    
+  } else {
+    timestampUnix = moment().unix();
+    if (e[dayElement]) timestampUnix = timestampUnix - e[dayElement]*unixDay
+    if (e[randomizeElement]) timestampUnix = timestampUnix + Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay));
+  }
+  timestamp = moment(timestampUnix, "X").format();
+  return [timestamp, timestampUnix]
 }
 
 export const createEventProps = (e, firedEvents) => {
