@@ -54,26 +54,21 @@ const launcher = async (
     } 
     if (checkDependency(eventList[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
       let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
-      // handle recall time
       let properties = createEventProps(eventList[e_i], firedEvents);
-      properties.timestampUnix = createTimestamp(eventList[e_i], firedEvents)[1]
       counter++;
       // Identify
       if (eventList[e_i][1] === "identify") {
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
-        firedEvents[parseInt(eventList[e_i][0])] = properties;
         await analytics.identify(userList[u_i].user_id, properties, 
           {timestamp:timestamp}
         );
       }
 
       if (eventList[e_i][1] === "page") {
-        Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
-        firedEvents[parseInt(eventList[e_i][0])] = properties
         await analytics.page(eventList[e_i][2], properties, 
           {
             anonymousId: userList[u_i].anonymousId,
@@ -84,12 +79,13 @@ const launcher = async (
 
       // Track
       if (eventList[e_i][1] === "track") {
-        firedEvents[parseInt(eventList[e_i][0])] = properties
         await analytics.track(eventList[e_i][2], properties, {
           anonymousId: userList[u_i].anonymousId,
           timestamp:timestamp
         });
       }
+      properties.timestampUnix = createTimestamp(eventList[e_i], firedEvents)[1]
+      firedEvents[parseInt(eventList[e_i][0])] = properties;
     }
   }
   
