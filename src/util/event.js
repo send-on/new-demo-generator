@@ -58,12 +58,12 @@ export const createTimestamp = (e, firedEvents) => {
     if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
     timestampUnix = firedEvents[recallNum]["timestampUnix"] 
     timestampUnix = timestampUnix + (parseFloat(e[dayElement].substring(1)) * unixDay)
-    if (e[randomizeElement]) timestampUnix = timestampUnix + Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay));
+    if (e[randomizeElement]) timestampUnix = timestampUnix + (Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay)));
     
   } else {
     timestampUnix = moment().unix();
     if (e[dayElement]) timestampUnix = timestampUnix - e[dayElement]*unixDay
-    if (e[randomizeElement]) timestampUnix = timestampUnix + Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay));
+    if (e[randomizeElement]) timestampUnix = timestampUnix - (Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay)));
   }
   timestamp = moment(timestampUnix, "X").format();
   return [timestamp, timestampUnix]
