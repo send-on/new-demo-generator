@@ -6,12 +6,9 @@ import CSVReader from './Parser';
 import { toaster } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import {
-  unixDay,
   firstEvent,
   dependencyElement,
   dropoffElement,
-  dayElement,
-  randomizeElement,
   version
 } from './constants/config'
 import {
@@ -37,7 +34,8 @@ const launcher = async (
   setCounter, 
   counter, 
   setUserCounter, 
-  setStatus
+  setStatus,
+  isRealTime
   ) => {
   // reset ajs on new user
   setStatus("Working...");
@@ -57,33 +55,30 @@ const launcher = async (
       let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
       let properties = createEventProps(eventList[e_i], firedEvents);
       counter++;
+      let context = {
+        anonymousId: userList[u_i].anonymousId,
+        timestamp:timestamp,
+      };
+      if (isRealTime) delete context.timestamp;
+
+
       // Identify
       if (eventList[e_i][1] === "identify") {
         Object.assign(properties, userList[u_i]);
         delete properties.user_id;
         delete properties.anonymousId;
-        await analytics.identify(userList[u_i].user_id, properties, 
-          {timestamp:timestamp}
-        );
+        await analytics.identify(userList[u_i].user_id, properties, context);
       }
 
       if (eventList[e_i][1] === "page") {
         delete properties.user_id;
         delete properties.anonymousId;
-        await analytics.page(eventList[e_i][2], properties, 
-          {
-            anonymousId: userList[u_i].anonymousId,
-            timestamp:timestamp
-          }
-        );
+        await analytics.page(eventList[e_i][2], properties, context);
       }
 
       // Track
       if (eventList[e_i][1] === "track") {
-        await analytics.track(eventList[e_i][2], properties, {
-          anonymousId: userList[u_i].anonymousId,
-          timestamp:timestamp
-        });
+        await analytics.track(eventList[e_i][2], properties, context);
       }
       properties.timestampUnix = createTimestamp(eventList[e_i], firedEvents)[1]
       firedEvents[parseInt(eventList[e_i][0])] = properties;
@@ -107,7 +102,8 @@ const launcher = async (
       setCounter, 
       counter, 
       setUserCounter, 
-      setStatus
+      setStatus,
+      isRealTime
       ), 10);
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
@@ -122,15 +118,21 @@ const launcher = async (
       setCounter, 
       counter, 
       setUserCounter, 
-      setStatus
+      setStatus,
+      isRealTime
       ), 10);
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
     setStatus("Finishing Up ...");
     let anonId = generateRandomValue("##"); 
-    loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
-
+    if (!isRealTime) {
+      loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
+    } else {
+      setIsLoading(false);
+      setStatus("DONE, Fire Again?");
+      toaster.success("All events fired!")
+    }
     return "finished";
   }
 }
@@ -147,6 +149,7 @@ const App = () => {
   const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isNotepadOpen, setIsNotepadOpen] = useState(true);
+  const [isRealTime, setIsRealTime] = useState(false);
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -241,7 +244,11 @@ const App = () => {
           setStatus={setStatus}
         />
         <div>
-        <h5>4. Fire Events (Turn Off Adblock)</h5>
+        
+        <div><h5>4. Fire Events (Turn Off Adblock)</h5></div>
+        <div><button onClick={()=>setIsRealTime(!isRealTime)}style={{width:"250px"}} className="button">Real-Time: {JSON.stringify(isRealTime)}</button></div>
+        <div style={{marginBottom:"0.25em"}} className="note">Note: Real-time: true will disable timestamp override (ignores Days Ago).</div>
+        <div style={{marginBottom:"2em"}} className="note">It is recommended to fire events in Real time first using a few users to populate the Personas workspace. </div>
         {!isLoading && (userList.length > 0) ? 
         <button 
           className="highlight button1" 
@@ -257,7 +264,8 @@ const App = () => {
               setCounter, 
               0,  //event counter
               setUserCounter, 
-              setStatus
+              setStatus,
+              isRealTime
               )
             }
           } 
@@ -267,6 +275,7 @@ const App = () => {
         :
         <button className="button1">{status}</button> 
         }  
+        
         </div>
         <h4>{counter}</h4> Events Fired
         <h4>{userCounter}</h4> Users Remaining
