@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
-import CSVReader from './Parser';
+import CSVReader from './components/Parser';
 import { toaster } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import {
@@ -21,7 +21,7 @@ import {
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
 
-// setEvent instead of setCounter, setUserCounter
+
 
 const launcher = async (
   eventList, // data schema
@@ -35,7 +35,8 @@ const launcher = async (
   counter, 
   setUserCounter, 
   setStatus,
-  isRealTime
+  isRealTime,
+  eventTimeout=10
   ) => {
   // reset ajs on new user
   setStatus("Working...");
@@ -103,8 +104,9 @@ const launcher = async (
       counter, 
       setUserCounter, 
       setStatus,
-      isRealTime
-      ), 10);
+      isRealTime,
+      eventTimeout
+      ), eventTimeout ?? 10);
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
     setTimeout(()=>launcher(
@@ -119,8 +121,9 @@ const launcher = async (
       counter, 
       setUserCounter, 
       setStatus,
-      isRealTime
-      ), 10);
+      isRealTime, 
+      eventTimeout
+      ), eventTimeout ?? 10);
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
@@ -138,6 +141,7 @@ const launcher = async (
 }
 
 const App = () => {
+  // setEvent instead of setCounter, setUserCounter
   const [eventList, setEventList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [csvLoaded, setCsvLoaded] = useState(false);
@@ -148,8 +152,8 @@ const App = () => {
   const [userCounter, setUserCounter] = useState(0);
   const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
-  const [isNotepadOpen, setIsNotepadOpen] = useState(true);
   const [isRealTime, setIsRealTime] = useState(false);
+  const [eventTimeout, setEventTimeout] = useState(10)
 
   const analytics = new Analytics();
   const integrationSettings = {
@@ -234,8 +238,7 @@ const App = () => {
         <form>
           <input name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
         </form>
-        {isNotepadOpen ? <Notepad /> : <div></div>}
-        
+        <Notepad />
 
         <CSVReader 
           setEventList={setEventList}
@@ -246,7 +249,10 @@ const App = () => {
         <div>
         
         <div><h5>4. Fire Events (Turn Off Adblock)</h5></div>
-        <div><button onClick={()=>setIsRealTime(!isRealTime)}style={{width:"250px"}} className="button">Real-Time: {JSON.stringify(isRealTime)}</button></div>
+        <div>
+          <button onClick={()=>setIsRealTime(!isRealTime)}style={{width:"250px"}} className="button">Real-Time: {JSON.stringify(isRealTime)}</button> 
+          <input style={{width: "275px"}} name="source" autoComplete="on" className="inputbox" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+        </div> 
         <div style={{marginBottom:"0.25em"}} className="note">Note: Real-time: true will disable timestamp override (ignores Days Ago).</div>
         <div style={{marginBottom:"2em"}} className="note">It is recommended to fire events in Real time first using a few users to populate the Personas workspace. </div>
         {!isLoading && (userList.length > 0) ? 
@@ -265,7 +271,8 @@ const App = () => {
               0,  //event counter
               setUserCounter, 
               setStatus,
-              isRealTime
+              isRealTime,
+              eventTimeout
               )
             }
           } 
