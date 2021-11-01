@@ -169,7 +169,7 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
       setStatus, 
       anonId
     ), 10)
-  } else if (u_i < 10) {
+  } else if (u_i < 30) {
     setTimeout(()=>loadEventProps(
       eventList,
       u_i+1,
