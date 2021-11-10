@@ -150,7 +150,7 @@ export const createEventProps = (e, firedEvents) => {
     let temp = propsObject[i].split([":"]);
     // check for * recall
     if (temp[1].includes("*") && (firedEvents[recallNum])) {
-      if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]
+      if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]; 
     } else if (temp[1].includes("{") && Array.isArray(recallCell)) {
       properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
     } else if (temp[1].includes('#')) {
@@ -199,23 +199,21 @@ export const shouldDropEvent = (dropoff) => {
   
 
 export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
+  let properties = createEventProps(eventList[e_i], firedEvents);
+  let contextObj = createEventContext(properties); 
+  let context = {...contextObj}
+  firedEvents[parseInt(eventList[e_i][0])] = properties
+  let fireProperties = removeEventContext(properties);
+
   if (eventList[e_i][1] === "identify") {
-    let properties = createEventProps(eventList[e_i], firedEvents);
-    firedEvents[parseInt(eventList[e_i][0])] = properties
-    analytics.identify(anonId, properties);
+    analytics.identify(anonId, fireProperties, context);
   }
   if (eventList[e_i][1] === "page") {
-    let properties = createEventProps(eventList[e_i], firedEvents);
-    firedEvents[parseInt(eventList[e_i][0])] = properties
-    analytics.page(eventList[e_i][2], properties);
+    analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
   }
 
   if (eventList[e_i][1] === "track") {
-    let properties = createEventProps(eventList[e_i], firedEvents);
-    firedEvents[parseInt(eventList[e_i][0])] = properties
-    analytics.track(eventList[e_i][2], properties, {
-      anonymousId: anonId,
-    });
+    analytics.track(eventList[e_i][2], fireProperties, context);
   } 
   // next event
   if (eventList[e_i+1]) {
@@ -233,7 +231,7 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
     setTimeout(()=>loadEventProps(
       eventList,
       u_i+1,
-      1,
+      2,
       firedEvents,
       analytics, 
       setIsLoading,

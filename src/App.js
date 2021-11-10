@@ -57,37 +57,39 @@ const launcher = async (
       let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
-      properties = removeEventContext(properties);
-
       counter++;
       let context = {
         anonymousId: userList[u_i].anonymousId,
         timestamp:timestamp,
         ...contextObj
       };
+
+      let fireProperties = removeEventContext(properties); // remove properties for fire object
+      
+      
       if (isRealTime) delete context.timestamp;
-
-
+      
       // Identify
       if (eventList[e_i][1] === "identify") {
-        Object.assign(properties, userList[u_i]);
-        delete properties.user_id;
-        delete properties.anonymousId;
-        await analytics.identify(userList[u_i].user_id, properties, context);
+        Object.assign(fireProperties, userList[u_i]);
+        delete fireProperties.user_id;
+        delete fireProperties.anonymousId;
+        await analytics.identify(userList[u_i].user_id, fireProperties, context);
       }
-
+      // Page
       if (eventList[e_i][1] === "page") {
-        delete properties.user_id;
-        delete properties.anonymousId;
-        await analytics.page(eventList[e_i][2], properties, context);
+        delete fireProperties.user_id;
+        delete fireProperties.anonymousId;
+        await analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
       }
 
       // Track
       if (eventList[e_i][1] === "track") {
-        await analytics.track(eventList[e_i][2], properties, context);
+        await analytics.track(eventList[e_i][2], fireProperties, context);
       }
       properties.timestampUnix = createTimestamp(eventList[e_i], firedEvents)[1]
-      firedEvents[parseInt(eventList[e_i][0])] = properties;
+      firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
+      
     }
   }
   
