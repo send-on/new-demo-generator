@@ -10,6 +10,38 @@ import {
 import {  generateRandomValue } from './faker';
 import moment from 'moment';
 
+/**
+ * Simple object check.
+ * @param item
+ * @returns {boolean}
+ */
+ const isObject = (item) => {
+  return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
+/**
+ * Deep merge two objects.
+ * @param target
+ * @param ...sources
+ */
+const mergeDeep = (target, ...sources) => {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+
+  return mergeDeep(target, ...sources);
+}
+
 export const checkIsArrayAndHasEvent = (recallArr, firedEvents) => {
   let isArrayAndHasEvent = false
   if (Array.isArray(recallArr)) {
@@ -68,6 +100,34 @@ export const createTimestamp = (e, firedEvents) => {
   timestamp = moment(timestampUnix, "X").format();
   return [timestamp, timestampUnix]
 }
+
+export const createEventContext = (eventsObj) => {
+  let contextObj = {};
+  let newObj = {};
+  for (let key in eventsObj) {
+    if (key.includes("context.")) {
+      let temp_arr = key.split(".")
+      if (temp_arr.length > 2) {
+        newObj = {[temp_arr[1]]: {[temp_arr[2]]: eventsObj[key]}}
+      } else {
+        newObj = {[temp_arr[1]]: eventsObj[key]}
+      }
+      contextObj = mergeDeep(contextObj, newObj)
+    }
+  }
+  return contextObj;
+}
+
+export const removeEventContext = (eventsObj) => {
+  let newPropsObject = {}
+  for (let key in eventsObj) {
+    if (!key.includes("context.")) {
+      newPropsObject[key] = eventsObj[key]
+    }
+  }
+  return newPropsObject;
+}
+
 
 export const createEventProps = (e, firedEvents) => {
   // set recallNum for single value

@@ -16,11 +16,12 @@ import {
   checkDependency,
   shouldDropEvent,
   loadEventProps, 
-  createTimestamp
+  createTimestamp, 
+  createEventContext, 
+  removeEventContext
 } from './util/event'
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
-
 
 
 const launcher = async (
@@ -55,10 +56,14 @@ const launcher = async (
     if (checkDependency(eventList[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
       let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
       let properties = createEventProps(eventList[e_i], firedEvents);
+      let contextObj = createEventContext(properties); 
+      properties = removeEventContext(properties);
+
       counter++;
       let context = {
         anonymousId: userList[u_i].anonymousId,
         timestamp:timestamp,
+        ...contextObj
       };
       if (isRealTime) delete context.timestamp;
 
