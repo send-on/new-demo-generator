@@ -218,6 +218,7 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
+        <h5>Share Your Templates or Search Existing Templates: <a href="https://docs.google.com/spreadsheets/d/1zYPYBais9JLmO4XukU6_GQ6ltg-Uofcq0IbUjLb08rI/edit?usp=sharing">HERE</a></h5>
         <h5>1. Enter Number of Users to Generate or Import List</h5>
       <div className="stepComponent">
         <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
