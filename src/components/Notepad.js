@@ -57,19 +57,25 @@ function Notepad() {
           <Card
             backgroundColor="white"
             elevation={0}
-            height={480}
+            height={640}
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
             <div>
 
-              <div><input onChange={handleChange} className="notepad" type="text" name="web" placeholder="Web" defaultValue={webKey} /></div>
-              <div><input onChange={handleChange} className="notepad" type="text" name="server" placeholder="Server" defaultValue={serverKey}/></div>
-              <div><input onChange={handleChange} className="notepad" type="text" name="email" placeholder="Email" defaultValue={emailKey}/></div>
-              <div><input onChange={handleChange} className="notepad" type="text" name="apple" placeholder="iOS" defaultValue={appleKey}/></div>
-              <div><input onChange={handleChange} className="notepad" type="text" name="android" placeholder="Android" defaultValue={androidKey} /></div>
-              <div><input onChange={handleChange} className="notepad" type="text" name="other" placeholder="Other" defaultValue={otherKey}/></div>
+              <div style={{"marginBottom": "1em"}}>
+                <div style={{"fontSize":"14px", "fontWeight": "bold"}}>Web Key</div><input onChange={handleChange} className="notepad" type="text" name="web" placeholder="Web" defaultValue={webKey} /></div>
+              <div style={{"marginBottom": "1em"}}>
+                <div style={{"fontSize":"14px", "fontWeight": "bold"}}>Server Key</div><input onChange={handleChange} className="notepad" type="text" name="server" placeholder="Server" defaultValue={serverKey}/></div>
+              <div style={{"marginBottom": "1em"}}>
+                <div style={{"fontSize":"14px", "fontWeight": "bold"}}>Email Key</div><input onChange={handleChange} className="notepad" type="text" name="email" placeholder="Email" defaultValue={emailKey}/></div>
+              <div style={{"marginBottom": "1em"}}>
+                <div style={{"fontSize":"14px", "fontWeight": "bold"}}>Apple (iOS) Key</div><input onChange={handleChange} className="notepad" type="text" name="apple" placeholder="iOS" defaultValue={appleKey}/></div>
+              <div style={{"marginBottom": "1em"}}>
+                <div style={{"fontSize":"14px", "fontWeight": "bold"}}>Android Key</div><input onChange={handleChange} className="notepad" type="text" name="android" placeholder="Android" defaultValue={androidKey} /></div>
+              <div style={{"marginBottom": "1em"}}>
+                <div style={{"fontSize":"14px", "fontWeight": "bold"}}>Other</div><input onChange={handleChange} className="notepad" type="text" name="other" placeholder="Other" defaultValue={otherKey}/></div>
               <div style={{textAlign: "center"}}><Button appearance="primary" style={{margin: "2em 0em 0em 0em"}} onClick={()=>saveToMemory()}className="button">Save</Button></div>
             </div>
           {/* <Button style={{"marginBottom":"10px"}} onClick={() => setIsShown(true)}>Add {tabName.slice(0,-1)}</Button> */}

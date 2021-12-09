@@ -18,6 +18,7 @@ import {
   loadEventProps, 
   createTimestamp, 
   createEventContext, 
+  createObjectProperty,
   removeEventContext
 } from './util/event'
 import UserForm from './components/UserForm';
@@ -57,6 +58,8 @@ const launcher = async (
       let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
+      let propertiesWithObjects = createObjectProperty(properties);
+
       counter++;
       let context = {
         anonymousId: userList[u_i].anonymousId,
@@ -65,7 +68,7 @@ const launcher = async (
       };
 
       let fireProperties = removeEventContext(properties); // remove properties for fire object
-      
+      Object.assign(fireProperties, propertiesWithObjects);
       
       if (isRealTime) delete context.timestamp;
       

@@ -118,10 +118,27 @@ export const createEventContext = (eventsObj) => {
   return contextObj;
 }
 
+export const createObjectProperty = (eventsObj) => {
+  let propertyObj = {};
+  let newObj = {};
+  for (let key in eventsObj) {
+    if (key.includes(".") && !key.includes("context")) {
+      let temp_arr = key.split(".")
+      if (temp_arr.length > 1) {
+        newObj = {[temp_arr[0]]: {[temp_arr[1]]: eventsObj[key]}}
+      } else {
+        newObj = {[temp_arr[0]]: eventsObj[key]}
+      }
+      propertyObj = mergeDeep(propertyObj, newObj)
+    }
+  }
+  return propertyObj;
+}
+
 export const removeEventContext = (eventsObj) => {
   let newPropsObject = {}
   for (let key in eventsObj) {
-    if (!key.includes("context.")) {
+    if (!key.includes(".")) {
       newPropsObject[key] = eventsObj[key]
     }
   }
@@ -137,6 +154,8 @@ export const createEventProps = (e, firedEvents) => {
     recallNum = parseInt(e[dependencyElement])
     recallCell = JSON.parse(e[dependencyElement])
   } 
+
+
   
   // set recallNum to existing value based on dependency
   if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
@@ -203,7 +222,9 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
   let contextObj = createEventContext(properties); 
   let context = {...contextObj}
   firedEvents[parseInt(eventList[e_i][0])] = properties
+  let propertiesWithObjects = createObjectProperty(properties)
   let fireProperties = removeEventContext(properties);
+  Object.assign(fireProperties, propertiesWithObjects);
 
   if (eventList[e_i][1] === "identify") {
     analytics.identify(anonId, fireProperties, context);
