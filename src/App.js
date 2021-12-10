@@ -55,7 +55,8 @@ const launcher = async (
       eventList[e_i][dependencyElement] = "0";
     } 
     if (checkDependency(eventList[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
-      let timestamp = createTimestamp(eventList[e_i], firedEvents)[0];
+      let timestampArr = createTimestamp(eventList[e_i], firedEvents);
+      let timestamp = timestampArr[0]
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
       let propertiesWithObjects = createObjectProperty(properties);
@@ -90,7 +91,7 @@ const launcher = async (
       if (eventList[e_i][1] === "track") {
         await analytics.track(eventList[e_i][2], fireProperties, context);
       }
-      properties.timestampUnix = createTimestamp(eventList[e_i], firedEvents)[1]
+      properties.timestampUnix = timestampArr[1]
       firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
       
     }
