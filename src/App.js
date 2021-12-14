@@ -238,6 +238,7 @@ const App = () => {
         <div className="main">
           <div className="section">
             <div className="header">1. Enter Number of Users to Generate or Import List</div>
+            <div className="note">Note: Click save after manually modifying values. </div>
           <div className="stepComponent">
             <TextInput type="text" placeholder="Number of Users (i.e. 100)" onChange={e => setNumOfUsers(e.target.value)} />
             <Button appearance='primary' style={{marginLeft: "2em"}} onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} >{`Generate or Reset Users`}</Button>
@@ -252,7 +253,7 @@ const App = () => {
             /> 
           </div>
           <Button style={{marginTop: "1em"}} onClick={()=>regenerateAnonymousId(userList, setUserList)} >Shuffle Anonymous ID</Button>
-          <div className="note">Note: Click save when manually changing values in text field (including copying and pasting). </div>
+          
         </div>
         <div className="section">
           <div className="header">2. Enter Source   
@@ -263,57 +264,57 @@ const App = () => {
           </form>
           <Notepad />
         </div>
-        
+        <div className="section">
           <CSVReader 
             setEventList={setEventList}
             setIsLoading={setIsLoading}
             setCsvLoaded={setCsvLoaded}
             setStatus={setStatus}
           />
+        </div>
 
-          <div style={{marginTop: "2em"}}>
-
-          <div className="header">4. Fire Events (Turn Off Adblock)</div>
-          <div>
-            <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-            <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
-          </div> 
-          <div style={{marginBottom:"0.25em"}} className="note">Note: Real-time: true will disable timestamp override (ignores Days Ago).</div>
-          <div style={{marginBottom:"2em"}} className="note">It is recommended to fire events in Real time first using a few users to populate the Personas workspace. </div>
-          {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
-          <Button 
-            isLoading={isLoading}
-            size='large' 
-            appearance='primary'
-            onClick={()=>{
-              if (csvLoaded) launcher(
-                eventList, // array of events
-                userList, // array of all users
-                0, // user position index
-                2, // event position index
-                {"0":true},  // firedEvents
-                setIsLoading, 
-                analytics, 
-                setCounter, 
-                0,  //event counter
-                setUserCounter, 
-                setStatus,
-                isRealTime,
-                eventTimeout
-                )
-              }
-            } 
-          >
-            {status}
-          </Button> 
-          :
-          <Button onClick={()=>toaster.warning(`Generate users or load CSV before firing. ${isLoading}`, {id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
-          }  
-          
-          </div>
-          <div style={{marginTop: "2em"}} className="note"><b>{counter}</b> Events Fired</div> 
-          <div className="note"><b>{userCounter}</b> Users Remaining</div> 
-          <div style={{marginTop: "2em", marginBottom: "2em"}} className="note">
+          <div className="section">
+            <div className="header">4. Fire Events (Turn Off Adblock)</div>
+            <div className="note">Note: Real-time: true will disable timestamp override.</div>
+            <div>
+              <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
+              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+            </div> 
+            
+            {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
+            <Button 
+              isLoading={isLoading}
+              size='large' 
+              appearance='primary'
+              onClick={()=>{
+                if (csvLoaded) launcher(
+                  eventList, // array of events
+                  userList, // array of all users
+                  0, // user position index
+                  2, // event position index
+                  {"0":true},  // firedEvents
+                  setIsLoading, 
+                  analytics, 
+                  setCounter, 
+                  0,  //event counter
+                  setUserCounter, 
+                  setStatus,
+                  isRealTime,
+                  eventTimeout
+                  )
+                }
+              } 
+            >
+              {status}
+            </Button> 
+            :
+            <Button onClick={()=>toaster.warning(`Generate users or load CSV before firing. ${isLoading}`, {id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
+            }  
+            
+            <div style={{marginTop: "2em"}} className="note"><b>{counter}</b> Events Fired</div> 
+            <div className="note"><b>{userCounter}</b> Users Remaining</div> 
+            <div style={{marginTop: "2em", marginBottom: "2em"}} className="note">
+            </div>
           </div>
         </div>
       </header>     
