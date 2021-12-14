@@ -161,7 +161,7 @@ const App = () => {
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
-  const [status, setStatus] = useState("NOT READY: GENERATE USERS OR LOAD CSV");
+  const [status, setStatus] = useState("FIRE EVENTS");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isRealTime, setIsRealTime] = useState(false);
   const [eventTimeout, setEventTimeout] = useState(10)
@@ -280,7 +280,7 @@ const App = () => {
           </div> 
           <div style={{marginBottom:"0.25em"}} className="note">Note: Real-time: true will disable timestamp override (ignores Days Ago).</div>
           <div style={{marginBottom:"2em"}} className="note">It is recommended to fire events in Real time first using a few users to populate the Personas workspace. </div>
-          {!isLoading && (userList.length > 0) ? 
+          {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
           <Button 
             isLoading={isLoading}
             size='large' 
@@ -307,7 +307,7 @@ const App = () => {
             {status}
           </Button> 
           :
-          <Button appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
+          <Button onClick={()=>toaster.warning(`Generate users or load CSV before firing. ${isLoading}`, {id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
           }  
           
           </div>
