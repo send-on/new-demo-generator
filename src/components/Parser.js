@@ -20,17 +20,18 @@ export default ({setEventList, setIsLoading, setCsvLoaded, setStatus}) => {
 
   return (
     <>
-      <h5>3. Click or Drag Upload <a style={{color:"white"}} href="https://docs.google.com/spreadsheets/d/1jXUA_clzEbEX5xMLGGhFsJDgRau6RnpKYAlBbZYJy6I/edit?usp=sharing">CSV</a></h5>
-      <div className="note" style={{"marginBottom": "1em"}}>(HINT - you can drag the file directly from the downloads bar at the bottom of Chrome after download)</div>
+      <div className="header">3. Click or Drag Upload <a href="https://docs.google.com/spreadsheets/d/1QpgfIq1VgGBy9iMNekSR80J2JHCmDaAPwEUH8_NDWcA/edit#gid=508251273">CSV</a></div>
+      <div className="note" style={{"marginBottom": "1em"}}>Note: you can drag the file directly from the downloads bar at the bottom of Chrome after download</div>
+      <div style={{margin: "auto", width: "12em", textAlign: "center" }}>
       <CSVReader
         onDrop={handleOnDrop}
         onError={handleOnError}
-        addRemoveButton
         onRemoveFile={handleOnRemoveFile}
         skipEmptyLines={false}
       >
         <span>Drop CSV file here or click to upload.</span>
       </CSVReader>
+      </div>
     </>
   );
   

@@ -248,7 +248,7 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
       setStatus, 
       anonId
     ), 10)
-  } else if (u_i < 30) {
+  } else if (u_i < 15) {
     setTimeout(()=>loadEventProps(
       eventList,
       u_i+1,
@@ -261,7 +261,7 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
     ), 10)
   } else {
     setIsLoading(false);
-    setStatus("DONE, Fire Again?");
+    setStatus("FIRE EVENTS");
     toaster.success("All events fired!")
   }
 }

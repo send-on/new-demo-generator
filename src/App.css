@@ -1,8 +1,50 @@
+.header {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.07px;
+  line-height: 24px;
+  color: #101840;
+  margin-top: 1em;
+}
+
+a:link {
+  color: #101840;
+  text-decoration: none;
+}
+a:visited {
+  color: #101840;
+  text-decoration: none;
+}
+a:hover {
+  color: #696f8c;
+  text-decoration: none;
+}
+.navigation-right {
+  flex:1;
+  display: flex;
+  flex-direction: row;
+}
+
+.navigation-header {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #cccccc;
+  height: 2em;
+  padding-left: 3em;
+  margin-top: 1em;
+  padding-bottom: 0.3em;
+  text-align:left;
+  /* min-height: 40px; */
+}
+.section {
+  padding-bottom: 2em;
+}
+
 .userinput {
   width: 40%;
-  height: 20em;
+  height: 15em;
   margin-bottom: 0.5em;
-  min-width: 400px;
+  /* min-width: 600px; */
 }
 
 .inputbox {
@@ -10,103 +52,20 @@
 }
 
 .notepad {
-  min-width: 350px;
-  
+  min-width: 350px; 
 }
 
-
-.button1 {
-  display:inline-block;
-  width: 25em;
-  height: 2.5em;
-  font-size: 26px;
-  /* padding:0.35em 1.2em; */
-  padding-top: 2px;
-  border:0.1em solid #FFFFFF;
-  background-color: #282C34;
-  margin:0em 2em 0em 2em;
-  border-radius:0.12em;
-  box-sizing: border-box;
-  text-decoration:none;
-  font-family:'Roboto',sans-serif;
-  font-weight:400;
-  color:#FFFFFF;
-  text-align:center;
-  transition: all 0.2s;
-  cursor: pointer;
+textarea {
+  border: 1px solid #cccccc
 }
-
-.button {
-  display:inline-block;
-  width: 15em;
-  height: 2em;
-  font-size: 22px;
-  padding:0.35em 1.2em;
-  padding-top: 2px;
-  border:0.1em solid #FFFFFF;
-  background-color: #282C34;
-  margin:0em 2em 0em 2em;
-  border-radius:0.12em;
-  box-sizing: border-box;
-  text-decoration:none;
-  font-family:'Roboto',sans-serif;
-  font-weight:300;
-  color:#FFFFFF;
-  text-align:center;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.smallbutton {
-  display:inline-block;
-  width: 5em;
-  height: 2em;
-  font-size: 22px;
-  padding:0.35em 1.2em;
-  padding-top: 2px;
-  border:0.1em solid #FFFFFF;
-  background-color: #282C34;
-  margin:0em 2em 0em 2em;
-  border-radius:0.12em;
-  box-sizing: border-box;
-  text-decoration:none;
-  font-family:'Roboto',sans-serif;
-  font-weight:300;
-  color:#FFFFFF;
-  text-align:center;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.smallbutton:link {color: #FFFFFF;}
-.smallbutton:visited {color: #FFFFFF;}
-.smallbutton:hover {color: #ffcc00;}
-
-.button:link {color: #FFFFFF;}
-.button:visited {color: #FFFFFF;}
-.button:hover {color: #ffcc00;}
 
 .note {
-  font-size: 16px;
   margin-top: 0.5em;
-
 }
-.button1:link {color: #FFFFFF;}
-.button1:visited {color: #FFFFFF;}
-.button1:hover {color: #ffcc00;}
+
 
 h6 {
   margin-top: 0.75em;
-}
-.highlight.button1:hover {
-  color:#000000;
-  background-color:#FFFFFF;
-}
-@media all and (max-width:30em) {
-  .button1{
-    display:block;
-    margin:0.4em auto;
-  }
 }
 
 h5 {
@@ -115,7 +74,6 @@ h5 {
 }
 
 h4 {
-  
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
@@ -132,7 +90,7 @@ input[type=text], select {
 input[type=submit] {
   width: 100%;
   background-color: #4CAF50;
-  color: white;
+  color: #101840;
   padding: 14px 20px;
   
   margin: 8px 0;
@@ -147,6 +105,7 @@ input[type=submit]:hover {
 
 .App {
   text-align: center;
+  
 }
 
 .App-logo {
@@ -159,16 +118,26 @@ input[type=submit]:hover {
     animation: App-logo-spin infinite 20s linear;
   }
 }
+.main {
+  width: 75%;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border: 1px solid #cccccc;
+}
 
-.App-header {
-  background-color: #282c34;
+.App-body {
+  /* background-color: #FFFFFF; */
+  background-color: #F5F6F7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-size: calc(10px + 1vmin);
+  font-size: 14px;
+  color: #101840;
 }
 
 .App-link {

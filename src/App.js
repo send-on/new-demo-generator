@@ -3,7 +3,7 @@ import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './components/Parser';
-import { toaster } from 'evergreen-ui'
+import { toaster, Button, TextInput } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import {
   firstEvent,
@@ -144,8 +144,8 @@ const launcher = async (
       loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
     } else {
       setIsLoading(false);
-      setStatus("DONE, Fire Again?");
-      toaster.success("All events fired!")
+      setStatus("FIRE EVENTS");
+      toaster.success(`All events fired for ${userList.length} users`, {id: 'single-toast'})
     }
     return "finished";
   }
@@ -181,13 +181,12 @@ const App = () => {
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
       setUserList([])
-      toaster.success("User List Reset")
+      toaster.success("User list has been reset", {id: 'single-toast'})
     } else {
-      setUserButtonStatus("Saved!")
+      setUserButtonStatus("Click to Save Changes ")
       setUserList(generateUsers(numOfUsers));
-      toaster.success("Successfully Generated User List!")
+      toaster.success("Successfully generated user list", {id: 'single-toast'})
     }    
-    
     return
   }
 
@@ -196,24 +195,24 @@ const App = () => {
     for (let i = 0; i < temp.length; i++) {
       temp[i].anonymousId = generateRandomValue("##");
     }
-    if (userButtonStatus === "Saved! ") {
-      setUserButtonStatus("Saved!")
+    if (userButtonStatus === "Click to Save Changes ") {
+      setUserButtonStatus("Click to Save Changes")
     } else {
-      setUserButtonStatus("Saved! ")
+      setUserButtonStatus("Click to Save Changes ")
     }
-    toaster.success("Anonymous IDs Regenerated!")
     setUserList(temp);
+    toaster.success("Anonymous IDs have been regenerated", {id: 'single-toast'})
   }
 
   const onSubmit = (e) => {
     e.preventDefault();
     try {
       setUserList(JSON.parse(e.target.userList.value));
-      toaster.success("Changes to user list saved!")
-      setUserButtonStatus("Saved!")
+      toaster.success("Changes to user list saved", {id: 'single-toast'})
+      setUserButtonStatus("Click to Save Changes")
     }
     catch(e) {
-      toaster.danger(e.message);
+      toaster.danger(e.message, {id: 'single-toast'});
     }
   }
 
@@ -221,89 +220,102 @@ const App = () => {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h5>Share Your Templates or Search Existing Templates: <a href="https://docs.google.com/spreadsheets/d/1zYPYBais9JLmO4XukU6_GQ6ltg-Uofcq0IbUjLb08rI/edit?usp=sharing">HERE</a></h5>
-        <h5>1. Enter Number of Users to Generate or Import List</h5>
-      <div className="stepComponent">
-        <input className="inputbox" type="text" placeholder="Number of Users (Recommended < 500)" onChange={e => setNumOfUsers(e.target.value)} />
-        {userList.length > 0 ? 
-        <button onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} className="button">{`Users Set, Click to Reset`}</button>
-        : 
-        <button onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} className="button">Generate Users</button>
-        }
-        <button style={{marginLeft: "-1em"}}onClick={()=>regenerateAnonymousId(userList, setUserList)} className="button">Regenerate Anonymous ID</button>
-      </div>
-
-      <div style={{marginTop: "0.5em", width: "100%"}}>
-        <UserForm 
-        userList={JSON.stringify(userList, null, 2)} 
-        onSubmit={onSubmit} 
-        userButtonStatus={userButtonStatus} 
-        setUserButtonStatus={setUserButtonStatus} 
-        /> 
-      </div>
-      <div className="note">Note: You can save your user list, import another list, or make changes directly.  Don't forget the commas and click Save after! </div>
-
-      <h5>2. Enter Source   
-        <a  style={{color:"white", marginLeft:"3px"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
-        </h5>
-        <form>
-          <input name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
-        </form>
-        <Notepad />
-
-        <CSVReader 
-          setEventList={setEventList}
-          setIsLoading={setIsLoading}
-          setCsvLoaded={setCsvLoaded}
-          setStatus={setStatus}
-        />
-        <div>
-        
-        <div><h5>4. Fire Events (Turn Off Adblock)</h5></div>
-        <div>
-          <button onClick={()=>setIsRealTime(!isRealTime)}style={{width:"250px"}} className="button">Real-Time: {JSON.stringify(isRealTime)}</button> 
-          <input style={{width: "275px"}} name="source" autoComplete="on" className="inputbox" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
-        </div> 
-        <div style={{marginBottom:"0.25em"}} className="note">Note: Real-time: true will disable timestamp override (ignores Days Ago).</div>
-        <div style={{marginBottom:"2em"}} className="note">It is recommended to fire events in Real time first using a few users to populate the Personas workspace. </div>
-        {!isLoading && (userList.length > 0) ? 
-        <button 
-          className="highlight button1" 
-          onClick={()=>{
-            if (csvLoaded) launcher(
-              eventList, // array of events
-              userList, // array of all users
-              0, // user position index
-              2, // event position index
-              {"0":true},  // firedEvents
-              setIsLoading, 
-              analytics, 
-              setCounter, 
-              0,  //event counter
-              setUserCounter, 
-              setStatus,
-              isRealTime,
-              eventTimeout
-              )
-            }
-          } 
-        >
-          {status}
-        </button> 
-        :
-        <button className="button1">{status}</button> 
-        }  
-        
+      <div className="navigation-header">
+        <a href="/">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGggZD0iTTMuMjYzIDE1LjU1N2MtLjYwNSAwLTEuMDk2LjUwNy0xLjA5NiAxLjEzMiAwIC42MjUuNDkgMS4xMzIgMS4wOTYgMS4xMzIuNjA1IDAgMS4wOTYtLjUwNyAxLjA5Ni0xLjEzMiAwLS42MjUtLjQ5LTEuMTMyLTEuMDk2LTEuMTMyek0xNS4zNDggMS44NzRjLS42MDUgMC0xLjA5Ni41MDctMS4wOTYgMS4xMzIgMCAuNjI1LjQ5IDEuMTMyIDEuMDk2IDEuMTMyLjYwNSAwIDEuMDk2LS41MDcgMS4wOTYtMS4xMzIgMC0uNjIzLS40ODgtMS4xMy0xLjA5Mi0xLjEzMmgtLjAwNHptLTcuOTMzIDQuNThWNy44NGMwIC4yMDguMTY0LjM3Ny4zNjYuMzc3aDEwLjg1NWMuMi0uMDAyLjM2MS0uMTcuMzYxLS4zNzdWNi40NTRhLjM3MS4zNzEgMCAwIDAtLjM2NS0uMzc3SDcuNzc2YS4zNzIuMzcyIDAgMCAwLS4zNjMuMzc3aC4wMDJ6bTQuMTc1IDYuNHYtMS4zODJhLjM3Mi4zNzIgMCAwIDAtLjM2NS0uMzc3SC4zN2EuMzcxLjM3MSAwIDAgMC0uMzcuMzczdjEuMzg3YzAgLjIwOC4xNjQuMzc3LjM2NS4zNzdoMTAuODU2YS4zNzEuMzcxIDAgMCAwIC4zNy0uMzczdi0uMDA0em03LjMzNC0xLjg1NmEuMzU5LjM1OSAwIDAgMC0uMjQ4LS4xNDJsLTEuMzM0LS4xNGEuMzY2LjM2NiAwIDAgMC0uMzk5LjMyNWMtLjU2MyA0LjMwMy00LjM5NiA3LjMyLTguNTYyIDYuNzRhNy40MSA3LjQxIDAgMCAxLTEuNjg2LS40NDMuMzU4LjM1OCAwIDAgMC0uNDY2LjIxNmwtLjUxNSAxLjI3OGEuMzguMzggMCAwIDAgLjIwOS40OTljNC45ODggMS45ODIgMTAuNTg4LS41ODggMTIuNTA3LTUuNzQxLjI3OC0uNzQ3LjQ2OS0xLjUyNS41NjctMi4zMThhLjM4LjM4IDAgMCAwLS4wNzMtLjI3NHpNLjA4IDcuODAyYS4zODQuMzg0IDAgMCAxLS4wNDQtLjI5MUMxLjEzNSAzLjA5MyA0Ljk5LjAwMyA5LjQwNyAwYTkuMzY3IDkuMzY3IDAgMCAxIDMuMTguNTUyLjM4OC4zODggMCAwIDEgLjIyMy40OTFsLS40NzQgMS4yOTVhLjM2LjM2IDAgMCAxLS40Ni4yMTUgNy4zNzYgNy4zNzYgMCAwIDAtMi40Ny0uNDMxIDcuMzcgNy4zNyAwIDAgMC00Ljc3MSAxLjc2QTcuOTMyIDcuOTMyIDAgMCAwIDIuMDUgOC4wMDlhLjM1OS4zNTkgMCAwIDEtLjQzNC4yNzJMLjMwOSA3Ljk3OWEuMzYzLjM2MyAwIDAgMS0uMjMtLjE3N3oiIGZpbGw9IiM1MEI2OEMiIC8+Cjwvc3ZnPgo=" alt="Segment" />
+        </a>
+        <div style={{flex:"2", marginLeft:"12px", fontSize: "16px", fontWeight: 600}}>Event Generator</div>
+        <div className="navigation-right" style={{flex: "1"}}>
+          <div style={{marginRight: "3em", fontSize: "14px", fontWeight: 500}}><a rel="noreferrer" target="_blank" href="https://docs.google.com/spreadsheets/d/1QpgfIq1VgGBy9iMNekSR80J2JHCmDaAPwEUH8_NDWcA/edit#gid=934482474">Templates</a></div>
+          <div style={{marginRight: "3em", fontSize: "14px", fontWeight: 500}}><a rel="noreferrer" target="_blank" href="https://segment.atlassian.net/wiki/spaces/SOLENG/pages/1904738629/Event+Generator+Formerly+Demo+Generator+2.0">Documentation</a></div>
+          <div style={{marginRight: "3em", fontSize: "14px", fontWeight: 500}}><a rel="noreferrer" target="_blank" href="https://docs.google.com/spreadsheets/d/1zYPYBais9JLmO4XukU6_GQ6ltg-Uofcq0IbUjLb08rI/edit?usp=sharing">Share</a></div>
+          <div style={{marginRight: "3em", fontSize: "14px", fontWeight: 500}}><a rel="noreferrer" target="_blank" href="https://github.com/send-on/new-demo-generator">Github</a></div>
         </div>
-        <h4>{counter}</h4> Events Fired
-        <h4>{userCounter}</h4> Users Remaining
-        <div></div>
-        <h6>
-          <a rel="noreferrer" href="https://docs.google.com/spreadsheets/d/1QpgfIq1VgGBy9iMNekSR80J2JHCmDaAPwEUH8_NDWcA/edit#gid=934482474" target="_blank">v{version} - Template</a><br></br><br></br>
-          <a rel="noreferrer" href="https://github.com/send-on/new-demo-generator" target="_blank">README</a>
-        </h6>
         
+        
+      </div>
+      <header className="App-body">
+        <div className="main">
+          <div className="section">
+            <div className="header">1. Enter Number of Users to Generate or Import List</div>
+          <div className="stepComponent">
+            <TextInput type="text" placeholder="Number of Users (i.e. 100)" onChange={e => setNumOfUsers(e.target.value)} />
+            <Button appearance='primary' style={{marginLeft: "2em"}} onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} >{`Generate or Reset Users`}</Button>
+          </div>
+
+          <div style={{marginTop: "0.5em", width: "100%"}}>
+            <UserForm 
+            userList={JSON.stringify(userList, null, 2)} 
+            onSubmit={onSubmit} 
+            userButtonStatus={userButtonStatus} 
+            setUserButtonStatus={setUserButtonStatus} 
+            /> 
+          </div>
+          <Button style={{marginTop: "1em"}} onClick={()=>regenerateAnonymousId(userList, setUserList)} >Shuffle Anonymous ID</Button>
+          <div className="note">Note: Click save when manually changing values in text field (including copying and pasting). </div>
+        </div>
+        <div className="section">
+          <div className="header">2. Enter Source   
+            <a style={{marginLeft:"3px"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
+          </div>
+          <form>
+            <TextInput name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
+          </form>
+          <Notepad />
+        </div>
+        
+          <CSVReader 
+            setEventList={setEventList}
+            setIsLoading={setIsLoading}
+            setCsvLoaded={setCsvLoaded}
+            setStatus={setStatus}
+          />
+
+          <div style={{marginTop: "2em"}}>
+
+          <div className="header">4. Fire Events (Turn Off Adblock)</div>
+          <div>
+            <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
+            <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+          </div> 
+          <div style={{marginBottom:"0.25em"}} className="note">Note: Real-time: true will disable timestamp override (ignores Days Ago).</div>
+          <div style={{marginBottom:"2em"}} className="note">It is recommended to fire events in Real time first using a few users to populate the Personas workspace. </div>
+          {!isLoading && (userList.length > 0) ? 
+          <Button 
+            isLoading={isLoading}
+            size='large' 
+            appearance='primary'
+            onClick={()=>{
+              if (csvLoaded) launcher(
+                eventList, // array of events
+                userList, // array of all users
+                0, // user position index
+                2, // event position index
+                {"0":true},  // firedEvents
+                setIsLoading, 
+                analytics, 
+                setCounter, 
+                0,  //event counter
+                setUserCounter, 
+                setStatus,
+                isRealTime,
+                eventTimeout
+                )
+              }
+            } 
+          >
+            {status}
+          </Button> 
+          :
+          <Button appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
+          }  
+          
+          </div>
+          <div style={{marginTop: "2em"}} className="note"><b>{counter}</b> Events Fired</div> 
+          <div className="note"><b>{userCounter}</b> Users Remaining</div> 
+          <div style={{marginTop: "2em", marginBottom: "2em"}} className="note">
+          </div>
+        </div>
       </header>     
     </div>
   );
