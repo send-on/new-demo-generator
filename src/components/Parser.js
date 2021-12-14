@@ -26,6 +26,7 @@ export default ({setEventList, setIsLoading, setCsvLoaded, setStatus}) => {
       <CSVReader
         onDrop={handleOnDrop}
         onError={handleOnError}
+        addRemoveButton
         onRemoveFile={handleOnRemoveFile}
         skipEmptyLines={false}
       >
