@@ -38,6 +38,12 @@ a:hover {
 }
 .section {
   padding-bottom: 2em;
+  margin-right: 4em;
+  margin-bottom: 2em;
+  border: 1px solid #cccccc;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding-left: 4em;
 }
 
 .userinput {
@@ -53,10 +59,12 @@ a:hover {
 
 .notepad {
   min-width: 350px; 
+  margin-top: 2em;
 }
 
 textarea {
-  border: 1px solid #cccccc
+  border: 1px solid #cccccc;
+  border-radius: 8px;
 }
 
 .note {
@@ -120,11 +128,14 @@ input[type=submit]:hover {
 }
 .main {
   width: 75%;
-  background-color: #FFFFFF;
+  text-align: left;
+  /* padding-top: 1em; */
+  padding-left: 4em;
+  /* background-color: #FFFFFF; */
   border-radius: 8px;
   margin-top: 2em;
   margin-bottom: 2em;
-  border: 1px solid #cccccc;
+  /* border: 1px solid #cccccc; */
 }
 
 .App-body {

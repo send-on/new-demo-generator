@@ -311,9 +311,9 @@ const App = () => {
             <Button onClick={()=>toaster.warning(`Generate users or load CSV before firing. ${isLoading}`, {id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
             }  
             
-            <div style={{marginTop: "2em"}} className="note"><b>{counter}</b> Events Fired</div> 
+            <div className="note"><b>{counter}</b> Events Fired</div> 
             <div className="note"><b>{userCounter}</b> Users Remaining</div> 
-            <div style={{marginTop: "2em", marginBottom: "2em"}} className="note">
+            <div className="note">
             </div>
           </div>
         </div>
