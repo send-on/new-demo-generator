@@ -211,12 +211,12 @@ export const createEventProps = (e, firedEvents) => {
       if (temp[0].trim()[0] === "[") {
         // Create tuple from key [prop, 2]
         if (temp[0].split(",").length > 0) {
-          let tuple = [
+          var tuple = [
             sanitize(temp[0].split(',')[0]),
             sanitize(temp[0].split(',')[1])
           ]
         } else {
-          let tuple = [sanitize(temp[0].split(',')[0]), 1]
+          var tuple = [sanitize(temp[0].split(',')[0]), 1]
         }
         let randomValue = [];
         // Push in random value i times, pop out element when chosen (block if too many)
