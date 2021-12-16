@@ -139,15 +139,9 @@ const launcher = async (
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
-    setStatus("Finishing Up ...");
-    let anonId = generateRandomValue("##"); 
-    if (!isRealTime) {
-      loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoading, setStatus, anonId);
-    } else {
-      setIsLoading(false);
-      setStatus("FIRE EVENTS");
-      toaster.success(`All events fired!`, {id: 'single-toast'})
-    }
+    setIsLoading(false);
+    setStatus("FIRE EVENTS");
+    toaster.success(`All events fired!`, {id: 'single-toast'})
     return "finished";
   }
 }
@@ -156,6 +150,7 @@ const App = () => {
   // setEvent instead of setCounter, setUserCounter
   const [eventList, setEventList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPersonas, setIsLoadingPersonas] = useState(false);
   const [csvLoaded, setCsvLoaded] = useState(false);
   const [writeKey, setWriteKey] = useState('');
   const [counter, setCounter] = useState(0);
@@ -216,7 +211,6 @@ const App = () => {
       toaster.danger(e.message, {id: 'single-toast'});
     }
   }
-
   
 
   return (
@@ -238,7 +232,7 @@ const App = () => {
       <header className="App-body">
         <div className="main">
           <div className="section">
-            <div className="header">1. Enter Number of Users to Generate or Import List</div>
+            <div className="header">Enter Number of Users to Generate or Import List</div>
             <div className="note">Note: Click save after manually modifying values. </div>
           <div className="stepComponent">
             <TextInput type="text" placeholder="Number of Users (i.e. 100)" onChange={e => setNumOfUsers(e.target.value)} />
@@ -257,7 +251,7 @@ const App = () => {
           
         </div>
         <div className="section">
-          <div className="header">2. Enter Source   
+          <div className="header">Enter Source   
             <a style={{marginLeft:"3px"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
           </div>
           <form>
@@ -273,9 +267,31 @@ const App = () => {
             setStatus={setStatus}
           />
         </div>
+        <div className="section"> 
+          <div className="header">Preload Personas Workspace with Values</div>
+          <div className="note">Note: Required to populate Personas audience/trait autocomplete</div>
+
+          {(!isLoading && (eventList.length > 0)) ? 
+          <Button 
+            isLoading={isLoadingPersonas} 
+            style={{marginTop: "1em"}} 
+            onClick={()=>loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoadingPersonas, setStatus)} 
+            isLoadingPersonas={isLoadingPersonas}>
+              Preload Personas (click once per demo)
+          </Button>
+          :
+          <Button 
+            isLoading={isLoadingPersonas} 
+            style={{marginTop: "1em"}} 
+            onClick={()=>toaster.warning(`Load CSV before Preloading`, {id: 'single-toast'})}
+            isLoadingPersonas={isLoadingPersonas}>
+              Preload Personas (click once per demo)
+          </Button>}
+
+        </div>
 
           <div className="section">
-            <div className="header">4. Fire Events (Turn Off Adblock)</div>
+            <div className="header">Fire Events (Turn Off Adblock)</div>
             <div className="note">Note: Real-time: true will disable timestamp override.</div>
             <div>
               <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 

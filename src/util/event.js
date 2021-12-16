@@ -80,18 +80,26 @@ export const createTimestamp = (e, firedEvents) => {
   // if recall exists
   let timestamp = "";
   let timestampUnix = 0;
+  let recallNum = "0"
+  let recallCell = "0"
+  if (e[dependencyElement]) {
+    recallNum = parseInt(e[dependencyElement])
+    recallCell = JSON.parse(e[dependencyElement])
+  }  
+  if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
+  // auto mode: blank days ago, blank randomizer, dependent event = 0.5 to 1 hour timestamp spacing
+  if ((parseInt(e[dependencyElement]) || Array.isArray(recallCell)) && !e[dayElement] && !e[randomizeElement]) {
+    timestampUnix = firedEvents[recallNum]["timestampUnix"];
+    timestampUnix = timestampUnix + (0.04 * unixDay);
+    timestampUnix = timestampUnix + (Math.floor((Math.random() * (0.04*unixDay))));
+    timestamp = moment(timestampUnix, "X").format();
+    return [timestamp, timestampUnix];
+  }
+
   if (e[dayElement].trim()[0] === ("#")) {
-    let recallNum = "0"
-    let recallCell = "0"
-    if (e[dependencyElement]) {
-      recallNum = parseInt(e[dependencyElement])
-      recallCell = JSON.parse(e[dependencyElement])
-    } 
-    if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
     timestampUnix = firedEvents[recallNum]["timestampUnix"];
     timestampUnix = timestampUnix + (parseFloat(e[dayElement].substring(1)) * unixDay);
     if (e[randomizeElement]) timestampUnix = timestampUnix + (Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay)));
-    
   } else {
     timestampUnix = moment().unix();
     if (e[dayElement]) timestampUnix = timestampUnix - e[dayElement]*unixDay;
@@ -243,7 +251,8 @@ export const shouldDropEvent = (dropoff) => {
 }
   
 
-export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoading, setStatus, anonId) => {
+export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoadingPersonas, setStatus, anonId=generateRandomValue("##")) => {
+  setIsLoadingPersonas(true);
   let properties = createEventProps(eventList[e_i], firedEvents);
   let contextObj = createEventContext(properties); 
   let context = {...contextObj}
@@ -270,25 +279,24 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
       e_i+1,
       firedEvents,
       analytics, 
-      setIsLoading,
+      setIsLoadingPersonas,
       setStatus, 
       anonId
     ), 10)
-  } else if (u_i < 15) {
+  } else if (u_i < 30) {
     setTimeout(()=>loadEventProps(
       eventList,
       u_i+1,
       2,
       firedEvents,
       analytics, 
-      setIsLoading,
+      setIsLoadingPersonas,
       setStatus, 
       anonId
     ), 10)
   } else {
-    setIsLoading(false);
-    setStatus("FIRE EVENTS");
-    toaster.success("All events fired!")
+    setIsLoadingPersonas(false);
+    toaster.success("Successfully preloaded values for Personas")
   }
 }
 
