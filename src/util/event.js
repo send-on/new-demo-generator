@@ -80,7 +80,7 @@ export const createTimestamp = (e, firedEvents) => {
   // if recall exists
   let timestamp = "";
   let timestampUnix = 0;
-  if (e[dayElement].includes("#")) {
+  if (e[dayElement].trim()[0] === ("#")) {
     let recallNum = "0"
     let recallCell = "0"
     if (e[dependencyElement]) {
@@ -194,7 +194,8 @@ export const createEventProps = (e, firedEvents) => {
       if (generateRandomValue(temp[1]) === "") toaster.warning(`Random value error on "${temp[1]}" - Invalid Phrase`)
     } else {
       if (temp[1].trim()[0] === "[") {
-        temp[1] = temp[1].split(',');
+        // if pipes are used, split by pipes instead of commas
+        temp[1] = (temp[1].includes('|')) ? temp[1].split('|') : temp[1].split(',');
       } else {
         temp[1] = [temp[1]]
       }
