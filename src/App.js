@@ -67,6 +67,7 @@ const launcher = async (
         timestamp:timestamp,
         ...contextObj
       };
+      
 
       let fireProperties = removeEventContext(properties); // remove properties for fire object
       Object.assign(fireProperties, propertiesWithObjects);

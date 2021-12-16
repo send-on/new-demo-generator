@@ -123,13 +123,32 @@ export const createObjectProperty = (eventsObj) => {
   let newObj = {};
   for (let key in eventsObj) {
     if (key.includes(".") && !key.includes("context")) {
-      let temp_arr = key.split(".")
+      let temp_arr = key.split(".");
       if (temp_arr.length > 1) {
         newObj = {[temp_arr[0]]: {[temp_arr[1]]: eventsObj[key]}}
       } else {
         newObj = {[temp_arr[0]]: eventsObj[key]}
       }
-      propertyObj = mergeDeep(propertyObj, newObj)
+      propertyObj = mergeDeep(propertyObj, newObj);
+    } else if (Array.isArray(eventsObj[key])) {
+      for (let i = 0; i < eventsObj[key].length; i++) { // eventsObj[key] is SurveyData
+       for (let newKey in eventsObj[key][i]) { // eventsObj[key][i] = is object {questionsId, selectedOptions.id}
+         if (newKey.includes('.')) { // newKey is questionId, selectedOptions etc.
+           let temp_arr = newKey.split('.'); // temp_arr is [selectedOptions, id]
+             if (temp_arr.length > 1) {
+              newObj = {[temp_arr[0]]: {[temp_arr[1]]: eventsObj[key][i][newKey]}}  // newObj: {selectedObj: {id: 3}}
+              newObj = mergeDeep(eventsObj[key][i], newObj); // newObj = {everything}
+              delete newObj[newKey] 
+            } else {
+              newObj = {[temp_arr[0]]: eventsObj[key][i]}
+              newObj = mergeDeep(eventsObj[key][i], newObj);
+              delete newObj[newKey]
+            }
+            newObj = mergeDeep(eventsObj[key], newObj)
+            propertyObj = mergeDeep(propertyObj, newObj); 
+          }
+         }
+      }
     }
   }
   return propertyObj;
@@ -154,8 +173,6 @@ export const createEventProps = (e, firedEvents) => {
     recallNum = parseInt(e[dependencyElement])
     recallCell = JSON.parse(e[dependencyElement])
   } 
-
-
   
   // set recallNum to existing value based on dependency
   if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
@@ -168,22 +185,30 @@ export const createEventProps = (e, firedEvents) => {
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
     // check for * recall
-    if (temp[1].includes("*") && (firedEvents[recallNum])) {
+    if (temp[1].trim()[0] === "*" && (firedEvents[recallNum])) {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]; 
-    } else if (temp[1].includes("{") && Array.isArray(recallCell)) {
+    } else if ((temp[1].trim()[0] === "{") && Array.isArray(recallCell)) {
       properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
-    } else if (temp[1].includes('#')) {
+    } else if (temp[1].trim()[0] === '#') {
       properties[temp[0]] = generateRandomValue(temp[1]);
       if (generateRandomValue(temp[1]) === "") toaster.warning(`Random value error on "${temp[1]}" - Invalid Phrase`)
     } else {
-      temp[1] = temp[1].split(',')
+      if (temp[1].trim()[0] === "[") {
+        temp[1] = temp[1].split(',');
+      } else {
+        temp[1] = [temp[1]]
+      }
       // if val[0] is array
-      if (temp[0].includes("[")) {
+      if (temp[0].trim()[0] === "[") {
         // Create tuple from key [prop, 2]
-        let tuple = [
-          sanitize(temp[0].split(',')[0]),
-          sanitize(temp[0].split(',')[1])
-        ]
+        if (temp[0].split(",").length > 0) {
+          let tuple = [
+            sanitize(temp[0].split(',')[0]),
+            sanitize(temp[0].split(',')[1])
+          ]
+        } else {
+          let tuple = [sanitize(temp[0].split(',')[0]), 1]
+        }
         let randomValue = [];
         // Push in random value i times, pop out element when chosen (block if too many)
         if (tuple[1] > temp[1].length) tuple[1] = temp[1].length;
@@ -265,3 +290,5 @@ export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setI
     toaster.success("All events fired!")
   }
 }
+
+
