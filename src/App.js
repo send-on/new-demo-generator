@@ -269,7 +269,7 @@ const App = () => {
         </div>
         <div className="section"> 
           <div className="header">Preload Personas Workspace with Values</div>
-          <div className="note">Note: Required to populate Personas audience/trait autocomplete</div>
+          <div className="note">Note: Required to populate Personas audience/trait autocomplete (click once per CSV template)</div>
 
           {(!isLoading && (eventList.length > 0)) ? 
           <Button 
@@ -277,7 +277,7 @@ const App = () => {
             style={{marginTop: "1em"}} 
             onClick={()=>loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoadingPersonas, setStatus)} 
             isLoadingPersonas={isLoadingPersonas}>
-              Preload Personas (click once per CSV template)
+              Preload Personas
           </Button>
           :
           <Button 
@@ -285,7 +285,7 @@ const App = () => {
             style={{marginTop: "1em"}} 
             onClick={()=>toaster.warning(`Load CSV before Preloading`, {id: 'single-toast'})}
             isLoadingPersonas={isLoadingPersonas}>
-              Preload Personas (click once per CSV template)
+              Preload Personas
           </Button>}
 
         </div>
