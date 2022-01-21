@@ -37,7 +37,7 @@ function Notepad({ analyticsNode }) {
     localStorage.setItem('other', otherKey);
     toaster.success("Saved Keys to Browser LocalStorage")
     analyticsNode.track({
-      userId: generateSessionId(),
+      anonymousId: generateSessionId(),
       event: 'Saved Writekey to Notepad',
       properties: {
         web: webKey,

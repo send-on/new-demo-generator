@@ -26,8 +26,10 @@ import {
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
 
+// Side tracking for product improvements
 var AnalyticsNode = require('analytics-node');
 var analyticsNode = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
+var globalCounter = 0;
 
 const launcher = async (
   eventList, // data schema
@@ -147,7 +149,7 @@ const launcher = async (
     setStatus("FIRE EVENTS");
     toaster.success(`All events fired!`, {id: 'single-toast'})
     analyticsNode.track({
-      userId: generateSessionId(),
+      anonymousId: generateSessionId(),
       event: 'End Fired Events',
       properties: {
         numOfUsers: u_i,
@@ -187,17 +189,21 @@ const App = () => {
   };
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
-  analytics.reset();
-  analytics.setAnonymousId(generateSessionId());
-  analytics.identify({
-    userAgent: window.navigator.userAgent,
-    path: document.location.href
-  })
-  
 
+  // Side tracking for product improvements
+  if (globalCounter === 0) {
+    analytics.reset();
+    analytics.setAnonymousId(generateSessionId());
+    analytics.identify({
+      userAgent: window.navigator.userAgent,
+      path: document.location.href
+    })
+    globalCounter++;
+  }
+  
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
     analyticsNode.track({
-      userId: generateSessionId(),
+      anonymousId: generateSessionId(),
       event: 'Generate Users',
       properties: {
         numOfUsers: numOfUsers,
@@ -218,7 +224,7 @@ const App = () => {
 
   const regenerateAnonymousId = (userList, setUserList) => {
     analyticsNode.track({
-      userId: generateSessionId(),
+      anonymousId: generateSessionId(),
       event: 'Shuffle AnonymousId',
       properties: {
         numOfUsers: userList.length
@@ -241,7 +247,7 @@ const App = () => {
   const onSubmit = (e) => {
     e.preventDefault();
     analyticsNode.track({
-      userId: generateSessionId(),
+      anonymousId: generateSessionId(),
       event: 'Saved User List'
     });
     try {
@@ -252,7 +258,7 @@ const App = () => {
     catch(e) {
       toaster.danger(e.message, {id: 'single-toast'});
       analyticsNode.track({
-        userId: generateSessionId(),
+        anonymousId: generateSessionId(),
         event: 'User List Error',
       });
     }
@@ -326,7 +332,7 @@ const App = () => {
             style={{marginTop: "1em"}} 
             onClick={()=> {
               analyticsNode.track({
-                userId: generateSessionId(),
+                anonymousId: generateSessionId(),
                 event: 'Load Persona Events',
               });
               loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoadingPersonas, setStatus)
@@ -361,7 +367,7 @@ const App = () => {
               onClick={()=>{
                 if (csvLoaded) {
                   analyticsNode.track({
-                    userId: generateSessionId(),
+                    anonymousId: generateSessionId(),
                     event: 'Begin Fired Events',
                     properties: {
                       numOfUsers: userList.length,

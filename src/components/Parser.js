@@ -10,7 +10,7 @@ export default ({setEventList, setIsLoading, setCsvLoaded, setStatus, analyticsN
     setEventList(arr)
     setStatus("FIRE EVENTS")
     analyticsNode.track({
-      userId: generateSessionId(),
+      anonymousId: generateSessionId(),
       event: 'Loaded CSV',
     });
   };
