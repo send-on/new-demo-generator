@@ -1,13 +1,18 @@
 import { CSVReader } from 'react-papaparse';
+import { generateSessionId } from '../util/common.js';
 import '../App.css';
 
-export default ({setEventList, setIsLoading, setCsvLoaded, setStatus}) => {
+export default ({setEventList, setIsLoading, setCsvLoaded, setStatus, analyticsNode}) => {
   const handleOnDrop = (data) => {
     setIsLoading(false)
     setCsvLoaded(true)
     let arr = data.map(obj => obj.data)
     setEventList(arr)
     setStatus("FIRE EVENTS")
+    analyticsNode.track({
+      userId: generateSessionId(),
+      event: 'Loaded CSV',
+    });
   };
   const handleOnError = (err, file, inputElem, reason) => {
     console.log(err);

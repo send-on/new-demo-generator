@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { SideSheet, Pane, Heading, Card, Button } from 'evergreen-ui';
 import { toaster } from 'evergreen-ui'
+import { generateSessionId } from '../util/common.js';
 
-function Notepad() {
+function Notepad({ analyticsNode }) {
   const [isShown, setIsShown] = React.useState(false)
   const [webKey, setWebKey] = useState(localStorage.getItem("web") ?? "");
   const [serverKey, setServerKey] = useState(localStorage.getItem("server") ?? "");
@@ -35,6 +36,17 @@ function Notepad() {
     localStorage.setItem('android', androidKey);
     localStorage.setItem('other', otherKey);
     toaster.success("Saved Keys to Browser LocalStorage")
+    analyticsNode.track({
+      userId: generateSessionId(),
+      event: 'Saved Writekey to Notepad',
+      properties: {
+        web: webKey,
+        server: serverKey,
+        email: emailKey,
+        android: androidKey,
+        other: otherKey
+      }
+    });
   }
 
   return (

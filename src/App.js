@@ -5,6 +5,8 @@ import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './components/Parser';
 import { toaster, Button, TextInput } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
+import { generateSessionId } from './util/common.js';
+
 import {
   firstEvent,
   dependencyElement,
@@ -24,6 +26,16 @@ import {
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
 
+var AnalyticsNode = require('analytics-node');
+var analyticsNode = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
+
+analyticsNode.identify({
+  anonymousId: generateSessionId(),
+  traits: {
+    userAgent: window.navigator.userAgent,
+    path: document.location.href,
+  }
+})
 
 const launcher = async (
   eventList, // data schema
@@ -142,6 +154,16 @@ const launcher = async (
     setIsLoading(false);
     setStatus("FIRE EVENTS");
     toaster.success(`All events fired!`, {id: 'single-toast'})
+    analyticsNode.track({
+      userId: generateSessionId(),
+      event: 'End Fired Events',
+      properties: {
+        numOfUsers: u_i,
+        numOfEvents: e_i,
+        isRealTime: isRealTime,
+        eventTimeout: eventTimeout
+      }
+    });
     return "finished";
   }
 }
@@ -172,8 +194,17 @@ const App = () => {
   };
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
+  
 
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
+    analyticsNode.track({
+      userId: generateSessionId(),
+      event: 'Generate Users',
+      properties: {
+        numOfUsers: numOfUsers,
+      }
+    });
+
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
       setUserList([])
@@ -187,6 +218,14 @@ const App = () => {
   }
 
   const regenerateAnonymousId = (userList, setUserList) => {
+    analyticsNode.track({
+      userId: generateSessionId(),
+      event: 'Shuffle AnonymousId',
+      properties: {
+        numOfUsers: userList.length
+      }
+    });
+
     let temp = userList;
     for (let i = 0; i < temp.length; i++) {
       temp[i].anonymousId = generateRandomValue("##");
@@ -202,6 +241,10 @@ const App = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+    analyticsNode.track({
+      userId: generateSessionId(),
+      event: 'Saved User List'
+    });
     try {
       setUserList(JSON.parse(e.target.userList.value));
       toaster.success("Changes to user list saved", {id: 'single-toast'})
@@ -209,6 +252,10 @@ const App = () => {
     }
     catch(e) {
       toaster.danger(e.message, {id: 'single-toast'});
+      analyticsNode.track({
+        userId: generateSessionId(),
+        event: 'User List Error',
+      });
     }
   }
   
@@ -257,7 +304,9 @@ const App = () => {
           <form>
             <TextInput name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
           </form>
-          <Notepad />
+          <Notepad 
+            analyticsNode={analyticsNode}
+          />
         </div>
         <div className="section">
           <CSVReader 
@@ -265,6 +314,7 @@ const App = () => {
             setIsLoading={setIsLoading}
             setCsvLoaded={setCsvLoaded}
             setStatus={setStatus}
+            analyticsNode={analyticsNode}
           />
         </div>
         <div className="section"> 
@@ -275,8 +325,14 @@ const App = () => {
           <Button 
             isLoading={isLoadingPersonas} 
             style={{marginTop: "1em"}} 
-            onClick={()=>loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoadingPersonas, setStatus)} 
-            isLoadingPersonas={isLoadingPersonas}>
+            onClick={()=> {
+              analyticsNode.track({
+                userId: generateSessionId(),
+                event: 'Load Persona Events',
+              });
+              loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoadingPersonas, setStatus)
+            }} 
+            >
               Preload Personas
           </Button>
           :
@@ -284,7 +340,7 @@ const App = () => {
             isLoading={isLoadingPersonas} 
             style={{marginTop: "1em"}} 
             onClick={()=>toaster.warning(`Load CSV before Preloading`, {id: 'single-toast'})}
-            isLoadingPersonas={isLoadingPersonas}>
+            >
               Preload Personas
           </Button>}
 
@@ -304,21 +360,34 @@ const App = () => {
               size='large' 
               appearance='primary'
               onClick={()=>{
-                if (csvLoaded) launcher(
-                  eventList, // array of events
-                  userList, // array of all users
-                  0, // user position index
-                  2, // event position index
-                  {"0":true},  // firedEvents
-                  setIsLoading, 
-                  analytics, 
-                  setCounter, 
-                  0,  //event counter
-                  setUserCounter, 
-                  setStatus,
-                  isRealTime,
-                  eventTimeout
-                  )
+                if (csvLoaded) {
+                  analyticsNode.track({
+                    userId: generateSessionId(),
+                    event: 'Begin Fired Events',
+                    properties: {
+                      numOfUsers: userList.length,
+                      numOfEvents: eventList.length,
+                      writeKey: writeKey,
+                      eventTimeout: eventTimeout,
+                      isRealTime: isRealTime
+                    }
+                  });
+                  launcher(
+                    eventList, // array of events
+                    userList, // array of all users
+                    0, // user position index
+                    2, // event position index
+                    {"0":true},  // firedEvents
+                    setIsLoading, 
+                    analytics, 
+                    setCounter, 
+                    0,  //event counter
+                    setUserCounter, 
+                    setStatus,
+                    isRealTime,
+                    eventTimeout
+                    )
+                  }
                 }
               } 
             >
