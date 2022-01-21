@@ -29,14 +29,6 @@ import Notepad from './components/Notepad';
 var AnalyticsNode = require('analytics-node');
 var analyticsNode = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
 
-analyticsNode.identify({
-  anonymousId: generateSessionId(),
-  traits: {
-    userAgent: window.navigator.userAgent,
-    path: document.location.href,
-  }
-})
-
 const launcher = async (
   eventList, // data schema
   userList, 
@@ -174,7 +166,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPersonas, setIsLoadingPersonas] = useState(false);
   const [csvLoaded, setCsvLoaded] = useState(false);
-  const [writeKey, setWriteKey] = useState('');
+  const [writeKey, setWriteKey] = useState('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
   const [counter, setCounter] = useState(0);
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
@@ -185,6 +177,7 @@ const App = () => {
   const [eventTimeout, setEventTimeout] = useState(10)
 
   const analytics = new Analytics();
+
   const integrationSettings = {
     "Segment.io": {
       apiKey: writeKey,
@@ -194,6 +187,12 @@ const App = () => {
   };
   analytics.use(SegmentIntegration);
   analytics.initialize(integrationSettings);
+  analytics.reset();
+  analytics.setAnonymousId(generateSessionId());
+  analytics.identify({
+    userAgent: window.navigator.userAgent,
+    path: document.location.href
+  })
   
 
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {

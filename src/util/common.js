@@ -35,6 +35,9 @@ String.prototype.hashCode = function() {
 };
 
 export const generateSessionId = () => {
+  if (localStorage.getItem('event_gen_id') && !(localStorage.getItem('event_gen_id').length > 5)) {
+    localStorage.removeItem('event_gen_id');
+  }
   if (!localStorage.getItem('event_gen_id')) {
     let event_gen_id = JSON.stringify(new Date()).hashCode();
     localStorage.setItem('event_gen_id', event_gen_id);
