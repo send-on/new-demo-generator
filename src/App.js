@@ -90,7 +90,7 @@ const launcher = async (
         await analytics.identify({
           userId :userList[u_i].user_id,
           anonymousId: fireProperties.anonymousId,
-          properties: fireProperties, 
+          traits: fireProperties, 
           context: context
         });
       }
@@ -342,7 +342,7 @@ const App = () => {
             analyticsSecondary={analyticsSecondary}
           />
         </div>
-        <div className="section"> 
+        {/* <div className="section"> 
           <div className="header">Preload Personas Workspace with Values</div>
           <div className="note">Note: Required to populate Personas audience/trait autocomplete (click once per CSV template)</div>
 
@@ -369,14 +369,14 @@ const App = () => {
               Preload Personas
           </Button>}
 
-        </div>
+        </div> */}
 
           <div className="section">
             <div className="header">Fire Events (Turn Off Adblock)</div>
             <div className="note">Note: Real-time: true will disable timestamp override.</div>
             <div style={{marginBottom: "0.5em"}}>
               <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+              {/* <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} />  */}
             </div> 
             
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 

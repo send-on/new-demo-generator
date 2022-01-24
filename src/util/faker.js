@@ -79,6 +79,15 @@ export const generateRandomValue = (string) => {
   if (type === "job_type") value = faker.name.jobType();
   if (type === "phone") value = faker.phone.phoneNumber();
 
+  // dates
+  if (type === "date_past") value = faker.date.past();
+  if (type === "date_recent") value = faker.date.recent();
+  if (type.includes("date_between") ) {
+    let start = string.split("#")[2];
+    let end = string.split("#")[3];
+    value = faker.date.between(start, end);
+  }
+
   if (value === "") {
 
   }
