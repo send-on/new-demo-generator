@@ -61,6 +61,7 @@ export const generateRandomValue = (string) => {
   if (type === "state") value = faker.address.state();
   if (type === "latitude") value = faker.address.latitude();
   if (type === "longitude") value = faker.address.longitude();
+  if (type === "ip") value = faker.internet.ip();
 
   // Commerce
   if (type === "color") value = faker.commerce.color();

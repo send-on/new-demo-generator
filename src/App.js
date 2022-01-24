@@ -28,7 +28,7 @@ import Notepad from './components/Notepad';
 
 // Side tracking for product improvements
 const AnalyticsNode = require('analytics-node');
-var analyticsNode = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
+var analyticsSecondary = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
 var globalCounter = 0;
 
 
@@ -167,7 +167,7 @@ const launcher = async (
     setIsLoading(false);
     setStatus("FIRE EVENTS");
     toaster.success(`All events fired!`, {id: 'single-toast'})
-    analyticsNode.track({
+    analyticsSecondary.track({
       anonymousId: generateSessionId(),
       event: 'End Fired Events',
       properties: {
@@ -222,13 +222,13 @@ const App = () => {
   // }
   
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
-    // analyticsNode.track({
-    //   anonymousId: generateSessionId(),
-    //   event: 'Generate Users',
-    //   properties: {
-    //     numOfUsers: numOfUsers,
-    //   }
-    // });
+    analyticsSecondary.track({
+      anonymousId: generateSessionId(),
+      event: 'Generate Users',
+      properties: {
+        numOfUsers: numOfUsers,
+      }
+    });
 
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
@@ -243,13 +243,13 @@ const App = () => {
   }
 
   const regenerateAnonymousId = (userList, setUserList) => {
-    // analyticsNode.track({
-    //   anonymousId: generateSessionId(),
-    //   event: 'Shuffle AnonymousId',
-    //   properties: {
-    //     numOfUsers: userList.length
-    //   }
-    // });
+    analyticsSecondary.track({
+      anonymousId: generateSessionId(),
+      event: 'Shuffle AnonymousId',
+      properties: {
+        numOfUsers: userList.length
+      }
+    });
 
     let temp = userList;
     for (let i = 0; i < temp.length; i++) {
@@ -266,7 +266,7 @@ const App = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    analyticsNode.track({
+    analyticsSecondary.track({
       anonymousId: generateSessionId(),
       event: 'Saved User List'
     });
@@ -277,7 +277,7 @@ const App = () => {
     }
     catch(e) {
       toaster.danger(e.message, {id: 'single-toast'});
-      analyticsNode.track({
+      analyticsSecondary.track({
         anonymousId: generateSessionId(),
         event: 'User List Error',
       });
@@ -330,7 +330,7 @@ const App = () => {
             <TextInput name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
           </form>
           <Notepad 
-            analyticsNode={analyticsNode}
+            analyticsSecondary={analyticsSecondary}
           />
         </div>
         <div className="section">
@@ -339,10 +339,10 @@ const App = () => {
             setIsLoading={setIsLoading}
             setCsvLoaded={setCsvLoaded}
             setStatus={setStatus}
-            analyticsNode={analyticsNode}
+            analyticsSecondary={analyticsSecondary}
           />
         </div>
-        {/* <div className="section"> 
+        <div className="section"> 
           <div className="header">Preload Personas Workspace with Values</div>
           <div className="note">Note: Required to populate Personas audience/trait autocomplete (click once per CSV template)</div>
 
@@ -351,7 +351,7 @@ const App = () => {
             isLoading={isLoadingPersonas} 
             style={{marginTop: "1em"}} 
             onClick={()=> {
-              analyticsNode.track({
+              analyticsSecondary.track({
                 anonymousId: generateSessionId(),
                 event: 'Load Persona Events',
               });
@@ -369,14 +369,14 @@ const App = () => {
               Preload Personas
           </Button>}
 
-        </div> */}
+        </div>
 
           <div className="section">
             <div className="header">Fire Events (Turn Off Adblock)</div>
             <div className="note">Note: Real-time: true will disable timestamp override.</div>
             <div style={{marginBottom: "0.5em"}}>
               <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-              {/* <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} />  */}
+              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
             </div> 
             
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
@@ -386,7 +386,7 @@ const App = () => {
               appearance='primary'
               onClick={()=>{
                 if (csvLoaded) {
-                  // analyticsNode.track({
+                  // analyticsSecondary.track({
                   //   anonymousId: generateSessionId(),
                   //   event: 'Begin Fired Events',
                   //   properties: {
