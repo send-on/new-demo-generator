@@ -124,7 +124,7 @@ const launcher = async (
       setStatus,
       isRealTime,
       eventTimeout
-      ), eventTimeout ?? 10);
+      ), eventTimeout ?? 1);
   } else if (userList[u_i+1]) {
     if (counter%100 === 0) setCounter(counter);
     setTimeout(()=>launcher(
@@ -141,7 +141,7 @@ const launcher = async (
       setStatus,
       isRealTime, 
       eventTimeout
-      ), eventTimeout ?? 10);
+      ), eventTimeout ?? 1);
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
@@ -176,7 +176,7 @@ const App = () => {
   const [status, setStatus] = useState("FIRE EVENTS");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isRealTime, setIsRealTime] = useState(false);
-  const [eventTimeout, setEventTimeout] = useState(10)
+  const [eventTimeout, setEventTimeout] = useState(1)
 
   const analytics = new Analytics();
 
@@ -356,7 +356,7 @@ const App = () => {
             <div className="note">Note: Real-time: true will disable timestamp override.</div>
             <div>
               <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 1ms)" onChange={e => setEventTimeout(e.target.value)} /> 
             </div> 
             
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
