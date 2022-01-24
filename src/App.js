@@ -27,9 +27,11 @@ import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
 
 // Side tracking for product improvements
-var AnalyticsNode = require('analytics-node');
+const AnalyticsNode = require('analytics-node');
 var analyticsNode = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
 var globalCounter = 0;
+
+
 
 const launcher = async (
   eventList, // data schema
@@ -49,10 +51,10 @@ const launcher = async (
   // reset ajs on new user
   setStatus("Working...");
   setIsLoading(true);
-  if (e_i < 3) {
-    analytics.reset();
-    analytics.setAnonymousId(userList[u_i].anonymousId);
-  }
+  // if (e_i < 3) {
+  //   analytics.reset();
+  //   analytics.setAnonymousId(userList[u_i].anonymousId);
+  // }
   // Check for dropoff
   if (shouldDropEvent(eventList[e_i][dropoffElement])) {
     // Check for dependency 
@@ -83,20 +85,37 @@ const launcher = async (
       // Identify
       if (eventList[e_i][1] === "identify") {
         Object.assign(fireProperties, userList[u_i]);
-        delete fireProperties.user_id;
-        delete fireProperties.anonymousId;
-        await analytics.identify(userList[u_i].user_id, fireProperties, context);
+        // delete fireProperties.user_id;
+        // delete fireProperties.anonymousId;
+        await analytics.identify({
+          userId :userList[u_i].user_id,
+          anonymousId: fireProperties.anonymousId,
+          properties: fireProperties, 
+          context: context
+        });
       }
       // Page
       if (eventList[e_i][1] === "page") {
-        delete fireProperties.user_id;
-        delete fireProperties.anonymousId;
-        await analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
+        // delete fireProperties.user_id;
+        // delete fireProperties.anonymousId;
+        await analytics.track({
+          event: "Page Viewed",
+          userId :userList[u_i].user_id,
+          anonymousId: fireProperties.anonymousId,
+          properties: fireProperties, 
+          context: context
+        });
       }
 
       // Track
       if (eventList[e_i][1] === "track") {
-        await analytics.track(eventList[e_i][2], fireProperties, context);
+        await analytics.track({
+          event: eventList[e_i][2],
+          userId :userList[u_i].user_id,
+          anonymousId: fireProperties.anonymousId,
+          properties: fireProperties, 
+          context: context
+        });
       }
       properties.timestampUnix = timestampArr[1]
       firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
@@ -105,12 +124,12 @@ const launcher = async (
   }
   
   // set event and user counters
-  if (u_i%10 === 0) setUserCounter(userList.length - u_i)
+  // if (u_i%10 === 0) setUserCounter(userList.length - u_i)
 
   // next event
   if (eventList[e_i+1]) {    
-    if (counter%100 === 0) setCounter(counter);
-    setTimeout(()=>launcher(
+    // if (counter%100 === 0) setCounter(counter);
+    launcher(
       eventList, 
       userList, 
       u_i, 
@@ -124,10 +143,10 @@ const launcher = async (
       setStatus,
       isRealTime,
       eventTimeout
-      ), eventTimeout ?? 10);
+      );
   } else if (userList[u_i+1]) {
-    if (counter%100 === 0) setCounter(counter);
-    setTimeout(()=>launcher(
+    // if (counter%100 === 0) setCounter(counter);
+    launcher(
       eventList, 
       userList, 
       u_i+1, 
@@ -141,7 +160,7 @@ const launcher = async (
       setStatus,
       isRealTime, 
       eventTimeout
-      ), eventTimeout ?? 10);
+      );
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
@@ -168,7 +187,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPersonas, setIsLoadingPersonas] = useState(false);
   const [csvLoaded, setCsvLoaded] = useState(false);
-  const [writeKey, setWriteKey] = useState('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
+  const [writeKey, setWriteKey] = useState('123');
   const [counter, setCounter] = useState(0);
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
@@ -178,37 +197,38 @@ const App = () => {
   const [isRealTime, setIsRealTime] = useState(false);
   const [eventTimeout, setEventTimeout] = useState(10)
 
-  const analytics = new Analytics();
+  // const analytics = new Analytics();
+  var analytics = new AnalyticsNode(writeKey || "placeholder");
 
-  const integrationSettings = {
-    "Segment.io": {
-      apiKey: writeKey,
-      retryQueue: true,
-      addBundledMetadata: true
-    }
-  };
-  analytics.use(SegmentIntegration);
-  analytics.initialize(integrationSettings);
+  // const integrationSettings = {
+  //   "Segment.io": {
+  //     apiKey: writeKey,
+  //     retryQueue: true,
+  //     addBundledMetadata: true
+  //   }
+  // };
+  // analytics.use(SegmentIntegration);
+  // analytics.initialize(integrationSettings);
 
   // Side tracking for product improvements
-  if (globalCounter === 0) {
-    analytics.reset();
-    analytics.setAnonymousId(generateSessionId());
-    analytics.identify({
-      userAgent: window.navigator.userAgent,
-      path: document.location.href
-    })
-    globalCounter++;
-  }
+  // if (globalCounter === 0) {
+  //   analytics.reset();
+  //   analytics.setAnonymousId(generateSessionId());
+  //   analytics.identify({
+  //     userAgent: window.navigator.userAgent,
+  //     path: document.location.href
+  //   })
+  //   globalCounter++;
+  // }
   
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
-    analyticsNode.track({
-      anonymousId: generateSessionId(),
-      event: 'Generate Users',
-      properties: {
-        numOfUsers: numOfUsers,
-      }
-    });
+    // analyticsNode.track({
+    //   anonymousId: generateSessionId(),
+    //   event: 'Generate Users',
+    //   properties: {
+    //     numOfUsers: numOfUsers,
+    //   }
+    // });
 
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
@@ -223,13 +243,13 @@ const App = () => {
   }
 
   const regenerateAnonymousId = (userList, setUserList) => {
-    analyticsNode.track({
-      anonymousId: generateSessionId(),
-      event: 'Shuffle AnonymousId',
-      properties: {
-        numOfUsers: userList.length
-      }
-    });
+    // analyticsNode.track({
+    //   anonymousId: generateSessionId(),
+    //   event: 'Shuffle AnonymousId',
+    //   properties: {
+    //     numOfUsers: userList.length
+    //   }
+    // });
 
     let temp = userList;
     for (let i = 0; i < temp.length; i++) {
@@ -322,7 +342,7 @@ const App = () => {
             analyticsNode={analyticsNode}
           />
         </div>
-        <div className="section"> 
+        {/* <div className="section"> 
           <div className="header">Preload Personas Workspace with Values</div>
           <div className="note">Note: Required to populate Personas audience/trait autocomplete (click once per CSV template)</div>
 
@@ -349,14 +369,14 @@ const App = () => {
               Preload Personas
           </Button>}
 
-        </div>
+        </div> */}
 
           <div className="section">
             <div className="header">Fire Events (Turn Off Adblock)</div>
             <div className="note">Note: Real-time: true will disable timestamp override.</div>
-            <div>
+            <div style={{marginBottom: "0.5em"}}>
               <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+              {/* <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} />  */}
             </div> 
             
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
@@ -366,17 +386,17 @@ const App = () => {
               appearance='primary'
               onClick={()=>{
                 if (csvLoaded) {
-                  analyticsNode.track({
-                    anonymousId: generateSessionId(),
-                    event: 'Begin Fired Events',
-                    properties: {
-                      numOfUsers: userList.length,
-                      numOfEvents: eventList.length,
-                      writeKey: writeKey,
-                      eventTimeout: eventTimeout,
-                      isRealTime: isRealTime
-                    }
-                  });
+                  // analyticsNode.track({
+                  //   anonymousId: generateSessionId(),
+                  //   event: 'Begin Fired Events',
+                  //   properties: {
+                  //     numOfUsers: userList.length,
+                  //     numOfEvents: eventList.length,
+                  //     writeKey: writeKey,
+                  //     eventTimeout: eventTimeout,
+                  //     isRealTime: isRealTime
+                  //   }
+                  // });
                   launcher(
                     eventList, // array of events
                     userList, // array of all users
