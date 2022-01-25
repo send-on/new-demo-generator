@@ -251,29 +251,55 @@ export const shouldDropEvent = (dropoff) => {
 }
 
 
-export const fireJSEvents = () => {
+export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) => {
+  if (eventList[e_i][1] === "identify") {
+    Object.assign(fireProperties, userList[u_i]);
+    delete fireProperties.user_id;
+    delete fireProperties.anonymousId;
+    analytics.identify(userList[u_i].user_id, fireProperties, context);
+  }
+  // Page
+  if (eventList[e_i][1] === "page") {
+    analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
+  }
+
+  // Track
+  if (eventList[e_i][1] === "track") {
+    analytics.track(eventList[e_i][2], fireProperties, context);
+  }
 
 }
 
-export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics) => {
+export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) => {
+  let nodeContext = {};
+  Object.assign(nodeContext, context);
+  delete nodeContext.timestamp;
+
   let payload = {
     userId :userList[u_i].user_id,
     anonymousId: userList[u_i].anonymousId,
-    traits: fireProperties, 
-    context: context
+    context: nodeContext,
+    timestamp: new Date(context.timestamp)
   }
+
   if (eventList[e_i][1] === "identify") {
+    Object.assign(fireProperties, userList[u_i])    
+    delete fireProperties.user_id;
+    delete fireProperties.anonymousId;
+    Object.assign(payload, {traits: fireProperties})    
     analytics.identify(payload);
   }
+
   if (eventList[e_i][1] === "page") {
+    Object.assign(payload, {properties: fireProperties})    
     analytics.track({
       ...payload,
       event: "Page Viewed"
     });
   }
 
-  // Track
   if (eventList[e_i][1] === "track") {
+    Object.assign(payload, {properties: fireProperties})    
     analytics.track({
       ...payload,
       event: eventList[e_i][2]

@@ -22,7 +22,8 @@ import {
   createEventContext, 
   createObjectProperty,
   removeEventContext, 
-  fireNodeEvents
+  fireNodeEvents,
+  fireJSEvents
 } from './util/event'
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
@@ -46,16 +47,16 @@ const launcher = async (
   counter, 
   setUserCounter, 
   setStatus,
-  isRealTime,
+  isNode,
   eventTimeout=1
   ) => {
   // reset ajs on new user
   setStatus("Working...");
   setIsLoading(true);
-  // if (e_i < 3) {
-  //   analytics.reset();
-  //   analytics.setAnonymousId(userList[u_i].anonymousId);
-  // }
+  if (e_i < 3 && !isNode) {
+    analytics.reset();
+    analytics.setAnonymousId(userList[u_i].anonymousId);
+  }
   // Check for dropoff
   if (shouldDropEvent(eventList[e_i][dropoffElement])) {
     // Check for dependency 
@@ -69,71 +70,103 @@ const launcher = async (
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
       let propertiesWithObjects = createObjectProperty(properties);
+      console.log(timestamp)
 
       counter++;
       let context = {
-        timestamp:timestamp,
+        timestamp: timestamp,
         ...contextObj
       };
       
-
       let fireProperties = removeEventContext(properties); // remove properties for fire object
       Object.assign(fireProperties, propertiesWithObjects);
       
-      if (isRealTime) delete context.timestamp;
-
-      Object.assign(fireProperties, userList[u_i]);
-      delete fireProperties.user_id;
-      delete fireProperties.anonymousId;
-      delete context.anonymousId
-
-      // Node
-      fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics);
-
-      properties.timestampUnix = timestampArr[1]
-      firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
+      (isNode) ? 
+      fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) // Bulk Mode
+      : 
+      fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) // AJS mode
       
+      properties.timestampUnix = timestampArr[1]
+      if (eventList[e_i][1] === "identify") firedEvents["identify"] = true
+      firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
     }
   }
   
   // set event and user counters
-  // if (u_i%10 === 0) setUserCounter(userList.length - u_i)
+  if (u_i%10 === 0 && !isNode) setUserCounter(userList.length - u_i)
 
   // next event
+  
   if (eventList[e_i+1]) {    
-    // if (counter%100 === 0) setCounter(counter);
-    launcher(
-      eventList, 
-      userList, 
-      u_i, 
-      e_i+1,
-      firedEvents, 
-      setIsLoading, 
-      analytics, 
-      setCounter, 
-      counter, 
-      setUserCounter, 
-      setStatus,
-      isRealTime,
-      eventTimeout
-      );
+    if (isNode) {
+      launcher(
+        eventList, 
+        userList, 
+        u_i, 
+        e_i+1,
+        firedEvents, 
+        setIsLoading, 
+        analytics, 
+        setCounter, 
+        counter, 
+        setUserCounter, 
+        setStatus,
+        isNode,
+        eventTimeout
+        );
+    } else {
+      if (counter%100 === 0) setCounter(counter);
+      setTimeout(()=>launcher(
+        eventList, 
+        userList, 
+        u_i, 
+        e_i+1,
+        firedEvents, 
+        setIsLoading, 
+        analytics, 
+        setCounter, 
+        counter, 
+        setUserCounter, 
+        setStatus,
+        isNode,
+        eventTimeout
+        ), eventTimeout ?? 4);
+    }
   } else if (userList[u_i+1]) {
-    // if (counter%100 === 0) setCounter(counter);
-    launcher(
-      eventList, 
-      userList, 
-      u_i+1, 
-      2,
-      {0:true}, 
-      setIsLoading, 
-      analytics, 
-      setCounter, 
-      counter, 
-      setUserCounter, 
-      setStatus,
-      isRealTime, 
-      eventTimeout
-      );
+    if (isNode) {
+      launcher(
+        eventList, 
+        userList, 
+        u_i+1, 
+        2,
+        {0:true}, 
+        setIsLoading, 
+        analytics, 
+        setCounter, 
+        counter, 
+        setUserCounter, 
+        setStatus,
+        isNode, 
+        eventTimeout
+        );
+    } else {
+      if (counter%100 === 0) setCounter(counter);
+      setTimeout(()=>launcher(
+        eventList, 
+        userList, 
+        u_i+1, 
+        2,
+        {0:true}, 
+        setIsLoading, 
+        analytics, 
+        setCounter, 
+        counter, 
+        setUserCounter, 
+        setStatus,
+        isNode, 
+        eventTimeout
+        ), eventTimeout ?? 1);
+    }
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
@@ -146,7 +179,7 @@ const launcher = async (
       properties: {
         numOfUsers: u_i,
         numOfEvents: e_i,
-        isRealTime: isRealTime,
+        isNode: isNode,
         eventTimeout: eventTimeout
       }
     });
@@ -158,17 +191,16 @@ const App = () => {
   // setEvent instead of setCounter, setUserCounter
   const [eventList, setEventList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingPersonas, setIsLoadingPersonas] = useState(false);
   const [csvLoaded, setCsvLoaded] = useState(false);
-  const [writeKey, setWriteKey] = useState('123');
+  const [writeKey, setWriteKey] = useState('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
   const [counter, setCounter] = useState(0);
   const [numOfUsers, setNumOfUsers] = useState(1);
   const [userList, setUserList] = useState([]);
   const [userCounter, setUserCounter] = useState(0);
   const [status, setStatus] = useState("FIRE EVENTS");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
-  const [isRealTime, setIsRealTime] = useState(false);
-  const [eventTimeout, setEventTimeout] = useState(1)
+  const [isNode, setIsNode] = useState(false);
+  const [eventTimeout, setEventTimeout] = useState(4)
 
   const analyticsJS = new Analytics();
   var analyticsNode = new AnalyticsNode(writeKey || "placeholder");
@@ -315,41 +347,13 @@ const App = () => {
             analyticsSecondary={analyticsSecondary}
           />
         </div>
-        {/* <div className="section"> 
-          <div className="header">Preload Personas Workspace with Values</div>
-          <div className="note">Note: Required to populate Personas audience/trait autocomplete (click once per CSV template)</div>
-
-          {(!isLoading && (eventList.length > 0)) ? 
-          <Button 
-            isLoading={isLoadingPersonas} 
-            style={{marginTop: "1em"}} 
-            onClick={()=> {
-              analyticsSecondary.track({
-                anonymousId: generateSessionId(),
-                event: 'Load Persona Events',
-              });
-              loadEventProps(eventList, 0, 2, {0:true}, analytics, setIsLoadingPersonas, setStatus)
-            }} 
-            >
-              Preload Personas
-          </Button>
-          :
-          <Button 
-            isLoading={isLoadingPersonas} 
-            style={{marginTop: "1em"}} 
-            onClick={()=>toaster.warning(`Load CSV before Preloading`, {id: 'single-toast'})}
-            >
-              Preload Personas
-          </Button>}
-
-        </div> */}
 
           <div className="section">
             <div className="header">Fire Events (Turn Off Adblock)</div>
-            <div className="note">Note: Real-time: true will disable timestamp override.</div>
+            <div className="note">Note: Bulk mode .</div>
             <div >
-              <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 1ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+              <Button style={{marginRight: "2em"}} onClick={()=>setIsNode(!isNode)} >Node Analytics Mode: {JSON.stringify(isNode)}</Button> 
+              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 4ms)" onChange={e => setEventTimeout(e.target.value)} /> 
             </div> 
             
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
@@ -363,11 +367,12 @@ const App = () => {
                     anonymousId: generateSessionId(),
                     event: 'Begin Fired Events',
                     properties: {
+                      type: "Bulk",
                       numOfUsers: userList.length,
                       numOfEvents: eventList.length,
                       writeKey: writeKey,
                       eventTimeout: eventTimeout,
-                      isRealTime: isRealTime
+                      isNode: isNode
                     }
                   });
                   launcher(
@@ -377,12 +382,12 @@ const App = () => {
                     2, // event position index
                     {"0":true},  // firedEvents
                     setIsLoading, 
-                    analyticsNode, 
+                    (isNode) ? analyticsNode : analyticsJS, 
                     setCounter, 
                     0,  //event counter
                     setUserCounter, 
                     setStatus,
-                    isRealTime,
+                    isNode,
                     eventTimeout
                     )
                   }
