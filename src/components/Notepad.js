@@ -3,7 +3,7 @@ import { SideSheet, Pane, Heading, Card, Button } from 'evergreen-ui';
 import { toaster } from 'evergreen-ui'
 import { generateSessionId } from '../util/common.js';
 
-function Notepad({ analyticsNode }) {
+function Notepad({ analyticsSecondary }) {
   const [isShown, setIsShown] = React.useState(false)
   const [webKey, setWebKey] = useState(localStorage.getItem("web") ?? "");
   const [serverKey, setServerKey] = useState(localStorage.getItem("server") ?? "");
@@ -36,7 +36,7 @@ function Notepad({ analyticsNode }) {
     localStorage.setItem('android', androidKey);
     localStorage.setItem('other', otherKey);
     toaster.success("Saved Keys to Browser LocalStorage")
-    analyticsNode.track({
+    analyticsSecondary.track({
       anonymousId: generateSessionId(),
       event: 'Saved Writekey to Notepad',
       properties: {

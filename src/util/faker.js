@@ -61,6 +61,7 @@ export const generateRandomValue = (string) => {
   if (type === "state") value = faker.address.state();
   if (type === "latitude") value = faker.address.latitude();
   if (type === "longitude") value = faker.address.longitude();
+  if (type === "ip") value = faker.internet.ip();
 
   // Commerce
   if (type === "color") value = faker.commerce.color();
@@ -77,6 +78,15 @@ export const generateRandomValue = (string) => {
   if (type === "title") value = faker.name.title();
   if (type === "job_type") value = faker.name.jobType();
   if (type === "phone") value = faker.phone.phoneNumber();
+
+  // dates
+  if (type === "date_past") value = faker.date.past();
+  if (type === "date_recent") value = faker.date.recent();
+  if (type.includes("date_between") ) {
+    let start = string.split("#")[2];
+    let end = string.split("#")[3];
+    value = faker.date.between(start, end);
+  }
 
   if (value === "") {
 

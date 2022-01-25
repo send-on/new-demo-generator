@@ -249,55 +249,64 @@ export const checkDependency = (dependentOn, firedEvents={}) => {
 export const shouldDropEvent = (dropoff) => {
   return (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true;
 }
-  
 
-export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoadingPersonas, setStatus, anonId=generateRandomValue("##")) => {
-  setIsLoadingPersonas(true);
-  let properties = createEventProps(eventList[e_i], firedEvents);
-  let contextObj = createEventContext(properties); 
-  let context = {...contextObj}
-  firedEvents[parseInt(eventList[e_i][0])] = properties
-  let propertiesWithObjects = createObjectProperty(properties)
-  let fireProperties = removeEventContext(properties);
-  Object.assign(fireProperties, propertiesWithObjects);
 
+export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) => {
   if (eventList[e_i][1] === "identify") {
-    analytics.identify(anonId, fireProperties, context);
+    Object.assign(fireProperties, userList[u_i]);
+    delete fireProperties.user_id;
+    delete fireProperties.anonymousId;
+    analytics.identify(userList[u_i].user_id, fireProperties, context);
   }
+  // Page
   if (eventList[e_i][1] === "page") {
     analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
   }
 
+  // Track
   if (eventList[e_i][1] === "track") {
     analytics.track(eventList[e_i][2], fireProperties, context);
-  } 
-  // next event
-  if (eventList[e_i+1]) {
-    setTimeout(()=>loadEventProps(
-      eventList,
-      u_i,
-      e_i+1,
-      firedEvents,
-      analytics, 
-      setIsLoadingPersonas,
-      setStatus, 
-      anonId
-    ), 10)
-  } else if (u_i < 30) {
-    setTimeout(()=>loadEventProps(
-      eventList,
-      u_i+1,
-      2,
-      firedEvents,
-      analytics, 
-      setIsLoadingPersonas,
-      setStatus, 
-      anonId
-    ), 10)
-  } else {
-    setIsLoadingPersonas(false);
-    toaster.success("Successfully preloaded values for Personas")
   }
+
 }
 
+export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) => {
+  let nodeContext = {};
+  Object.assign(nodeContext, context);
+  delete nodeContext.timestamp;
+
+  let payload = {
+    userId :userList[u_i].user_id,
+    anonymousId: userList[u_i].anonymousId,
+    context: nodeContext,
+    timestamp: new Date(context.timestamp)
+  }
+
+  if (eventList[e_i][1] === "identify") {
+    Object.assign(fireProperties, userList[u_i])    
+    delete fireProperties.user_id;
+    delete fireProperties.anonymousId;
+    Object.assign(payload, {traits: fireProperties})    
+    analytics.identify(payload);
+  }
+
+  if (eventList[e_i][1] === "page") {
+    Object.assign(payload, {properties: fireProperties})    
+    if (!firedEvents['identify']) delete payload.userId;
+    analytics.track({
+      ...payload,
+      event: "Page Viewed"
+    });
+  }
+
+  if (eventList[e_i][1] === "track") {
+    Object.assign(payload, {properties: fireProperties})    
+    if (!firedEvents['identify']) delete payload.userId;
+    analytics.track({
+      ...payload,
+      event: eventList[e_i][2]
+    });
+  }
+  
+}
 
