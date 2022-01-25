@@ -292,6 +292,7 @@ export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, co
 
   if (eventList[e_i][1] === "page") {
     Object.assign(payload, {properties: fireProperties})    
+    if (!firedEvents['identify']) delete payload.userId;
     analytics.track({
       ...payload,
       event: "Page Viewed"
@@ -300,6 +301,7 @@ export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, co
 
   if (eventList[e_i][1] === "track") {
     Object.assign(payload, {properties: fireProperties})    
+    if (!firedEvents['identify']) delete payload.userId;
     analytics.track({
       ...payload,
       event: eventList[e_i][2]
@@ -307,54 +309,4 @@ export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, co
   }
   
 }
-
-export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoadingPersonas, setStatus, anonId=generateRandomValue("##")) => {
-  setIsLoadingPersonas(true);
-  let properties = createEventProps(eventList[e_i], firedEvents);
-  let contextObj = createEventContext(properties); 
-  let context = {...contextObj}
-  firedEvents[parseInt(eventList[e_i][0])] = properties
-  let propertiesWithObjects = createObjectProperty(properties)
-  let fireProperties = removeEventContext(properties);
-  Object.assign(fireProperties, propertiesWithObjects);
-
-  if (eventList[e_i][1] === "identify") {
-    analytics.identify(anonId, fireProperties, context);
-  }
-  if (eventList[e_i][1] === "page") {
-    analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
-  }
-
-  if (eventList[e_i][1] === "track") {
-    analytics.track(eventList[e_i][2], fireProperties, context);
-  } 
-  // next event
-  if (eventList[e_i+1]) {
-    setTimeout(()=>loadEventProps(
-      eventList,
-      u_i,
-      e_i+1,
-      firedEvents,
-      analytics, 
-      setIsLoadingPersonas,
-      setStatus, 
-      anonId
-    ), 10)
-  } else if (u_i < 30) {
-    setTimeout(()=>loadEventProps(
-      eventList,
-      u_i+1,
-      2,
-      firedEvents,
-      analytics, 
-      setIsLoadingPersonas,
-      setStatus, 
-      anonId
-    ), 10)
-  } else {
-    setIsLoadingPersonas(false);
-    toaster.success("Successfully preloaded values for Personas")
-  }
-}
-
 

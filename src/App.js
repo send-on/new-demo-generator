@@ -17,7 +17,6 @@ import {
   createEventProps,
   checkDependency,
   shouldDropEvent,
-  loadEventProps, 
   createTimestamp, 
   createEventContext, 
   createObjectProperty,
@@ -32,8 +31,6 @@ import Notepad from './components/Notepad';
 const AnalyticsNode = require('analytics-node');
 var analyticsSecondary = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
 var globalCounter = 0;
-
-
 
 const launcher = async (
   eventList, // data schema
@@ -70,7 +67,6 @@ const launcher = async (
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
       let propertiesWithObjects = createObjectProperty(properties);
-      console.log(timestamp)
 
       counter++;
       let context = {
@@ -199,7 +195,7 @@ const App = () => {
   const [userCounter, setUserCounter] = useState(0);
   const [status, setStatus] = useState("FIRE EVENTS");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
-  const [isNode, setIsNode] = useState(false);
+  const [isNode, setIsNode] = useState(true);
   const [eventTimeout, setEventTimeout] = useState(4)
 
   const analyticsJS = new Analytics();
@@ -350,9 +346,9 @@ const App = () => {
 
           <div className="section">
             <div className="header">Fire Events (Turn Off Adblock)</div>
-            <div className="note">Note: Bulk mode .</div>
+            <div className="note">Note: Toggle between AJS and Node Analytics (faster).</div>
             <div >
-              <Button style={{marginRight: "2em"}} onClick={()=>setIsNode(!isNode)} >Node Analytics Mode: {JSON.stringify(isNode)}</Button> 
+              <Button style={{marginRight: "2em"}} onClick={()=>setIsNode(!isNode)} >Analytics Mode: {(isNode ? "Node" : "AJS")}</Button> 
               <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 4ms)" onChange={e => setEventTimeout(e.target.value)} /> 
             </div> 
             
