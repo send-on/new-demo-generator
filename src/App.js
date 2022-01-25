@@ -21,7 +21,8 @@ import {
   createTimestamp, 
   createEventContext, 
   createObjectProperty,
-  removeEventContext
+  removeEventContext, 
+  fireNodeEvents
 } from './util/event'
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
@@ -46,7 +47,7 @@ const launcher = async (
   setUserCounter, 
   setStatus,
   isRealTime,
-  eventTimeout=10
+  eventTimeout=1
   ) => {
   // reset ajs on new user
   setStatus("Working...");
@@ -71,7 +72,6 @@ const launcher = async (
 
       counter++;
       let context = {
-        anonymousId: userList[u_i].anonymousId,
         timestamp:timestamp,
         ...contextObj
       };
@@ -81,42 +81,15 @@ const launcher = async (
       Object.assign(fireProperties, propertiesWithObjects);
       
       if (isRealTime) delete context.timestamp;
-      
-      // Identify
-      if (eventList[e_i][1] === "identify") {
-        Object.assign(fireProperties, userList[u_i]);
-        // delete fireProperties.user_id;
-        // delete fireProperties.anonymousId;
-        await analytics.identify({
-          userId :userList[u_i].user_id,
-          anonymousId: fireProperties.anonymousId,
-          traits: fireProperties, 
-          context: context
-        });
-      }
-      // Page
-      if (eventList[e_i][1] === "page") {
-        // delete fireProperties.user_id;
-        // delete fireProperties.anonymousId;
-        await analytics.track({
-          event: "Page Viewed",
-          userId :userList[u_i].user_id,
-          anonymousId: fireProperties.anonymousId,
-          properties: fireProperties, 
-          context: context
-        });
-      }
 
-      // Track
-      if (eventList[e_i][1] === "track") {
-        await analytics.track({
-          event: eventList[e_i][2],
-          userId :userList[u_i].user_id,
-          anonymousId: fireProperties.anonymousId,
-          properties: fireProperties, 
-          context: context
-        });
-      }
+      Object.assign(fireProperties, userList[u_i]);
+      delete fireProperties.user_id;
+      delete fireProperties.anonymousId;
+      delete context.anonymousId
+
+      // Node
+      fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics);
+
       properties.timestampUnix = timestampArr[1]
       firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
       
@@ -195,31 +168,31 @@ const App = () => {
   const [status, setStatus] = useState("FIRE EVENTS");
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isRealTime, setIsRealTime] = useState(false);
-  const [eventTimeout, setEventTimeout] = useState(10)
+  const [eventTimeout, setEventTimeout] = useState(1)
 
-  // const analytics = new Analytics();
-  var analytics = new AnalyticsNode(writeKey || "placeholder");
+  const analyticsJS = new Analytics();
+  var analyticsNode = new AnalyticsNode(writeKey || "placeholder");
 
-  // const integrationSettings = {
-  //   "Segment.io": {
-  //     apiKey: writeKey,
-  //     retryQueue: true,
-  //     addBundledMetadata: true
-  //   }
-  // };
-  // analytics.use(SegmentIntegration);
-  // analytics.initialize(integrationSettings);
+  const integrationSettings = {
+    "Segment.io": {
+      apiKey: writeKey,
+      retryQueue: true,
+      addBundledMetadata: true
+    }
+  };
+  analyticsJS.use(SegmentIntegration);
+  analyticsJS.initialize(integrationSettings);
 
   // Side tracking for product improvements
-  // if (globalCounter === 0) {
-  //   analytics.reset();
-  //   analytics.setAnonymousId(generateSessionId());
-  //   analytics.identify({
-  //     userAgent: window.navigator.userAgent,
-  //     path: document.location.href
-  //   })
-  //   globalCounter++;
-  // }
+  if (globalCounter === 0) {
+    analyticsJS.reset();
+    analyticsJS.setAnonymousId(generateSessionId());
+    analyticsJS.identify({
+      userAgent: window.navigator.userAgent,
+      path: document.location.href
+    })
+    globalCounter++;
+  }
   
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
     analyticsSecondary.track({
@@ -374,9 +347,9 @@ const App = () => {
           <div className="section">
             <div className="header">Fire Events (Turn Off Adblock)</div>
             <div className="note">Note: Real-time: true will disable timestamp override.</div>
-            <div style={{marginBottom: "0.5em"}}>
+            <div >
               <Button style={{marginRight: "2em"}} onClick={()=>setIsRealTime(!isRealTime)} >Real-Time: {JSON.stringify(isRealTime)}</Button> 
-              {/* <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 10ms)" onChange={e => setEventTimeout(e.target.value)} />  */}
+              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 1ms)" onChange={e => setEventTimeout(e.target.value)} /> 
             </div> 
             
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
@@ -386,17 +359,17 @@ const App = () => {
               appearance='primary'
               onClick={()=>{
                 if (csvLoaded) {
-                  // analyticsSecondary.track({
-                  //   anonymousId: generateSessionId(),
-                  //   event: 'Begin Fired Events',
-                  //   properties: {
-                  //     numOfUsers: userList.length,
-                  //     numOfEvents: eventList.length,
-                  //     writeKey: writeKey,
-                  //     eventTimeout: eventTimeout,
-                  //     isRealTime: isRealTime
-                  //   }
-                  // });
+                  analyticsSecondary.track({
+                    anonymousId: generateSessionId(),
+                    event: 'Begin Fired Events',
+                    properties: {
+                      numOfUsers: userList.length,
+                      numOfEvents: eventList.length,
+                      writeKey: writeKey,
+                      eventTimeout: eventTimeout,
+                      isRealTime: isRealTime
+                    }
+                  });
                   launcher(
                     eventList, // array of events
                     userList, // array of all users
@@ -404,7 +377,7 @@ const App = () => {
                     2, // event position index
                     {"0":true},  // firedEvents
                     setIsLoading, 
-                    analytics, 
+                    analyticsNode, 
                     setCounter, 
                     0,  //event counter
                     setUserCounter, 

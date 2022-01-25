@@ -249,7 +249,38 @@ export const checkDependency = (dependentOn, firedEvents={}) => {
 export const shouldDropEvent = (dropoff) => {
   return (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true;
 }
+
+
+export const fireJSEvents = () => {
+
+}
+
+export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics) => {
+  let payload = {
+    userId :userList[u_i].user_id,
+    anonymousId: userList[u_i].anonymousId,
+    traits: fireProperties, 
+    context: context
+  }
+  if (eventList[e_i][1] === "identify") {
+    analytics.identify(payload);
+  }
+  if (eventList[e_i][1] === "page") {
+    analytics.track({
+      ...payload,
+      event: "Page Viewed"
+    });
+  }
+
+  // Track
+  if (eventList[e_i][1] === "track") {
+    analytics.track({
+      ...payload,
+      event: eventList[e_i][2]
+    });
+  }
   
+}
 
 export const loadEventProps = (eventList, u_i, e_i, firedEvents, analytics, setIsLoadingPersonas, setStatus, anonId=generateRandomValue("##")) => {
   setIsLoadingPersonas(true);
