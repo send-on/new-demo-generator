@@ -67,6 +67,8 @@ const launcher = async (
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
       let propertiesWithObjects = createObjectProperty(properties);
+      if (eventList[e_i][1] === "identify") firedEvents["identify"] = true
+      if (!firedEvents["ip"]) firedEvents['ip'] = generateRandomValue("#ip")
 
       counter++;
       let context = {
@@ -83,7 +85,7 @@ const launcher = async (
       await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) // AJS mode
       
       properties.timestampUnix = timestampArr[1]
-      if (eventList[e_i][1] === "identify") firedEvents["identify"] = true
+      
       firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
     }
   }

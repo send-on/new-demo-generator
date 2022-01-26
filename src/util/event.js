@@ -274,9 +274,11 @@ export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, co
   let nodeContext = {};
   Object.assign(nodeContext, context);
   delete nodeContext.timestamp;
+  if (!nodeContext['ip']) nodeContext["ip"] = firedEvents['ip'];
+  if (!nodeContext['userAgent']) nodeContext["userAgent"] = window.navigator.userAgent;
 
   let payload = {
-    userId :userList[u_i].user_id,
+    userId: userList[u_i].user_id,
     anonymousId: userList[u_i].anonymousId,
     context: nodeContext,
     timestamp: new Date(context.timestamp)
