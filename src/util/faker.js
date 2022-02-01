@@ -32,26 +32,28 @@ const formatter = new Intl.NumberFormat('en-US', {
 });
 
 export const generateRandomValue = (string) => {
-  // backwards compatibility
   let value = "";
-  if (!string.includes("#")) return value;
+
+  if (!string.includes("#")) return string;
+
+  // Return long ID
   if (string.trim() == "##") {
     value = faker.datatype.uuid();
     return value;
   }
+  // Return short ID
   if (string.trim() == "#") {
     value = faker.datatype.uuid();
     value = value.split("-")[0]
     return value;
   } 
   
-  
+  // Split string and set type equal to string after #
   let type = string.split("#")[1];
   if (type === "id" || type === "short_id") {
     value = faker.datatype.uuid();
     if (type === "short_id") value = value.split("-")[0]
   }
-
   
   // Locations
   if (type === "city") value = faker.address.city();
@@ -77,7 +79,7 @@ export const generateRandomValue = (string) => {
   if (type === "gender") value = faker.name.gender();
   if (type === "title") value = faker.name.title();
   if (type === "job_type") value = faker.name.jobType();
-  if (type === "phone") value = faker.phone.phoneNumber();
+  if (type === "phone") value = faker.phone.phoneNumber().substring(0,12);
 
   // dates
   if (type === "date_past") value = faker.date.past();
@@ -89,7 +91,7 @@ export const generateRandomValue = (string) => {
   }
 
   if (value === "") {
-
+    return string
   }
   
   return value
