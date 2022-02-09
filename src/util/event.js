@@ -260,7 +260,7 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
   }
   // Page
   if (eventList[e_i][1] === "page") {
-    analytics.page(eventList[e_i][2], eventList[e_i][2], fireProperties, context);
+    analytics.page(eventList[e_i][2], fireProperties, context);
   }
 
   // Track
@@ -295,7 +295,8 @@ export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, co
   if (eventList[e_i][1] === "page") {
     Object.assign(payload, {properties: fireProperties})    
     if (!firedEvents['identify']) delete payload.userId;
-    analytics.track({
+    payload.name = eventList[e_i][2]
+    analytics.page({
       ...payload,
       event: "Page Viewed"
     });

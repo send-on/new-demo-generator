@@ -25,6 +25,12 @@ a:hover {
   flex-direction: row;
 }
 
+.navigation-header-tab {
+  margin-right: 3em;
+  font-size: 14px;
+  font-weight: 500
+}
+
 .navigation-header {
   display: flex;
   flex-direction: row;
@@ -34,7 +40,6 @@ a:hover {
   margin-top: 1em;
   padding-bottom: 0.3em;
   text-align:left;
-  /* min-height: 40px; */
 }
 .section {
   padding-bottom: 2em;
