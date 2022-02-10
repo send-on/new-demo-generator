@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { SideSheet, Pane, Heading, Card, Button, TextInput, IconButton, TrashIcon, majorScale } from 'evergreen-ui';
+import { SideSheet, Pane, Heading, Card, Button, TextInput, IconButton, TrashIcon } from 'evergreen-ui';
 import { toaster } from 'evergreen-ui'
 import { generateSessionId } from '../util/common.js';
-import { isCompositeComponent } from 'react-dom/cjs/react-dom-test-utils.production.min';
 
 function Notepad({ analyticsSecondary }) {
   const [isShown, setIsShown] = React.useState(false);
@@ -30,7 +29,7 @@ function Notepad({ analyticsSecondary }) {
       }
       setKeys([...keys])
     }
-    toaster.success("Write Key Deleted", {id: 'single-toast'})
+    toaster.success("Write Key Deleted - Hit Save to Save", {id: 'single-toast'})
   }
 
   const addKey = () => {
