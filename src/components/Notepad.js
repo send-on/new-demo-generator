@@ -1,50 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { SideSheet, Pane, Heading, Card, Button } from 'evergreen-ui';
+import { SideSheet, Pane, Heading, Card, Button, TextInput, IconButton, TrashIcon, majorScale } from 'evergreen-ui';
 import { toaster } from 'evergreen-ui'
 import { generateSessionId } from '../util/common.js';
+import { isCompositeComponent } from 'react-dom/cjs/react-dom-test-utils.production.min';
 
 function Notepad({ analyticsSecondary }) {
-  const [isShown, setIsShown] = React.useState(false)
-  const [webKey, setWebKey] = useState(localStorage.getItem("web") ?? "");
-  const [serverKey, setServerKey] = useState(localStorage.getItem("server") ?? "");
-  const [emailKey, setEmailKey] = useState(localStorage.getItem("email") ?? "");
-  const [appleKey, setAppleKey] = useState(localStorage.getItem("apple") ?? "");
-  const [androidKey, setAndroidKey] = useState(localStorage.getItem("android") ?? "");
-  const [otherKey, setOtherKey] = useState(localStorage.getItem("other") ?? "");
+  const [isShown, setIsShown] = React.useState(false);
+  const [keys, setKeys] = useState(JSON.parse(localStorage.getItem("keys")) ?? [{name:"Source Name", value:"Write Key", index:0}]);
 
   const handleChange = (e) => {
-    if (e.target.name === "web") {
-      setWebKey(e.target.value);
-    } else if (e.target.name === "apple") {
-      setAppleKey(e.target.value);
-    } else if (e.target.name === "android") {
-      setAndroidKey(e.target.value);
-    } else if (e.target.name === "other") {
-      setOtherKey(e.target.value);
-    } else if (e.target.name === "server") {
-      setServerKey(e.target.value);
-    } else if (e.target.name === "email") {
-      setEmailKey(e.target.value);
+    let el = e.target.attributes.name.value;
+    let targetIndex = 0;
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i].index === parseInt(el)) targetIndex = i
     }
+
+    (e.target.attributes['placeholder'].value === "Source Name")
+    ? keys[targetIndex]["name"] = e.target.value ?? "Source Name"
+    : keys[targetIndex]["value"] = e.target.value ?? "Write Key"
+    setKeys(keys);
+  }
+
+  const deleteKey = (index) => {
+    if (index > -1 ) {
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i].index === index) {
+          keys.splice(i, 1)
+        }
+      }
+      setKeys([...keys])
+    }
+    toaster.success("Write Key Deleted", {id: 'single-toast'})
+  }
+
+  const addKey = () => {
+    let highestIndex = 0;
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i].index > highestIndex) highestIndex = keys[i].index
+    }
+    setKeys([...keys, {name: "", value: "", index: highestIndex+1}])
   }
 
   const saveToMemory = () => {
-    localStorage.setItem('web', webKey);
-    localStorage.setItem('server', serverKey);
-    localStorage.setItem('email', emailKey);
-    localStorage.setItem('apple', appleKey);
-    localStorage.setItem('android', androidKey);
-    localStorage.setItem('other', otherKey);
-    toaster.success("Saved Keys to Browser LocalStorage")
+    localStorage.setItem('keys', JSON.stringify(keys));
+    toaster.success("Saved Keys to Browser LocalStorage", {id: 'single-toast'})
     analyticsSecondary.track({
       anonymousId: generateSessionId(),
       event: 'Saved Writekey to Notepad',
       properties: {
-        web: webKey,
-        server: serverKey,
-        email: emailKey,
-        android: androidKey,
-        other: otherKey
+        keys: keys
       }
     });
   }
@@ -62,40 +66,33 @@ function Notepad({ analyticsSecondary }) {
       >
         <Pane zIndex={1} flexShrink={0} elevation={0} backgroundColor="white">
           <Pane padding={16}>
-            <Heading size={600}>Writekey Notepad (Save Keys)</Heading>
+            <Heading size={600}>Writekey Notepad</Heading>
           </Pane>
         </Pane>
         <Pane flex="1" overflowY="scroll" background="tint1" padding={16}>
           <Card
             backgroundColor="white"
             elevation={0}
-            height={640}
             display="flex"
-            alignItems="center"
+            alignItems="top"
             justifyContent="center"
           >
             <div>
-
-              <div style={{"marginBottom": "1em"}}>
-                <div style={{"fontSize":"14px"}}>Web</div><input onChange={handleChange} className="notepad" type="text" name="web" placeholder="Web" defaultValue={webKey} /></div>
-              <div style={{"marginBottom": "1em"}}>
-                <div style={{"fontSize":"14px"}}>Server</div><input onChange={handleChange} className="notepad" type="text" name="server" placeholder="Server" defaultValue={serverKey}/></div>
-              <div style={{"marginBottom": "1em"}}>
-                <div style={{"fontSize":"14px"}}>Email</div><input onChange={handleChange} className="notepad" type="text" name="email" placeholder="Email" defaultValue={emailKey}/></div>
-              <div style={{"marginBottom": "1em"}}>
-                <div style={{"fontSize":"14px"}}>Apple (iOS)</div><input onChange={handleChange} className="notepad" type="text" name="apple" placeholder="iOS" defaultValue={appleKey}/></div>
-              <div style={{"marginBottom": "1em"}}>
-                <div style={{"fontSize":"14px"}}>Android</div><input onChange={handleChange} className="notepad" type="text" name="android" placeholder="Android" defaultValue={androidKey} /></div>
-              <div style={{"marginBottom": "1em"}}>
-                <div style={{"fontSize":"14px"}}>Other</div><input onChange={handleChange} className="notepad" type="text" name="other" placeholder="Other" defaultValue={otherKey}/></div>
-              <div style={{textAlign: "center"}}><Button appearance="primary" style={{margin: "2em 0em 0em 0em"}} onClick={()=>saveToMemory()}className="button">Save</Button></div>
+              {keys.map((key) => {
+                return (
+                  <div key={key.index} style={{"margin": "1em", "display": "flex"}}>
+                    <TextInput width={"150px"} style={{marginRight: "1em"}} onChange={handleChange} type="text" name={key.index} placeholder="Source Name" defaultValue={key.name ?? "Source Name"} />
+                    <TextInput width={"300px"} onChange={handleChange} type="text" name={key.index} placeholder="Write Key" defaultValue={key.value ?? "Write Key"} />
+                    <IconButton name={key.index} style={{"marginTop": "8px", "marginLeft": "1em"}} icon={TrashIcon} intent="danger" onClick={()=>deleteKey(key.index)} />
+                  </div>
+                )
+              })}
+              <div style={{textAlign: "left", display: "block"}}>
+                <Button appearance="primary" width={"70px"} style={{margin: "2em 1.5em 2em 1.5em"}} onClick={addKey}className="button">+ New</Button>
+              </div>
             </div>
-          {/* <Button style={{"marginBottom":"10px"}} onClick={() => setIsShown(true)}>Add {tabName.slice(0,-1)}</Button> */}
-      
-
-            
-            
           </Card>
+          <div style={{textAlign: "right", display: "block"}} ><Button appearance="primary" style={{margin: "2em 1.5em 2em 1.5em"}} onClick={()=>saveToMemory()}className="button">Save Write Keys</Button></div>
         </Pane>
       </SideSheet>
       <Button onClick={() => setIsShown(true)}>Show Write Key Notepad</Button>
