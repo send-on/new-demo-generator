@@ -1,4 +1,5 @@
 const faker = require('faker');
+import { toaster } from 'evergreen-ui'
 
 export const generateUsers = (numOfUsers) => {
   let users = [];
@@ -83,9 +84,13 @@ export const generateRandomValue = (string) => {
   if (type === "price") value = parseFloat(faker.commerce.price()/4.00.toFixed(2));
   if (type === "price_high") value = parseFloat(faker.commerce.price().toFixed(2));
   if (type === "price_between") {
-    let min = string.split("#")[2];
-    let max = string.split("#")[3];
-    value = randomCurrencyFromInterval(min, max)
+    if (string.split("#").length === 4) {
+      let min = string.split("#")[2];
+      let max = string.split("#")[3];
+      value = randomCurrencyFromInterval(min, max)
+    } else {
+      toaster.danger(`Random Value Error - price_between`, {id: 'error-toast'})
+    }
   } 
   if (type === "material") value = faker.commerce.material();
   if (type === "product_description") value = faker.commerce.productDescription();
@@ -102,9 +107,13 @@ export const generateRandomValue = (string) => {
   if (type === "date_past") value = faker.date.past();
   if (type === "date_recent") value = faker.date.recent();
   if (type.includes("date_between") ) {
-    let start = string.split("#")[2];
-    let end = string.split("#")[3];
-    value = faker.date.between(start, end);
+    if (string.split("#").length === 4) {
+      let start = string.split("#")[2];
+      let end = string.split("#")[3];
+      value = faker.date.between(start, end);
+    } else {
+      toaster.danger(`Random Value Error - date_between`, {id: 'error-toast'})
+    }
   }
 
   if (value === "") {
