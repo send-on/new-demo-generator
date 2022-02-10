@@ -177,6 +177,8 @@ export const createEventProps = (e, firedEvents) => {
   // set recallNum for single value
   let recallNum = "0"
   let recallCell = "0"
+  let shouldReuseIndex = false; 
+
   if (e[dependencyElement]) {
     recallNum = parseInt(e[dependencyElement])
     recallCell = JSON.parse(e[dependencyElement])
@@ -189,9 +191,17 @@ export const createEventProps = (e, firedEvents) => {
   let propsObject = e.slice(firstProp);
   propsObject = propsObject.filter(function(el) { return el; });
   const properties = {};
+  var randomInt = 0;
   // create properties object, randomize array element selection per iteration, sanitize 
   for (let i = 0; i < propsObject.length; i++) {
     let temp = propsObject[i].split([":"]);
+    // If property key begins with #, reuse the random index from previous property to select position
+    shouldReuseIndex = false; 
+    if (temp[0][0] === "#") {
+      shouldReuseIndex = true;
+      temp[0] = temp[0].substring(1);
+    }
+
     // check for * recall
     if (temp[1].trim()[0] === "*" && (firedEvents[recallNum])) {
       if (firedEvents[recallNum][temp[0]] !== undefined) properties[temp[0]] = firedEvents[recallNum][temp[0]]; 
@@ -222,15 +232,19 @@ export const createEventProps = (e, firedEvents) => {
         // Push in random value i times, pop out element when chosen (block if too many)
         if (tuple[1] > temp[1].length) tuple[1] = temp[1].length;
         for (let i = 0; i < tuple[1]; i++) {
-          let randomInt = getRandomInt(temp[1].length)
+          randomInt = getRandomInt(temp[1].length)
           randomValue.push(sanitize(temp[1][randomInt]));
           temp[1].splice(randomInt,1);
         }
         properties[tuple[0]] = randomValue;
       } else { 
         // randomly choose element in array
-        let randomValue = sanitize(temp[1][getRandomInt(temp[1].length)]);
-        properties[temp[0]] = randomValue;
+        if (shouldReuseIndex && temp[1][randomInt]) {
+          properties[temp[0]] = sanitize(temp[1][randomInt]);
+        } else {
+          randomInt = getRandomInt(temp[1].length)
+          properties[temp[0]] = sanitize(temp[1][randomInt]);
+        }
       }
     }
   }

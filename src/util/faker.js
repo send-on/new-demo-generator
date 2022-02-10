@@ -1,8 +1,7 @@
 const faker = require('faker');
-// const { getRandomInt } = require('./common');
 
 export const generateUsers = (numOfUsers) => {
-  let users = []
+  let users = [];
   for (let id=1; id <= numOfUsers; id++) {
 
     let firstName = faker.name.firstName();
@@ -18,8 +17,17 @@ export const generateUsers = (numOfUsers) => {
         "user_id": user_id
     });
   }
-
   return users 
+}
+
+export const generateGroups = (numofGroups=100) => {
+  let groups = [];
+  for (let i = 0; i < numofGroups; i++) {
+    let companyName = faker.company.companyName();
+    groups.push({
+      "company_name": companyName,
+    })
+  }
 }
 
 const formatter = new Intl.NumberFormat('en-US', {
@@ -30,6 +38,10 @@ const formatter = new Intl.NumberFormat('en-US', {
   //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
   //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
 });
+
+const randomCurrencyFromInterval = (min, max) => { // min and max included 
+  return parseFloat((Math.random() * (parseFloat(max) - parseFloat(min)) + parseFloat(min)).toFixed(2))
+}
 
 export const generateRandomValue = (string) => {
   let value = "";
@@ -68,8 +80,13 @@ export const generateRandomValue = (string) => {
   // Commerce
   if (type === "color") value = faker.commerce.color();
   if (type === "department") value = faker.commerce.department();
-  if (type === "price") value = parseFloat(formatter.format(faker.commerce.price()/4.00).substring(1));
-  if (type === "price_high") value = parseFloat(formatter.format(faker.commerce.price()).substring(1));
+  if (type === "price") value = parseFloat(faker.commerce.price()/4.00.toFixed(2));
+  if (type === "price_high") value = parseFloat(faker.commerce.price().toFixed(2));
+  if (type === "price_between") {
+    let min = string.split("#")[2];
+    let max = string.split("#")[3];
+    value = randomCurrencyFromInterval(min, max)
+  } 
   if (type === "material") value = faker.commerce.material();
   if (type === "product_description") value = faker.commerce.productDescription();
 
