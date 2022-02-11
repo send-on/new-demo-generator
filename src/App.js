@@ -50,7 +50,7 @@ const launcher = async (
   // reset ajs on new user
   setStatus("Working...");
   setIsLoading(true);
-  if (e_i < 1 && !isNode) {
+  if (e_i < 3 && !isNode) {
     analytics.reset();
     analytics.setAnonymousId(userList[u_i].anonymousId);
   }
