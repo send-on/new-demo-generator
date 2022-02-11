@@ -136,7 +136,7 @@ const launcher = async (
         eventList, 
         userList, 
         u_i+1, 
-        0,
+        2,
         {0:true}, 
         setIsLoading, 
         analytics, 
@@ -153,7 +153,7 @@ const launcher = async (
         eventList, 
         userList, 
         u_i+1, 
-        0,
+        2,
         {0:true}, 
         setIsLoading, 
         analytics, 
@@ -384,7 +384,7 @@ const App = () => {
                     eventList, // array of events
                     userList, // array of all users
                     0, // user position index
-                    0, // event position index
+                    2, // event position index
                     {"0":true},  // firedEvents
                     setIsLoading, 
                     (isNode) ? analyticsNode : analyticsJS, 
