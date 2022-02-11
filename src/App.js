@@ -50,7 +50,7 @@ const launcher = async (
   // reset ajs on new user
   setStatus("Working...");
   setIsLoading(true);
-  if (e_i < 3 && !isNode) {
+  if (e_i < 1 && !isNode) {
     analytics.reset();
     analytics.setAnonymousId(userList[u_i].anonymousId);
   }
@@ -136,7 +136,7 @@ const launcher = async (
         eventList, 
         userList, 
         u_i+1, 
-        2,
+        0,
         {0:true}, 
         setIsLoading, 
         analytics, 
@@ -153,7 +153,7 @@ const launcher = async (
         eventList, 
         userList, 
         u_i+1, 
-        2,
+        0,
         {0:true}, 
         setIsLoading, 
         analytics, 
@@ -236,11 +236,11 @@ const App = () => {
     if (userList.length > 0) { 
       setUserButtonStatus("Click to Save Changes")
       setUserList([])
-      toaster.success("User list has been reset", {id: 'single-toast'})
+      toaster.success("User list has been reset", {id: 'reset-toast'})
     } else {
       setUserButtonStatus("Click to Save Changes ")
       setUserList(generateUsers(numOfUsers));
-      toaster.success("Successfully generated user list", {id: 'single-toast'})
+      toaster.success("User list successfully generated", {description: "If you modify user properties, remember to hit save.",id: 'user-toast'})
     }    
     return
   }
@@ -253,30 +253,38 @@ const App = () => {
         numOfUsers: userList.length
       }
     });
-
-    let temp = userList;
-    for (let i = 0; i < temp.length; i++) {
-      temp[i].anonymousId = generateRandomValue("##");
-    }
-    if (userButtonStatus === "Click to Save Changes ") {
-      setUserButtonStatus("Click to Save Changes")
+    if (userList.length > 0) {
+      let temp = userList;
+      for (let i = 0; i < temp.length; i++) {
+        temp[i].anonymousId = generateRandomValue("##");
+      }
+      // Random bug fix
+      (userButtonStatus === "Click to Save Changes ") 
+      ? setUserButtonStatus("Click to Save Changes")
+      : setUserButtonStatus("Click to Save Changes ")
+      setUserList(temp);
+      toaster.success("Anonymous IDs have been regenerated", {description: "New anonymousId(s) have been saved", id: 'user-toast'})
     } else {
-      setUserButtonStatus("Click to Save Changes ")
+      toaster.danger("No users entered", {description: "Click generate users or paste custom", id: 'user-toast'})
     }
-    setUserList(temp);
-    toaster.success("Anonymous IDs have been regenerated", {id: 'single-toast'})
+
+    
   }
 
-  const onSubmit = (e) => {
+  const onSubmit = async(e) => {
     e.preventDefault();
     analyticsSecondary.track({
       anonymousId: generateSessionId(),
       event: 'Saved User List'
     });
     try {
-      setUserList(JSON.parse(e.target.userList.value));
-      toaster.success("Changes to user list saved", {id: 'single-toast'})
-      setUserButtonStatus("Click to Save Changes")
+      if (userList.length > 0) {
+        setUserList(JSON.parse(e.target.userList.value));
+        toaster.success("User list has been saved", {id: 'user-toast'})
+        setUserButtonStatus("Click to Save Changes")
+      } else {
+        toaster.danger("No users entered", {description: "Click generate users or paste custom", id: 'user-toast'})
+      }
     }
     catch(e) {
       toaster.danger(e.message, {id: 'single-toast'});
@@ -287,7 +295,6 @@ const App = () => {
     }
   }
   
-
   return (
     <div className="App">
       <div className="navigation-header">
@@ -350,7 +357,7 @@ const App = () => {
             <div className="header">Fire Events (Turn Off Adblock)</div>
             <div className="note">Note: Toggle between AJS and Node Analytics (faster).</div>
             <div >
-              <Button style={{marginRight: "2em"}} onClick={()=>setIsNode(!isNode)} >Analytics Mode: {(isNode ? "Node" : "AJS")}</Button> 
+              <Button width={"150px"} style={{marginRight: "2em"}} onClick={()=>setIsNode(!isNode)} >Analytics Mode: {(isNode ? "Node" : "AJS")}</Button> 
               <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 4ms)" onChange={e => setEventTimeout(e.target.value)} /> 
             </div> 
             
@@ -377,7 +384,7 @@ const App = () => {
                     eventList, // array of events
                     userList, // array of all users
                     0, // user position index
-                    2, // event position index
+                    0, // event position index
                     {"0":true},  // firedEvents
                     setIsLoading, 
                     (isNode) ? analyticsNode : analyticsJS, 
@@ -395,7 +402,7 @@ const App = () => {
               {status}
             </Button> 
             :
-            <Button onClick={()=>toaster.warning(`Generate users or load CSV before firing. ${isLoading}`, {id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
+            <Button onClick={()=>toaster.warning(`Event Generator not ready`, {description: "Generate users or load CSV before firing", id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
             }  
             
             <div className="note"><b>{counter}</b> Events Fired</div> 

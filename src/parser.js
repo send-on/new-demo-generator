@@ -6,6 +6,7 @@ export default ({setEventList, setIsLoading, setCsvLoaded, setStatus}) => {
     setIsLoading(false)
     setCsvLoaded(true)
     let arr = data.map(obj => obj.data)
+    arr.splice(0,2);
     setEventList(arr)
     setStatus("FIRE EVENTS")
   };

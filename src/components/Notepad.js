@@ -29,7 +29,7 @@ function Notepad({ analyticsSecondary }) {
       }
       setKeys([...keys])
     }
-    toaster.success("Write Key Deleted - Hit Save to Save", {id: 'single-toast'})
+    toaster.success("Write Key Deleted", {description: "Remember to hit save to save changes",id: 'single-toast'})
   }
 
   const addKey = () => {
@@ -77,12 +77,13 @@ function Notepad({ analyticsSecondary }) {
             justifyContent="center"
           >
             <div>
+              
               {keys.map((key) => {
                 return (
                   <div key={key.index} style={{"margin": "1em", "display": "flex"}}>
                     <TextInput width={"150px"} style={{marginRight: "1em"}} onChange={handleChange} type="text" name={key.index} placeholder="Source Name" defaultValue={key.name ?? "Source Name"} />
                     <TextInput width={"300px"} onChange={handleChange} type="text" name={key.index} placeholder="Write Key" defaultValue={key.value ?? "Write Key"} />
-                    <IconButton name={key.index} style={{"marginTop": "8px", "marginLeft": "1em"}} icon={TrashIcon} intent="danger" onClick={()=>deleteKey(key.index)} />
+                    {(keys.length > 1) ? <IconButton name={key.index} style={{"marginTop": "8px", "marginLeft": "1em"}} icon={TrashIcon} intent="danger" onClick={()=>deleteKey(key.index)} /> : <div></div>}
                   </div>
                 )
               })}
