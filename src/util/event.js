@@ -86,6 +86,11 @@ export const createTimestamp = (e, firedEvents) => {
     recallNum = parseInt(e[dependencyElement])
     recallCell = JSON.parse(e[dependencyElement])
   }  
+  if (e[dayElement].trim()[0] === "#") {
+    // FIX LATER: bad practice to mutate
+    e[dayElement] = e[dayElement].substring(1);
+  }
+  // Check for multiple dependencies and set recallNum to event with the latest timestamp
   if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
   // auto mode: blank days ago, blank randomizer, dependent event = 0.5 to 1 hour timestamp spacing
   if ((parseInt(e[dependencyElement]) || Array.isArray(recallCell)) && !e[dayElement] && !e[randomizeElement]) {
@@ -95,12 +100,13 @@ export const createTimestamp = (e, firedEvents) => {
     timestamp = moment(timestampUnix, "X").format();
     return [timestamp, timestampUnix];
   }
-
-  if (e[dayElement].trim()[0] === ("#")) {
+  // Automatically key off of dependent event's timestamp
+  if (parseInt(recallNum) > 0 && firedEvents[recallNum]["timestampUnix"]) {
     timestampUnix = firedEvents[recallNum]["timestampUnix"];
-    timestampUnix = timestampUnix + (parseFloat(e[dayElement].substring(1)) * unixDay);
+    timestampUnix = timestampUnix + (parseFloat(e[dayElement]) * unixDay);
     if (e[randomizeElement]) timestampUnix = timestampUnix + (Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay)));
   } else {
+    // Absolute timestamps
     timestampUnix = moment().unix();
     if (e[dayElement]) timestampUnix = timestampUnix - e[dayElement]*unixDay;
     if (e[randomizeElement]) timestampUnix = timestampUnix - (Math.floor((Math.random() * (parseFloat(e[randomizeElement]))*unixDay)));
