@@ -67,7 +67,12 @@ const launcher = async (
       let properties = createEventProps(eventList[e_i], firedEvents);
       let contextObj = createEventContext(properties); 
       let propertiesWithObjects = createObjectProperty(properties);
+
+      // If user is identified, set event property to true
+      // This is used to determine if userId should be used in node analytics
       if (eventList[e_i][1] === "identify") firedEvents["identify"] = true
+
+      // Generate a random IP for node analytics
       if (!firedEvents["ip"]) firedEvents['ip'] = generateRandomValue("#ip")
 
       counter++;
@@ -94,7 +99,6 @@ const launcher = async (
   if (u_i%10 === 0 && !isNode) setUserCounter(userList.length - u_i)
 
   // next event
-  
   if (eventList[e_i+1]) {    
     if (isNode) {
       launcher(
