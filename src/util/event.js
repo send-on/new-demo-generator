@@ -43,13 +43,21 @@ const mergeDeep = (target, ...sources) => {
 }
 
 export const checkIsArrayAndHasEvent = (recallArr, firedEvents) => {
-  let isArrayAndHasEvent = false
+  // timeStampTuple = [eventId, event timestamp]
+  let timeStampTuple = []
   if (Array.isArray(recallArr)) {
     recallArr.forEach(e => {
-      if (firedEvents[e]) isArrayAndHasEvent = e
+      if (firedEvents[e]) {
+        if (timeStampTuple.length === 0) {
+          timeStampTuple = [e, firedEvents[e]['timestampUnix']]
+        } else if (firedEvents[e]['timestampUnix'] > timeStampTuple[1]) {
+          timeStampTuple = [e, firedEvents[e]['timestampUnix']]
+        }
+      }
     })
   } 
-  return isArrayAndHasEvent
+  // return ID of the most recent timestamp
+  return timeStampTuple[0] ?? false
 }
 
 export const removeMissingEvents = (newRecallCell, firedEvents) => {
