@@ -5,10 +5,16 @@ import {
   dependencyElement,
   dayElement,
   unixDay, 
-  randomizeElement
+  randomizeElement,
+  writeKeyElement
 } from '../constants/config.js';
 import {  generateRandomValue } from './faker';
 import moment from 'moment';
+import Analytics from "@segment/analytics.js-core/build/analytics";
+import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
+
+const AnalyticsNode = require('analytics-node');
+const analyticsJSOptional = new Analytics();
 
 /**
  * Simple object check.
@@ -280,25 +286,44 @@ export const shouldDropEvent = (dropoff) => {
 
 
 export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) => {
+  const integrationSettings = {
+    "Segment.io": {
+      apiKey: eventList[e_i][writeKeyElement] || 'fallback',
+      retryQueue: true,
+      addBundledMetadata: true
+    }
+  };
+  if (eventList[e_i][writeKeyElement]) {
+    analyticsJSOptional.use(SegmentIntegration);
+    analyticsJSOptional.initialize(integrationSettings);
+  }
+
   if (eventList[e_i][1] === "identify") {
     Object.assign(fireProperties, userList[u_i]);
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
-    analytics.identify(userList[u_i].user_id, fireProperties, context);
+    (eventList[e_i][writeKeyElement])
+    ? analyticsJSOptional.identify(userList[u_i].user_id, fireProperties, context)
+    : analytics.identify(userList[u_i].user_id, fireProperties, context);
   }
   // Page
   if (eventList[e_i][1] === "page") {
-    analytics.page(eventList[e_i][2], fireProperties, context);
+    (eventList[e_i][writeKeyElement])
+    ? analyticsJSOptional.page(eventList[e_i][2], fireProperties, context)
+    : analytics.page(eventList[e_i][2], fireProperties, context);
   }
 
   // Track
   if (eventList[e_i][1] === "track") {
-    analytics.track(eventList[e_i][2], fireProperties, context);
+    (eventList[e_i][writeKeyElement])
+    ? analyticsJSOptional.track(eventList[e_i][2], fireProperties, context)
+    : analytics.track(eventList[e_i][2], fireProperties, context) 
+    
   }
 
 }
 
-export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) => {
+export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) => {
   let nodeContext = {};
   Object.assign(nodeContext, context);
   delete nodeContext.timestamp;
@@ -311,32 +336,38 @@ export const fireNodeEvents = (fireProperties, eventList, e_i, userList, u_i, co
     context: nodeContext,
     timestamp: new Date(context.timestamp)
   }
+  // Instantiate optional analytics library if optional writekey is detected
+  // if (eventList[e_i][writeKeyElement]) {
+    console.log(eventList[e_i][writeKeyElement]);
+  const analyticsNodeOptional = new AnalyticsNode(eventList[e_i][writeKeyElement] || 'fallback');
+    
 
   if (eventList[e_i][1] === "identify") {
     Object.assign(fireProperties, userList[u_i])    
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
     Object.assign(payload, {traits: fireProperties})    
-    analytics.identify(payload);
+    (eventList[e_i][writeKeyElement]) 
+    ? analyticsNodeOptional.identify(payload)
+    : analytics.identify(payload)
   }
 
   if (eventList[e_i][1] === "page") {
     Object.assign(payload, {properties: fireProperties})    
     if (!firedEvents['identify']) delete payload.userId;
-    payload.name = eventList[e_i][2]
-    analytics.page({
-      ...payload,
-      event: "Page Viewed"
-    });
+    payload.name = eventList[e_i][2];
+
+    (eventList[e_i][writeKeyElement]) 
+    ? analyticsNodeOptional.page({...payload, event: "Page Viewed"})
+    : analytics.page({...payload, event: "Page Viewed"});
   }
 
   if (eventList[e_i][1] === "track") {
     Object.assign(payload, {properties: fireProperties})    
     if (!firedEvents['identify']) delete payload.userId;
-    analytics.track({
-      ...payload,
-      event: eventList[e_i][2]
-    });
+    (eventList[e_i][writeKeyElement]) 
+    ? analyticsNodeOptional.track({...payload, event: eventList[e_i][2]})
+    : analytics.track({...payload, event: eventList[e_i][2]})
   }
   
 }
