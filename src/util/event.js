@@ -317,8 +317,7 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
   if (eventList[e_i][1] === "track") {
     (eventList[e_i][writeKeyElement])
     ? analyticsJSOptional.track(eventList[e_i][2], fireProperties, context)
-    : analytics.track(eventList[e_i][2], fireProperties, context) 
-    
+    : analytics.track(eventList[e_i][2], fireProperties, context)     
   }
 
 }
@@ -337,19 +336,25 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     timestamp: new Date(context.timestamp)
   }
   // Instantiate optional analytics library if optional writekey is detected
-  // if (eventList[e_i][writeKeyElement]) {
-    console.log(eventList[e_i][writeKeyElement]);
   const analyticsNodeOptional = new AnalyticsNode(eventList[e_i][writeKeyElement] || 'fallback');
     
 
   if (eventList[e_i][1] === "identify") {
-    Object.assign(fireProperties, userList[u_i])    
+    Object.assign(fireProperties, userList[u_i]);  
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
     Object.assign(payload, {traits: fireProperties})    
-    (eventList[e_i][writeKeyElement]) 
-    ? analyticsNodeOptional.identify(payload)
-    : analytics.identify(payload)
+
+    // Works
+    if (eventList[e_i][writeKeyElement]) {
+      analyticsNodeOptional.identify(payload)
+    } else {
+      analytics.identify(payload)
+    }
+    
+    // (eventList[e_i][writeKeyElement])
+    // ? analyticsNodeOptional.identify(payload)
+    // : analytics.identify(payload) 
   }
 
   if (eventList[e_i][1] === "page") {
@@ -357,17 +362,31 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     if (!firedEvents['identify']) delete payload.userId;
     payload.name = eventList[e_i][2];
 
-    (eventList[e_i][writeKeyElement]) 
-    ? analyticsNodeOptional.page({...payload, event: "Page Viewed"})
-    : analytics.page({...payload, event: "Page Viewed"});
+    if (eventList[e_i][writeKeyElement]) {
+      analyticsNodeOptional.page({...payload, event: "Page Viewed"})
+    } else {
+      analytics.page({...payload, event: "Page Viewed"});
+    }
+
+    // (eventList[e_i][writeKeyElement]) 
+    // ? analyticsNodeOptional.page({...payload, event: "Page Viewed"})
+    // : analytics.page({...payload, event: "Page Viewed"});
+
   }
 
   if (eventList[e_i][1] === "track") {
     Object.assign(payload, {properties: fireProperties})    
     if (!firedEvents['identify']) delete payload.userId;
-    (eventList[e_i][writeKeyElement]) 
-    ? analyticsNodeOptional.track({...payload, event: eventList[e_i][2]})
-    : analytics.track({...payload, event: eventList[e_i][2]})
+
+    if (eventList[e_i][writeKeyElement]) {
+      analyticsNodeOptional.track({...payload, event: eventList[e_i][2]})
+    } else {
+      analytics.track({...payload, event: eventList[e_i][2]})
+    }
+
+    // (eventList[e_i][writeKeyElement]) 
+    // ? analyticsNodeOptional.track({...payload, event: eventList[e_i][2]})
+    // : analytics.track({...payload, event: eventList[e_i][2]})
   }
   
 }
