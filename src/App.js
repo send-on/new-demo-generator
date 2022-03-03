@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
@@ -26,11 +26,11 @@ import {
 } from './util/event'
 import UserForm from './components/UserForm';
 import Notepad from './components/Notepad';
+const AnalyticsNode = require('analytics-node');
 
 // Side tracking for product improvements
-const AnalyticsNode = require('analytics-node');
-var analyticsSecondary = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
-var globalCounter = 0;
+const analyticsSecondary = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
+
 
 const launcher = async (
   eventList, // data schema
@@ -45,7 +45,9 @@ const launcher = async (
   setUserCounter, 
   setStatus,
   isNode,
-  eventTimeout=1
+  eventTimeout=1, 
+  analyticsJSOptional,
+  analyticsNodeOptional,
   ) => {
   // reset ajs on new user
   setStatus("Working...");
@@ -83,11 +85,11 @@ const launcher = async (
       
       let fireProperties = removeEventContext(properties); // remove properties for fire object
       Object.assign(fireProperties, propertiesWithObjects);
-      
+
       (isNode) ? 
-      await fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) // Bulk Mode
+      fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsNodeOptional) // Bulk Mode
       : 
-      await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) // AJS mode
+      fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsJSOptional) // AJS mode
       
       properties.timestampUnix = timestampArr[1]
       
@@ -114,7 +116,9 @@ const launcher = async (
         setUserCounter, 
         setStatus,
         isNode,
-        eventTimeout
+        eventTimeout, 
+        analyticsJSOptional,
+        analyticsNodeOptional,
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -131,7 +135,9 @@ const launcher = async (
         setUserCounter, 
         setStatus,
         isNode,
-        eventTimeout
+        eventTimeout, 
+        analyticsJSOptional,
+        analyticsNodeOptional,
         ), eventTimeout ?? 4);
     }
   } else if (userList[u_i+1]) {
@@ -149,7 +155,9 @@ const launcher = async (
         setUserCounter, 
         setStatus,
         isNode, 
-        eventTimeout
+        eventTimeout, 
+        analyticsJSOptional,
+        analyticsNodeOptional,
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -166,7 +174,9 @@ const launcher = async (
         setUserCounter, 
         setStatus,
         isNode, 
-        eventTimeout
+        eventTimeout,
+        analyticsJSOptional,
+        analyticsNodeOptional,
         ), eventTimeout ?? 1);
     }
   } else {
@@ -204,8 +214,11 @@ const App = () => {
   const [isNode, setIsNode] = useState(true);
   const [eventTimeout, setEventTimeout] = useState(4)
 
+  // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
-  var analyticsNode = new AnalyticsNode(writeKey || "placeholder");
+  const analyticsNode = new AnalyticsNode(writeKey || "placeholder");
+  const analyticsJSOptional = new Analytics();
+  const analyticsNodeOptional = new AnalyticsNode(writeKey || "placeholder");
 
   const integrationSettings = {
     "Segment.io": {
@@ -214,20 +227,23 @@ const App = () => {
       addBundledMetadata: true
     }
   };
+
+  // Initialize JS clients
   analyticsJS.use(SegmentIntegration);
   analyticsJS.initialize(integrationSettings);
+  analyticsJSOptional.use(SegmentIntegration);
+  analyticsJSOptional.initialize(integrationSettings);
 
-  // Side tracking for product improvements
-  if (globalCounter === 0) {
+  useEffect(() => {
+    // Side tracking for product improvements
     analyticsJS.reset();
     analyticsJS.setAnonymousId(generateSessionId());
     analyticsJS.identify({
       userAgent: window.navigator.userAgent,
       path: document.location.href
     })
-    globalCounter++;
-  }
-  
+  }, [])
+
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
     analyticsSecondary.track({
       anonymousId: generateSessionId(),
@@ -397,7 +413,9 @@ const App = () => {
                     setUserCounter, 
                     setStatus,
                     isNode,
-                    eventTimeout
+                    eventTimeout, 
+                    analyticsJSOptional,
+                    analyticsNodeOptional
                     )
                   }
                 }

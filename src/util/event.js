@@ -10,11 +10,6 @@ import {
 } from '../constants/config.js';
 import {  generateRandomValue } from './faker';
 import moment from 'moment';
-import Analytics from "@segment/analytics.js-core/build/analytics";
-import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
-
-const AnalyticsNode = require('analytics-node');
-const analyticsJSOptional = new Analytics();
 
 /**
  * Simple object check.
@@ -285,17 +280,9 @@ export const shouldDropEvent = (dropoff) => {
 }
 
 
-export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp) => {
-  const integrationSettings = {
-    "Segment.io": {
-      apiKey: eventList[e_i][writeKeyElement] || 'fallback',
-      retryQueue: true,
-      addBundledMetadata: true
-    }
-  };
+export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsJSOptional) => {
   if (eventList[e_i][writeKeyElement]) {
-    analyticsJSOptional.use(SegmentIntegration);
-    analyticsJSOptional.initialize(integrationSettings);
+    analyticsJSOptional._integrations['Segment.io'].options.apiKey = eventList[e_i][writeKeyElement]
   }
 
   if (eventList[e_i][1] === "identify") {
@@ -306,14 +293,14 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     ? analyticsJSOptional.identify(userList[u_i].user_id, fireProperties, context)
     : analytics.identify(userList[u_i].user_id, fireProperties, context);
   }
-  // Page
+  
   if (eventList[e_i][1] === "page") {
     (eventList[e_i][writeKeyElement])
     ? analyticsJSOptional.page(eventList[e_i][2], fireProperties, context)
     : analytics.page(eventList[e_i][2], fireProperties, context);
   }
 
-  // Track
+  
   if (eventList[e_i][1] === "track") {
     (eventList[e_i][writeKeyElement])
     ? analyticsJSOptional.track(eventList[e_i][2], fireProperties, context)
@@ -322,7 +309,7 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
 
 }
 
-export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents) => {
+export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsNodeOptional) => {
   let nodeContext = {};
   Object.assign(nodeContext, context);
   delete nodeContext.timestamp;
@@ -335,17 +322,17 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     context: nodeContext,
     timestamp: new Date(context.timestamp)
   }
-  // Instantiate optional analytics library if optional writekey is detected
-  const analyticsNodeOptional = new AnalyticsNode(eventList[e_i][writeKeyElement] || 'fallback');
+  // Set writeKey for optional node analytics client
+  if (eventList[e_i][writeKeyElement]) {
+    analyticsNodeOptional.writeKey = eventList[e_i][writeKeyElement]
+  }
     
-
   if (eventList[e_i][1] === "identify") {
     Object.assign(fireProperties, userList[u_i]);  
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
     Object.assign(payload, {traits: fireProperties})    
 
-    // Works
     if (eventList[e_i][writeKeyElement]) {
       analyticsNodeOptional.identify(payload)
     } else {
