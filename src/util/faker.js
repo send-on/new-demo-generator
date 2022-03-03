@@ -101,7 +101,7 @@ export const generateRandomValue = (string) => {
   if (type === "gender") value = faker.name.gender();
   if (type === "title") value = faker.name.title();
   if (type === "job_type") value = faker.name.jobType();
-  if (type === "phone") value = faker.phone.phoneNumber().substring(0,12);
+  if (type === "phone") value = faker.phone.phoneNumber().substring(0,14);
 
   // dates
   if (type === "date_past") value = faker.date.past();
