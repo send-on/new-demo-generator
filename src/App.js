@@ -87,9 +87,9 @@ const launcher = async (
       Object.assign(fireProperties, propertiesWithObjects);
 
       (isNode) ? 
-      fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsNodeOptional) // Bulk Mode
+      await fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsNodeOptional) // Bulk Mode
       : 
-      fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsJSOptional) // AJS mode
+      await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsJSOptional) // AJS mode
       
       properties.timestampUnix = timestampArr[1]
       
