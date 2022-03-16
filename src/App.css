@@ -5,6 +5,8 @@
   line-height: 24px;
   color: #101840;
   margin-top: 1em;
+  display: flex;
+  flex-direction: columns;
 }
 
 a:link {

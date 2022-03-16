@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import './App.css';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
-import CSVReader from './components/Parser';
-import { toaster, Button, TextInput } from 'evergreen-ui'
+import CSVReader from './components/CSVReader';
+import { toaster, Button, TextInput, Tooltip, InfoSignIcon } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import { generateSessionId } from './util/common.js';
 
@@ -11,7 +11,8 @@ import {
   firstEvent,
   dependencyElement,
   dropoffElement,
-  version
+  defaultEventTimeout,
+  usageTrackingWriteKey
 } from './constants/config'
 import {
   createEventProps,
@@ -24,13 +25,14 @@ import {
   fireNodeEvents,
   fireJSEvents
 } from './util/event'
-import UserForm from './components/UserForm';
-import Notepad from './components/Notepad';
+
+import GenerateUsers from './components/GenerateUsers';
+import Source from './components/Source';
+import Header from './components/Header';
 const AnalyticsNode = require('analytics-node');
 
 // Side tracking for product improvements
-const analyticsSecondary = new AnalyticsNode('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
-
+const analyticsSecondary = new AnalyticsNode(usageTrackingWriteKey);
 
 const launcher = async (
   eventList, // data schema
@@ -43,15 +45,13 @@ const launcher = async (
   setCounter, 
   counter, 
   setUserCounter, 
-  setStatus,
   isNode,
   eventTimeout=1, 
-  analyticsJSOptional,
-  analyticsNodeOptional,
+  analyticsOptional
   ) => {
   // reset ajs on new user
-  setStatus("Working...");
   setIsLoading(true);
+  // reset traits in localStorage on each user for ajs
   if (e_i < 3 && !isNode) {
     analytics.reset();
     analytics.setAnonymousId(userList[u_i].anonymousId);
@@ -64,12 +64,11 @@ const launcher = async (
       eventList[e_i][dependencyElement] = "0";
     } 
     if (checkDependency(eventList[e_i][dependencyElement], firedEvents) || e_i === firstEvent) {
-      let timestampArr = createTimestamp(eventList[e_i], firedEvents);
-      let timestamp = timestampArr[0]
-      let properties = createEventProps(eventList[e_i], firedEvents);
-      let contextObj = createEventContext(properties); 
-      let propertiesWithObjects = createObjectProperty(properties);
-
+      let timestampArr = createTimestamp(eventList[e_i], firedEvents); // Create timestamp Tuple
+      let timestamp = timestampArr[0] // parse out timestamp used in event
+      let properties = createEventProps(eventList[e_i], firedEvents); // create event properties
+      let contextObj = createEventContext(properties);  // create event context 
+      let propertiesWithObjects = createObjectProperty(properties); // Handle nested objects 
       // If user is identified, set event property to true
       // This is used to determine if userId should be used in node analytics
       if (eventList[e_i][1] === "identify") firedEvents["identify"] = true
@@ -83,16 +82,15 @@ const launcher = async (
         ...contextObj
       };
       
-      let fireProperties = removeEventContext(properties); // remove properties for fire object
-      Object.assign(fireProperties, propertiesWithObjects);
+      let fireProperties = removeEventContext(properties); // remove properties to fire object
+      Object.assign(fireProperties, propertiesWithObjects); // Handle nested objects
 
       (isNode) ? 
-      await fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsNodeOptional) // Bulk Mode
+      await fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional) // Bulk Node Mode
       : 
-      await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsJSOptional) // AJS mode
+      await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional) // AJS mode
       
-      properties.timestampUnix = timestampArr[1]
-      
+      properties.timestampUnix = timestampArr[1] // set unix time stamp before saving to memmory
       firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
     }
   }
@@ -114,11 +112,9 @@ const launcher = async (
         setCounter, 
         counter, 
         setUserCounter, 
-        setStatus,
         isNode,
         eventTimeout, 
-        analyticsJSOptional,
-        analyticsNodeOptional,
+        analyticsOptional
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -133,12 +129,10 @@ const launcher = async (
         setCounter, 
         counter, 
         setUserCounter, 
-        setStatus,
         isNode,
         eventTimeout, 
-        analyticsJSOptional,
-        analyticsNodeOptional,
-        ), eventTimeout ?? 4);
+        analyticsOptional
+        ), eventTimeout ?? defaultEventTimeout);
     }
   } else if (userList[u_i+1]) {
     if (isNode) {
@@ -153,11 +147,9 @@ const launcher = async (
         setCounter, 
         counter, 
         setUserCounter, 
-        setStatus,
         isNode, 
         eventTimeout, 
-        analyticsJSOptional,
-        analyticsNodeOptional,
+        analyticsOptional,
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -172,19 +164,19 @@ const launcher = async (
         setCounter, 
         counter, 
         setUserCounter, 
-        setStatus,
         isNode, 
         eventTimeout,
-        analyticsJSOptional,
-        analyticsNodeOptional,
-        ), eventTimeout ?? 1);
+        analyticsOptional,
+        ), eventTimeout ?? defaultEventTimeout);
     }
   } else {
     setCounter(counter);
     setUserCounter(userList.length-1- u_i);
     setIsLoading(false);
-    setStatus("FIRE EVENTS");
-    toaster.success(`All events fired!`, {id: 'single-toast'})
+    isNode 
+    ? toaster.success("All events fired! ", {description: "Keep window open to allow node client to flush remaining events",id: 'single-toast'})
+    : toaster.success(`All events fired!`, {id: 'single-toast'})
+    
     analyticsSecondary.track({
       anonymousId: generateSessionId(),
       event: 'End Fired Events',
@@ -200,25 +192,23 @@ const launcher = async (
 }
 
 const App = () => {
-  // setEvent instead of setCounter, setUserCounter
-  const [eventList, setEventList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [csvLoaded, setCsvLoaded] = useState(false);
-  const [writeKey, setWriteKey] = useState('CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr');
-  const [counter, setCounter] = useState(0);
-  const [numOfUsers, setNumOfUsers] = useState(1);
-  const [userList, setUserList] = useState([]);
-  const [userCounter, setUserCounter] = useState(0);
-  const [status, setStatus] = useState("FIRE EVENTS");
+  const [eventList, setEventList] = useState([]); // Event Schema
+  const [isLoading, setIsLoading] = useState(false); // Firing status
+  const [csvLoaded, setCsvLoaded] = useState(false); // CSV loaded status
+  const [writeKey, setWriteKey] = useState(usageTrackingWriteKey); // Write key - Default is usage tracking
+  const [counter, setCounter] = useState(0); // Event counter
+  const [numOfUsers, setNumOfUsers] = useState(1); // Number of users set
+  const [userList, setUserList] = useState([]); // Generated User List
+  const [userCounter, setUserCounter] = useState(0); // User Counter
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
-  const [isNode, setIsNode] = useState(true);
-  const [eventTimeout, setEventTimeout] = useState(4)
+  const [isNode, setIsNode] = useState(true); // Node Analytics vs AJS
+  const [eventTimeout, setEventTimeout] = useState(defaultEventTimeout) // Firing speed
 
   // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
-  const analyticsNode = new AnalyticsNode(writeKey || "placeholder");
+  const analyticsNode = new AnalyticsNode(writeKey ?? "placeholder");
   const analyticsJSOptional = new Analytics();
-  const analyticsNodeOptional = new AnalyticsNode(writeKey || "placeholder");
+  const analyticsNodeOptional = new AnalyticsNode(writeKey ?? "placeholder");
 
   const integrationSettings = {
     "Segment.io": {
@@ -242,6 +232,7 @@ const App = () => {
       userAgent: window.navigator.userAgent,
       path: document.location.href
     })
+    setWriteKey('placeholder');
   }, [])
 
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
@@ -258,7 +249,7 @@ const App = () => {
       setUserList([])
       toaster.success("User list has been reset", {id: 'reset-toast'})
     } else {
-      setUserButtonStatus("Click to Save Changes ")
+      setUserButtonStatus("Click to Save Changes ") // The space is required, do not remove.
       setUserList(generateUsers(numOfUsers));
       toaster.success("User list successfully generated", {description: "If you modify user properties, remember to hit save.",id: 'user-toast'})
     }    
@@ -278,7 +269,7 @@ const App = () => {
       for (let i = 0; i < temp.length; i++) {
         temp[i].anonymousId = generateRandomValue("##");
       }
-      // Random bug fix
+      // Random bug fix - do not change
       (userButtonStatus === "Click to Save Changes ") 
       ? setUserButtonStatus("Click to Save Changes")
       : setUserButtonStatus("Click to Save Changes ")
@@ -287,8 +278,6 @@ const App = () => {
     } else {
       toaster.danger("No users entered", {description: "Click generate users or paste custom", id: 'user-toast'})
     }
-
-    
   }
 
   const onSubmit = async(e) => {
@@ -317,70 +306,54 @@ const App = () => {
   
   return (
     <div className="App">
-      <div className="navigation-header">
-        <a href="/">
-          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGggZD0iTTMuMjYzIDE1LjU1N2MtLjYwNSAwLTEuMDk2LjUwNy0xLjA5NiAxLjEzMiAwIC42MjUuNDkgMS4xMzIgMS4wOTYgMS4xMzIuNjA1IDAgMS4wOTYtLjUwNyAxLjA5Ni0xLjEzMiAwLS42MjUtLjQ5LTEuMTMyLTEuMDk2LTEuMTMyek0xNS4zNDggMS44NzRjLS42MDUgMC0xLjA5Ni41MDctMS4wOTYgMS4xMzIgMCAuNjI1LjQ5IDEuMTMyIDEuMDk2IDEuMTMyLjYwNSAwIDEuMDk2LS41MDcgMS4wOTYtMS4xMzIgMC0uNjIzLS40ODgtMS4xMy0xLjA5Mi0xLjEzMmgtLjAwNHptLTcuOTMzIDQuNThWNy44NGMwIC4yMDguMTY0LjM3Ny4zNjYuMzc3aDEwLjg1NWMuMi0uMDAyLjM2MS0uMTcuMzYxLS4zNzdWNi40NTRhLjM3MS4zNzEgMCAwIDAtLjM2NS0uMzc3SDcuNzc2YS4zNzIuMzcyIDAgMCAwLS4zNjMuMzc3aC4wMDJ6bTQuMTc1IDYuNHYtMS4zODJhLjM3Mi4zNzIgMCAwIDAtLjM2NS0uMzc3SC4zN2EuMzcxLjM3MSAwIDAgMC0uMzcuMzczdjEuMzg3YzAgLjIwOC4xNjQuMzc3LjM2NS4zNzdoMTAuODU2YS4zNzEuMzcxIDAgMCAwIC4zNy0uMzczdi0uMDA0em03LjMzNC0xLjg1NmEuMzU5LjM1OSAwIDAgMC0uMjQ4LS4xNDJsLTEuMzM0LS4xNGEuMzY2LjM2NiAwIDAgMC0uMzk5LjMyNWMtLjU2MyA0LjMwMy00LjM5NiA3LjMyLTguNTYyIDYuNzRhNy40MSA3LjQxIDAgMCAxLTEuNjg2LS40NDMuMzU4LjM1OCAwIDAgMC0uNDY2LjIxNmwtLjUxNSAxLjI3OGEuMzguMzggMCAwIDAgLjIwOS40OTljNC45ODggMS45ODIgMTAuNTg4LS41ODggMTIuNTA3LTUuNzQxLjI3OC0uNzQ3LjQ2OS0xLjUyNS41NjctMi4zMThhLjM4LjM4IDAgMCAwLS4wNzMtLjI3NHpNLjA4IDcuODAyYS4zODQuMzg0IDAgMCAxLS4wNDQtLjI5MUMxLjEzNSAzLjA5MyA0Ljk5LjAwMyA5LjQwNyAwYTkuMzY3IDkuMzY3IDAgMCAxIDMuMTguNTUyLjM4OC4zODggMCAwIDEgLjIyMy40OTFsLS40NzQgMS4yOTVhLjM2LjM2IDAgMCAxLS40Ni4yMTUgNy4zNzYgNy4zNzYgMCAwIDAtMi40Ny0uNDMxIDcuMzcgNy4zNyAwIDAgMC00Ljc3MSAxLjc2QTcuOTMyIDcuOTMyIDAgMCAwIDIuMDUgOC4wMDlhLjM1OS4zNTkgMCAwIDEtLjQzNC4yNzJMLjMwOSA3Ljk3OWEuMzYzLjM2MyAwIDAgMS0uMjMtLjE3N3oiIGZpbGw9IiM1MEI2OEMiIC8+Cjwvc3ZnPgo=" alt="Segment" />
-        </a>
-        <div style={{flex:"2", marginLeft:"12px", fontSize: "16px", fontWeight: 600}}>Event Generator (v{version})</div>
-        <div className="navigation-right" style={{flex: "1"}}>
-          <div className="navigation-header-tab"><a rel="noreferrer" target="_blank" href="https://docs.google.com/spreadsheets/d/1QpgfIq1VgGBy9iMNekSR80J2JHCmDaAPwEUH8_NDWcA/edit#gid=934482474">Templates</a></div>
-          <div className="navigation-header-tab"><a rel="noreferrer" target="_blank" href="https://segment.atlassian.net/wiki/spaces/SOLENG/pages/1904738629/Event+Generator+Formerly+Demo+Generator+2.0">Documentation</a></div>
-          <div className="navigation-header-tab"><a rel="noreferrer" target="_blank" href="https://docs.google.com/spreadsheets/d/1zYPYBais9JLmO4XukU6_GQ6ltg-Uofcq0IbUjLb08rI/edit?usp=sharing">Share</a></div>
-          <div className="navigation-header-tab"><a rel="noreferrer" target="_blank" href="https://github.com/send-on/new-demo-generator">Github</a></div>
-        </div>
-        
-        
-      </div>
+      <Header />
       <header className="App-body">
         <div className="main">
-          <div className="section">
-            <div className="header">Enter Number of Users to Generate or Import List</div>
-            <div className="note">Note: Click save after manually modifying values. </div>
-          <div className="stepComponent">
-            <TextInput type="text" placeholder="Number of Users (i.e. 100)" onChange={e => setNumOfUsers(e.target.value)} />
-            <Button appearance='primary' style={{marginLeft: "2em"}} onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} >{`Generate or Reset Users`}</Button>
-          </div>
-
-          <div style={{marginTop: "0.5em", width: "100%"}}>
-            <UserForm 
-            userList={JSON.stringify(userList, null, 2)} 
-            onSubmit={onSubmit} 
-            userButtonStatus={userButtonStatus} 
-            setUserButtonStatus={setUserButtonStatus} 
-            /> 
-          </div>
-          <Button style={{marginTop: "1em"}} onClick={()=>regenerateAnonymousId(userList, setUserList)} >Shuffle Anonymous ID</Button>
-          
-        </div>
-        <div className="section">
-          <div className="header">Enter Source   
-            <a style={{marginLeft:"3px"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
-          </div>
-          <form>
-            <TextInput name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
-          </form>
-          <Notepad 
+          <GenerateUsers 
+            numOfUsers={numOfUsers}
+            setNumOfUsers={setNumOfUsers}
+            lockUserList={lockUserList}
+            setUserList={setUserList}
+            userList={userList}
+            setUserButtonStatus={setUserButtonStatus}
+            userButtonStatus={userButtonStatus}
+            onSubmit={onSubmit}
+            regenerateAnonymousId={regenerateAnonymousId}
+          />
+          <Source 
+            setWriteKey={setWriteKey}
             analyticsSecondary={analyticsSecondary}
           />
-        </div>
         <div className="section">
           <CSVReader 
             setEventList={setEventList}
             setIsLoading={setIsLoading}
             setCsvLoaded={setCsvLoaded}
-            setStatus={setStatus}
             analyticsSecondary={analyticsSecondary}
           />
         </div>
 
           <div className="section">
-            <div className="header">Fire Events (Turn Off Adblock)</div>
-            <div className="note">Note: Toggle between AJS and Node Analytics (faster).</div>
-            <div >
-              <Button width={"150px"} style={{marginRight: "2em"}} onClick={()=>setIsNode(!isNode)} >Analytics Mode: {(isNode ? "Node" : "AJS")}</Button> 
-              <TextInput style={{width: "275px"}} name="source" autoComplete="on" type="text" placeholder="[Optional] Firing Speed (Default 4ms)" onChange={e => setEventTimeout(e.target.value)} /> 
+            <div className="header">
+              Fire Events (Turn Off Adblock)  
+              <div style={{marginLeft: "0.25em"}}>
+                <Tooltip content="Toggle between AJS and Node Analytics (faster)">
+                  <InfoSignIcon />
+                </Tooltip>
+              </div>
+            </div>
+            <div style={{marginTop: "0.5em"}}>
+              <Button width={"150px"} style={{marginRight: "0.5em"}} onClick={()=>{
+              toaster.success(`Switched analytics library to ${(isNode ? "analytics-node" : "Analytics JS")}`, {id: 'single-toast'})
+              setIsNode(!isNode)}}>
+                Analytics Mode: {(isNode ? "Node" : "AJS")}
+              </Button> 
+              
             </div> 
-            
+            <div>
+              <TextInput style={{width: "300px"}} name="source" autoComplete="on" type="text" placeholder={`[Optional AJS] Speed: Default ${defaultEventTimeout}ms)`} onChange={e => setEventTimeout(e.target.value)} />
+            </div>
+            <div>
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
             <Button 
               isLoading={isLoading}
@@ -411,21 +384,20 @@ const App = () => {
                     setCounter, 
                     0,  //event counter
                     setUserCounter, 
-                    setStatus,
                     isNode,
                     eventTimeout, 
-                    analyticsJSOptional,
-                    analyticsNodeOptional
+                    (isNode) ? analyticsNodeOptional : analyticsJSOptional
                     )
                   }
                 }
               } 
             >
-              {status}
+              Dispatch Events
             </Button> 
             :
-            <Button onClick={()=>toaster.warning(`Event Generator not ready`, {description: "Generate users or load CSV before firing", id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>{status}</Button> 
+            <Button onClick={()=>toaster.warning(`Event Generator not ready`, {description: "Generate users or load CSV before firing", id: 'single-toast'}) } appearance='primary' size='large' isLoading={isLoading}>Dispatch Events</Button> 
             }  
+            </div>
             
             <div className="note"><b>{counter}</b> Events Fired</div> 
             <div className="note"><b>{userCounter}</b> Users Remaining</div> 
