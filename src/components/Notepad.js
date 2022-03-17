@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SideSheet, Pane, Heading, Card, Button, TextInput, IconButton, TrashIcon } from 'evergreen-ui';
 import { toaster } from 'evergreen-ui'
 import { generateSessionId } from '../util/common.js';

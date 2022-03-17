@@ -216,6 +216,7 @@ export const createEventProps = (e, firedEvents) => {
       shouldReuseIndex = true;
       temp[0] = temp[0].substring(1);
     }
+    temp[0] = temp[0].trim();
 
     // check for * recall
     if (temp[1].trim()[0] === "*" && (firedEvents[recallNum])) {
@@ -278,7 +279,6 @@ export const checkDependency = (dependentOn, firedEvents={}) => {
 export const shouldDropEvent = (dropoff) => {
   return (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true;
 }
-
 
 export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional) => {
   if (eventList[e_i][writeKeyElement]) {

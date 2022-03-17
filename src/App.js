@@ -12,7 +12,8 @@ import {
   dependencyElement,
   dropoffElement,
   defaultEventTimeout,
-  usageTrackingWriteKey
+  usageTrackingWriteKey,
+  nodeConfiguration
 } from './constants/config'
 import {
   createEventProps,
@@ -32,7 +33,7 @@ import Header from './components/Header';
 const AnalyticsNode = require('analytics-node');
 
 // Side tracking for product improvements
-const analyticsSecondary = new AnalyticsNode(usageTrackingWriteKey);
+const analyticsSecondary = new AnalyticsNode(usageTrackingWriteKey, nodeConfiguration);
 
 const launcher = async (
   eventList, // data schema
@@ -206,9 +207,9 @@ const App = () => {
 
   // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
-  const analyticsNode = new AnalyticsNode(writeKey ?? "placeholder");
+  const analyticsNode = new AnalyticsNode(writeKey ?? "placeholder", nodeConfiguration);
   const analyticsJSOptional = new Analytics();
-  const analyticsNodeOptional = new AnalyticsNode(writeKey ?? "placeholder");
+  const analyticsNodeOptional = new AnalyticsNode(writeKey ?? "placeholder", nodeConfiguration);
 
   const integrationSettings = {
     "Segment.io": {
