@@ -6,7 +6,6 @@ import CSVReader from './components/CSVReader';
 import { toaster, Button, TextInput, Tooltip, InfoSignIcon } from 'evergreen-ui'
 import { generateUsers, generateRandomValue } from './util/faker'
 import { generateSessionId } from './util/common.js';
-
 import {
   firstEvent,
   dependencyElement,

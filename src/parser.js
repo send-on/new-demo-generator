@@ -8,6 +8,7 @@ export default ({setEventList, setIsLoading, setCsvLoaded, setStatus}) => {
     let arr = data.map(obj => obj.data)
     setEventList(arr)
     setStatus("FIRE EVENTS")
+    console.log(arr)
   };
   const handleOnError = (err, file, inputElem, reason) => {
     console.log(err);

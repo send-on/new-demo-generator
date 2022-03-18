@@ -203,7 +203,9 @@ export const createEventProps = (e, firedEvents) => {
   if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
 
   // remove non property/traits from array
+  if (e[firstProp].length === 32 && !e[firstProp].includes(":")) firstProp++;
   let propsObject = e.slice(firstProp);
+
   propsObject = propsObject.filter(function(el) { return el; });
   const properties = {};
   var randomInt = 0;
@@ -281,7 +283,7 @@ export const shouldDropEvent = (dropoff) => {
 }
 
 export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional) => {
-  if (eventList[e_i][writeKeyElement]) {
+  if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
     analyticsOptional._integrations['Segment.io'].options.apiKey = eventList[e_i][writeKeyElement]
   }
 
@@ -289,20 +291,20 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     Object.assign(fireProperties, userList[u_i]);
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
-    (eventList[e_i][writeKeyElement])
+    (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
     ? analyticsOptional.identify(userList[u_i].user_id, fireProperties, context)
     : analytics.identify(userList[u_i].user_id, fireProperties, context);
   }
   
   if (eventList[e_i][1] === "page") {
-    (eventList[e_i][writeKeyElement])
+    (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
     ? analyticsOptional.page(eventList[e_i][2], fireProperties, context)
     : analytics.page(eventList[e_i][2], fireProperties, context);
   }
 
   
   if (eventList[e_i][1] === "track") {
-    (eventList[e_i][writeKeyElement])
+    (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
     ? analyticsOptional.track(eventList[e_i][2], fireProperties, context)
     : analytics.track(eventList[e_i][2], fireProperties, context)     
   }
@@ -323,7 +325,7 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     timestamp: new Date(context.timestamp)
   }
   // Set writeKey for optional node analytics client
-  if (eventList[e_i][writeKeyElement]) {
+  if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
     analyticsOptional.writeKey = eventList[e_i][writeKeyElement]
   }
     
@@ -333,7 +335,7 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     delete fireProperties.anonymousId;
     Object.assign(payload, {traits: fireProperties})    
 
-    if (eventList[e_i][writeKeyElement]) {
+    if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
       analyticsOptional.identify(payload)
     } else {
       analytics.identify(payload)
@@ -349,7 +351,7 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     if (!firedEvents['identify']) delete payload.userId;
     payload.name = eventList[e_i][2];
 
-    if (eventList[e_i][writeKeyElement]) {
+    if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
       analyticsOptional.page({...payload, event: "Page Viewed"})
     } else {
       analytics.page({...payload, event: "Page Viewed"});
@@ -365,7 +367,7 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     Object.assign(payload, {properties: fireProperties})    
     if (!firedEvents['identify']) delete payload.userId;
 
-    if (eventList[e_i][writeKeyElement]) {
+    if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
       analyticsOptional.track({...payload, event: eventList[e_i][2]})
     } else {
       analytics.track({...payload, event: eventList[e_i][2]})

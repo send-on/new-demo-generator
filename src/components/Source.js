@@ -7,7 +7,7 @@ const Source = ({ setWriteKey, analyticsSecondary }) => (
       <a style={{marginLeft:"3px"}} href="https://segment.com/docs/getting-started/02-simple-install/#find-your-write-key">Write Key</a>
     </div>
     <form>
-      <TextInput name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value)} /> 
+      <TextInput name="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value || "placeholder")} /> 
     </form>
     <Notepad 
       analyticsSecondary={analyticsSecondary}
