@@ -344,7 +344,7 @@ const App = () => {
             </div>
             <div style={{marginTop: "0.5em"}}>
               <Button width={"150px"} style={{marginRight: "0.5em"}} onClick={()=>{
-              toaster.success(`Switched analytics library to ${(isNode ? "analytics-node" : "Analytics JS")}`, {id: 'single-toast'})
+              toaster.success(`Switched analytics library to ${(!isNode ? "analytics-node" : "Analytics JS")}`, {id: 'single-toast'})
               setIsNode(!isNode)}}>
                 Analytics Mode: {(isNode ? "Node" : "AJS")}
               </Button> 
