@@ -92,6 +92,15 @@ export const generateRandomValue = (string) => {
       toaster.danger(`Random Value Error - price_between`, {id: 'error-toast'})
     }
   } 
+  if (type === "int_between") {
+    if (string.split("#").length === 4) {
+      let min = Math.ceil(string.split("#")[2]);
+      let max = Math.floor(string.split("#")[3]);
+      value = Math.floor(Math.random() * (max - min + 1)) + min;
+    } else {
+      toaster.danger(`Random Value Error - price_between`, {id: 'error-toast'})
+    }
+  } 
   if (type === "material") value = faker.commerce.material();
   if (type === "product_description") value = faker.commerce.productDescription();
 

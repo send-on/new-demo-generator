@@ -219,6 +219,7 @@ export const createEventProps = (e, firedEvents) => {
       temp[0] = temp[0].substring(1);
     }
     temp[0] = temp[0].trim();
+    temp[1] = temp[1].trim();
 
     // check for * recall
     if (temp[1].trim()[0] === "*" && (firedEvents[recallNum])) {
