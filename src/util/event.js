@@ -292,6 +292,7 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     Object.assign(fireProperties, userList[u_i]);
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
+    delete fireProperties.email;
     (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
     ? analyticsOptional.identify(userList[u_i].user_id, fireProperties, context)
     : analytics.identify(userList[u_i].user_id, fireProperties, context);
@@ -334,6 +335,7 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     Object.assign(fireProperties, userList[u_i]);  
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
+    delete fireProperties.email;
     Object.assign(payload, {traits: fireProperties})    
 
     if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
@@ -349,7 +351,9 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
 
   if (eventList[e_i][1] === "page") {
     Object.assign(payload, {properties: fireProperties})    
-    if (!firedEvents['identify']) delete payload.userId;
+    if (!firedEvents['identify']) {
+      delete payload.userId;
+    }
     payload.name = eventList[e_i][2];
 
     if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
