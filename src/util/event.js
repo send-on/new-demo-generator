@@ -154,13 +154,13 @@ export const createObjectProperty = (eventsObj) => {
       }
       propertyObj = mergeDeep(propertyObj, newObj);
     } else if (Array.isArray(eventsObj[key])) {
-      for (let i = 0; i < eventsObj[key].length; i++) { // eventsObj[key] is SurveyData
-       for (let newKey in eventsObj[key][i]) { // eventsObj[key][i] = is object {questionsId, selectedOptions.id}
-         if (newKey.includes('.')) { // newKey is questionId, selectedOptions etc.
-           let temp_arr = newKey.split('.'); // temp_arr is [selectedOptions, id]
+      for (let i = 0; i < eventsObj[key].length; i++) { 
+       for (let newKey in eventsObj[key][i]) { 
+         if (newKey.includes('.')) { 
+           let temp_arr = newKey.split('.'); 
              if (temp_arr.length > 1) {
-              newObj = {[temp_arr[0]]: {[temp_arr[1]]: eventsObj[key][i][newKey]}}  // newObj: {selectedObj: {id: 3}}
-              newObj = mergeDeep(eventsObj[key][i], newObj); // newObj = {everything}
+              newObj = {[temp_arr[0]]: {[temp_arr[1]]: eventsObj[key][i][newKey]}}
+              newObj = mergeDeep(eventsObj[key][i], newObj); 
               delete newObj[newKey] 
             } else {
               newObj = {[temp_arr[0]]: eventsObj[key][i]}
@@ -187,6 +187,15 @@ export const removeEventContext = (eventsObj) => {
   return newPropsObject;
 }
 
+// Used for weighting property selection using brand:[[brand1, 10], [brand2,20]]
+const pickWeightedPosition = (chancesArr, position, target, cursor) => {
+  let newCursor = cursor + chancesArr[position];
+  if (newCursor > target) {
+    return position
+  } else {
+    return pickWeightedPosition(chancesArr, position+1, target, newCursor)
+  }
+}
 
 export const createEventProps = (e, firedEvents) => {
   // set recallNum for single value
@@ -261,8 +270,19 @@ export const createEventProps = (e, firedEvents) => {
         if (shouldReuseIndex && temp[1][randomInt]) {
           properties[temp[0]] = sanitize(temp[1][randomInt]);
         } else {
-          randomInt = getRandomInt(temp[1].length)
-          properties[temp[0]] = sanitize(temp[1][randomInt]);
+          // If temp[1] is an array of arrays, use weight logic
+          if (temp[1][0][0] === '[' && temp[1][0][1] === '[') {
+            let cleanedArray = temp[1].map(el => sanitize(el)) 
+            let valuesArr = cleanedArray.filter(function(v, i) {return i % 2 == 0;}); // Even positions
+            let weightsArr = cleanedArray.filter(function(v, i) {return i % 2 == 1;}); // Odd positions
+            let sum = weightsArr.reduce((a, b) => a + b, 0) // number/sum = probability
+            let chancesArr = weightsArr.map(el => (el/sum)*100) // Calculate probability
+            properties[temp[0]]= valuesArr[pickWeightedPosition(chancesArr, 0, getRandomInt(99), 0)]
+          } else {
+            // Pick random position from value side
+            randomInt = getRandomInt(temp[1].length)
+            properties[temp[0]] = sanitize(temp[1][randomInt]);
+          }
         }
       }
     }
