@@ -368,12 +368,13 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     if (!firedEvents['identify']) {
       delete payload.userId;
     }
-    payload.name = eventList[e_i][2];
+    
+    payload.name = (eventList[e_i][2].length > 0 ? eventList[e_i][2] : "Page Viewed")
 
     if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
       analyticsOptional.page({...payload, event: "Page Viewed"})
     } else {
-      analytics.page({...payload, event: "Page Viewed"});
+      analytics.page({ ...payload });
     }
   }
 
