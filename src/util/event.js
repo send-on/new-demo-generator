@@ -212,7 +212,7 @@ export const createEventProps = (e, firedEvents) => {
   if (Array.isArray(recallCell)) recallNum = checkIsArrayAndHasEvent(recallCell, firedEvents)
 
   // remove non property/traits from array
-  if (e[firstProp].length === 32 && !e[firstProp].includes(":")) firstProp++;
+  // if (e[firstProp].length === 32 && !e[firstProp].includes(":")) firstProp++;
   let propsObject = e.slice(firstProp);
 
   propsObject = propsObject.filter(function(el) { return el; });
@@ -312,7 +312,6 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     Object.assign(fireProperties, userList[u_i]);
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
-    delete fireProperties.email;
     (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
     ? analyticsOptional.identify(userList[u_i].user_id, fireProperties, context)
     : analytics.identify(userList[u_i].user_id, fireProperties, context);
@@ -355,7 +354,6 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     Object.assign(fireProperties, userList[u_i]);  
     delete fireProperties.user_id;
     delete fireProperties.anonymousId;
-    delete fireProperties.email;
     Object.assign(payload, {traits: fireProperties})    
 
     if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
@@ -363,10 +361,6 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     } else {
       analytics.identify(payload)
     }
-    
-    // (eventList[e_i][writeKeyElement])
-    // ? analyticsOptional.identify(payload)
-    // : analytics.identify(payload) 
   }
 
   if (eventList[e_i][1] === "page") {
@@ -381,11 +375,6 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     } else {
       analytics.page({...payload, event: "Page Viewed"});
     }
-
-    // (eventList[e_i][writeKeyElement]) 
-    // ? analyticsOptional.page({...payload, event: "Page Viewed"})
-    // : analytics.page({...payload, event: "Page Viewed"});
-
   }
 
   if (eventList[e_i][1] === "track") {
@@ -397,10 +386,6 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     } else {
       analytics.track({...payload, event: eventList[e_i][2]})
     }
-
-    // (eventList[e_i][writeKeyElement]) 
-    // ? analyticsOptional.track({...payload, event: eventList[e_i][2]})
-    // : analytics.track({...payload, event: eventList[e_i][2]})
   }
   
 }

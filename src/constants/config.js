@@ -1,12 +1,12 @@
 // Constants - DO NOT CHANGE
 export const unixDay = 86400;
 export const firstEvent = 2;
-export const firstProp = 7;
+export const firstProp = 8;
 export const dependencyElement = 3;
 export const dropoffElement = 4;
 export const dayElement = 5;
 export const randomizeElement = 6;
-export const version = "2.4";
+export const version = "2.41";
 export const writeKeyElement = 7;
 export const defaultEventTimeout = 4;
 export const usageTrackingWriteKey = 'CFb9iZw4bGVGg7os4tCsR3yToPHpx9Hr';
