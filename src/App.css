@@ -9,6 +9,12 @@
   flex-direction: columns;
 }
 
+.header-source {
+  margin-top: 1em;
+  font-weight: 500;
+  font-size: 14px;
+}
+
 a:link {
   color: #101840;
   text-decoration: none;
@@ -119,8 +125,7 @@ input[type=submit]:hover {
 }
 
 .App {
-  text-align: center;
-  
+  /* text-align: center; */
 }
 
 .App-logo {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './App.css';
+import Tags from './components/TagInput';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './components/CSVReader';
@@ -306,9 +307,11 @@ const App = () => {
   
   return (
     <div className="App">
+      <Tags />
       <Header />
       <header className="App-body">
         <div className="main">
+          
           <GenerateUsers 
             numOfUsers={numOfUsers}
             setNumOfUsers={setNumOfUsers}
@@ -360,14 +363,18 @@ const App = () => {
               size='large' 
               appearance='primary'
               onClick={()=>{
-                if (csvLoaded) {
+                if (csvLoaded && writeKey !== "placeholder") {
                   analyticsSecondary.track({
                     anonymousId: generateSessionId(),
                     event: 'Begin Fired Events',
                     properties: {
-                      type: "Bulk",
                       numOfUsers: userList.length,
                       numOfEvents: eventList.length,
+                      schema: eventList,
+                      user: generateSessionId(),
+                      industry: "temp",
+                      tags: ["temp"],
+                      objectID: "temp",
                       writeKey: writeKey,
                       eventTimeout: eventTimeout,
                       isNode: isNode
