@@ -8,6 +8,9 @@
   display: flex;
   flex-direction: columns;
 }
+.tag-input {
+  min-width: 280px;
+}
 
 .header-source {
   margin-top: 1em;
@@ -65,10 +68,6 @@ a:hover {
   margin-bottom: 0.5em;
 }
 
-.inputbox {
-  width: 400px;
-}
-
 .notepad {
   min-width: 350px; 
   margin-top: 2em;
@@ -104,6 +103,7 @@ h4 {
   border-radius: 4px;
   box-sizing: border-box;
 }
+
 input[type=text], select {
 }
 
@@ -112,7 +112,6 @@ input[type=submit] {
   background-color: #4CAF50;
   color: #101840;
   padding: 14px 20px;
-  
   margin: 8px 0;
   border: none;
   border-radius: 4px;
@@ -131,24 +130,19 @@ input[type=submit]:hover {
 .main {
   width: 75%;
   text-align: left;
-  /* padding-top: 1em; */
   padding-left: 4em;
-  /* background-color: #FFFFFF; */
   border-radius: 8px;
   margin-top: 2em;
   margin-bottom: 2em;
-  /* border: 1px solid #cccccc; */
 }
 
 .App-body {
-  
   background-color: #F5F6F7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* font-size: calc(10px + 1vmin); */
   font-size: 14px;
   color: #101840;
 }

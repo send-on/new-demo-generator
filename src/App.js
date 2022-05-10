@@ -344,7 +344,7 @@ const App = () => {
                 </Tooltip>
               </div>
             </div>
-            <div style={{marginTop: "0.5em"}}>
+            <div className='input-box'>
               <Button width={"150px"} style={{marginRight: "0.5em"}} onClick={()=>{
               toaster.success(`Switched analytics library to ${(!isNode ? "analytics-node" : "Analytics JS")}`, {id: 'single-toast'})
               setIsNode(!isNode)}}>
@@ -352,7 +352,7 @@ const App = () => {
               </Button> 
               
             </div> 
-            <div>
+            <div className='input-box'>
               <TextInput style={{width: "300px"}} name="source" autoComplete="on" type="text" placeholder={`[Optional AJS] Speed: Default ${defaultEventTimeout}ms)`} onChange={e => setEventTimeout(e.target.value)} />
             </div>
             <div>

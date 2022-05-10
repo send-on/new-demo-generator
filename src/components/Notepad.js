@@ -5,7 +5,7 @@ import { generateSessionId } from '../util/common.js';
 
 function Notepad({ analyticsSecondary }) {
   const [isShown, setIsShown] = React.useState(false);
-  const [keys, setKeys] = useState(JSON.parse(localStorage.getItem("keys")) ?? [{name:"Source Name", value:"Write Key", index:0}]);
+  const [keys, setKeys] = useState(JSON.parse(localStorage.getItem("keys")) ?? [{name:"", value:"", index:0}]);
 
   const handleChange = (e) => {
     let el = e.target.attributes.name.value;
@@ -83,7 +83,7 @@ function Notepad({ analyticsSecondary }) {
                   <div key={key.index} style={{"margin": "1em", "display": "flex"}}>
                     <TextInput width={"150px"} style={{marginRight: "1em"}} onChange={handleChange} type="text" name={key.index} placeholder="Source Name" defaultValue={key.name ?? "Source Name"} />
                     <TextInput width={"300px"} onChange={handleChange} type="text" name={key.index} placeholder="Write Key" defaultValue={key.value ?? "Write Key"} />
-                    {(keys.length > 1) ? <IconButton name={key.index} style={{"marginTop": "8px", "marginLeft": "1em"}} icon={TrashIcon} intent="danger" onClick={()=>deleteKey(key.index)} /> : <div></div>}
+                    {(keys.length > 0) ? <IconButton name={key.index} style={{ "marginLeft": "1em"}} icon={TrashIcon} intent="danger" onClick={()=>deleteKey(key.index)} /> : <div></div>}
                   </div>
                 )
               })}
