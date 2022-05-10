@@ -53,7 +53,7 @@ function Notepad({ analyticsSecondary }) {
   }
 
   return (
-    <React.Fragment>
+    <div style={{"marginLeft":"8px"}}>
       <SideSheet
         isShown={isShown}
         onCloseComplete={() => setIsShown(false)}
@@ -96,7 +96,7 @@ function Notepad({ analyticsSecondary }) {
         </Pane>
       </SideSheet>
       <Button onClick={() => setIsShown(true)}>Show Write Key Notepad</Button>
-    </React.Fragment>
+    </div>
   )
 }
 

@@ -307,7 +307,6 @@ const App = () => {
   
   return (
     <div className="App">
-      <Tags />
       <Header />
       <header className="App-body">
         <div className="main">

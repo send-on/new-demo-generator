@@ -63,7 +63,6 @@ a:hover {
   width: 50%;
   height: 15em;
   margin-bottom: 0.5em;
-  /* min-width: 600px; */
 }
 
 .inputbox {
@@ -98,14 +97,14 @@ h4 {
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
-input[type=text], select {
-  /* min-width: 400px; */
-  padding: 12px 20px 12px 20px;
+
+.input-box {
   margin: 8px 0 8px 0;
   display: inline-block;
-  border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+}
+input[type=text], select {
 }
 
 input[type=submit] {
@@ -122,15 +121,6 @@ input[type=submit] {
 
 input[type=submit]:hover {
   background-color: #45a049;
-}
-
-.App {
-  /* text-align: center; */
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -151,14 +141,14 @@ input[type=submit]:hover {
 }
 
 .App-body {
-  /* background-color: #FFFFFF; */
+  
   background-color: #F5F6F7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 1vmin);
+  /* font-size: calc(10px + 1vmin); */
   font-size: 14px;
   color: #101840;
 }

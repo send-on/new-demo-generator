@@ -7,7 +7,9 @@ const GenerateUsers = ({ numOfUsers, setNumOfUsers, lockUserList, setUserList, u
       <div className="header">Enter Number of Users to Generate or Import List</div>
       <div className="note">Note: Click save after manually modifying values. </div>
       <div className="stepComponent">
+        <div className="input-box">
         <TextInput type="text" placeholder="Number of Users (i.e. 100)" onChange={e => setNumOfUsers(e.target.value)} />
+        </div>
         <Button appearance='primary' style={{marginLeft: "2em"}} onClick={()=>lockUserList(numOfUsers, setUserList, userList, setUserButtonStatus)} >{`Generate or Reset Users`}</Button>
       </div>
 
