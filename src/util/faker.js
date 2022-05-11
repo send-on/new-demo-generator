@@ -82,7 +82,7 @@ export const generateRandomValue = (string) => {
   if (type === "color") value = faker.commerce.color();
   if (type === "department") value = faker.commerce.department();
   if (type === "price") value = parseFloat(faker.commerce.price()/4.00.toFixed(2));
-  if (type === "price_high") value = parseFloat(faker.commerce.price().toFixed(2));
+  if (type === "price_high") value = parseFloat(faker.commerce.price()).toFixed(2);
   if (type === "price_between") {
     if (string.split("#").length === 4) {
       let min = string.split("#")[2];
@@ -110,7 +110,11 @@ export const generateRandomValue = (string) => {
   if (type === "gender") value = faker.name.gender();
   if (type === "title") value = faker.name.title();
   if (type === "job_type") value = faker.name.jobType();
-  if (type === "phone") value = faker.phone.phoneNumber().substring(0,14);
+  if (type === "phone") {
+    value = faker.phone.phoneNumber();
+    value = value.replace(/\D/g, '');
+    value = `${value.substring(0,3)}-${value.substring(3,6)}-${value.substring(6,10)}`
+  }
 
   // dates
   if (type === "date_past") value = faker.date.past();
