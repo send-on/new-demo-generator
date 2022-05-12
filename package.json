@@ -1,6 +1,7 @@
 {
   "name": "new-demo-generator",
-  "version": "2.02",
+  "type":"module",
+  "version": "3.0",
   "private": true,
   "dependencies": {
     "@segment/analytics.js-core": "^4.1.11",
@@ -8,6 +9,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "algoliasearch": "^4.13.0",
     "analytics-node": "^6.0.0",
     "evergreen-ui": "^6.9.10",
     "faker": "^5.5.3",

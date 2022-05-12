@@ -1,30 +1,16 @@
 import { TagInput } from "evergreen-ui";
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
-const Tags = () => {
-  
+const Tags = ({ allTags, selectedTags, setSelectedTags }) => {
   const [values, setValues] = useState([])
-  const allValues = [
-    "Podcast",
-    "Multi-brand",
-    "Mortgage",
-    "Food & Beverage",
-    "Package Delivery",
-    "Scooters / MicroMobility",
-    "OTT",
-    "Ski & Snowboard",
-    "Basketball",
-    "Infrastructure",
-    "Publishing Software"
-  ]
-  const autocompleteItems = useMemo(() => allValues.filter((i) => !values.includes(i)), [allValues, values])
+  const autocompleteItems = useMemo(() => allTags.filter((i) => !selectedTags.includes(i)), [allTags, selectedTags])
 
   return (
     <TagInput
       className='tag-input'
-      inputProps={{ placeholder: 'Enter Tags or Pick from List' }}
-      values={values}
-      onChange={setValues}
+      inputProps={{ placeholder: 'Add New or Search' }}
+      values={selectedTags}
+      onChange={setSelectedTags}
       autocompleteItems={autocompleteItems}
     />
   )

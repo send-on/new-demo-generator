@@ -26,10 +26,17 @@ import {
   fireNodeEvents,
   fireJSEvents
 } from './util/event'
+import { algoliaAppId, algoliaSearchKey } from './constants/config.js'
 
 import GenerateUsers from './components/GenerateUsers';
 import Source from './components/Source';
 import Header from './components/Header';
+
+// Algolia (for tag/industry input)
+const algoliasearch = require('algoliasearch');
+const client = algoliasearch(algoliaAppId, algoliaSearchKey);
+const algoliaIndex = client.initIndex('event_gen_meta')
+
 const AnalyticsNode = require('analytics-node');
 
 // Side tracking for product improvements
@@ -204,6 +211,10 @@ const App = () => {
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isNode, setIsNode] = useState(true); // Node Analytics vs AJS
   const [eventTimeout, setEventTimeout] = useState(defaultEventTimeout) // Firing speed
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [company, setCompany] = useState([]);
+
 
   // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
@@ -310,7 +321,6 @@ const App = () => {
       <Header />
       <header className="App-body">
         <div className="main">
-          
           <GenerateUsers 
             numOfUsers={numOfUsers}
             setNumOfUsers={setNumOfUsers}
@@ -325,6 +335,12 @@ const App = () => {
           <Source 
             setWriteKey={setWriteKey}
             analyticsSecondary={analyticsSecondary}
+            algoliaIndex={algoliaIndex}
+            setSelectedTags={setSelectedTags}
+            setSelectedIndustries={setSelectedIndustries}
+            selectedTags={selectedTags}
+            selectedIndustries={selectedIndustries}
+            setCompany={setCompany}
           />
         <div className="section">
           <CSVReader 
@@ -369,14 +385,15 @@ const App = () => {
                     properties: {
                       numOfUsers: userList.length,
                       numOfEvents: eventList.length,
-                      schema: eventList,
                       user: generateSessionId(),
-                      industry: "temp",
-                      tags: ["temp"],
-                      objectID: "temp",
+                      company: company,
+                      industry: selectedIndustries,
+                      tags: selectedTags,
+                      objectID: `${company}-${generateSessionId()}`,
                       writeKey: writeKey,
                       eventTimeout: eventTimeout,
-                      isNode: isNode
+                      isNode: isNode, 
+                      schema: eventList
                     }
                   });
                   launcher(
