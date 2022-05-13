@@ -5,6 +5,7 @@ const Tags = ({ allTags, selectedTags, setSelectedTags }) => {
   const [values, setValues] = useState([])
   const autocompleteItems = useMemo(() => allTags.filter((i) => !selectedTags.includes(i)), [allTags, selectedTags])
 
+
   return (
     <TagInput
       className='tag-input'

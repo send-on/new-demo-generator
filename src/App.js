@@ -203,7 +203,7 @@ const App = () => {
   const [eventList, setEventList] = useState([]); // Event Schema
   const [isLoading, setIsLoading] = useState(false); // Firing status
   const [csvLoaded, setCsvLoaded] = useState(false); // CSV loaded status
-  const [writeKey, setWriteKey] = useState(usageTrackingWriteKey); // Write key - Default is usage tracking
+  const [writeKey, setWriteKey] = useState(localStorage.getItem('writeKey') ?? ''); // Write key - Default is usage tracking
   const [counter, setCounter] = useState(0); // Event counter
   const [numOfUsers, setNumOfUsers] = useState(1); // Number of users set
   const [userList, setUserList] = useState([]); // Generated User List
@@ -211,23 +211,25 @@ const App = () => {
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isNode, setIsNode] = useState(true); // Node Analytics vs AJS
   const [eventTimeout, setEventTimeout] = useState(defaultEventTimeout) // Firing speed
-  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState(localStorage.getItem('selectedIndustries') ?? '-');
   const [selectedTags, setSelectedTags] = useState([]);
   const [company, setCompany] = useState([]);
 
+  // localStorage.getItem("keys") ?? [{name:"", value:"", index:0}]);
 
   // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
-  const analyticsNode = new AnalyticsNode(writeKey ?? "placeholder", nodeConfiguration);
+  const analyticsNode = new AnalyticsNode(writeKey || "Write Key", nodeConfiguration);
   const analyticsJSOptional = new Analytics();
-  const analyticsNodeOptional = new AnalyticsNode(writeKey ?? "placeholder", nodeConfiguration);
+  const analyticsNodeOptional = new AnalyticsNode(writeKey || "Write Key", nodeConfiguration);
+  const metrics = new Analytics();
 
   const integrationSettings = {
-    "Segment.io": {
-      apiKey: writeKey,
-      retryQueue: true,
-      addBundledMetadata: true
-    }
+    "Segment.io": { apiKey: writeKey, retryQueue: true, addBundledMetadata: true }
+  };
+
+  const metricSettings = {
+    "Segment.io": { apiKey: usageTrackingWriteKey, retryQueue: true, addBundledMetadata: true }
   };
 
   // Initialize JS clients
@@ -235,16 +237,25 @@ const App = () => {
   analyticsJS.initialize(integrationSettings);
   analyticsJSOptional.use(SegmentIntegration);
   analyticsJSOptional.initialize(integrationSettings);
+  metrics.use(SegmentIntegration);
+  metrics.initialize(metricSettings);
 
   useEffect(() => {
     // Side tracking for product improvements
-    analyticsJS.reset();
-    analyticsJS.setAnonymousId(generateSessionId());
-    analyticsJS.identify({
+    metrics.reset();
+    metrics.setAnonymousId(generateSessionId());
+    metrics.identify({
       userAgent: window.navigator.userAgent,
       path: document.location.href
     })
-    setWriteKey('placeholder');
+    
+    
+
+    if (localStorage.getItem('selectedTags')) setSelectedTags(JSON.parse(localStorage.getItem('selectedTags')))
+    if (localStorage.getItem('company')) setCompany(localStorage.getItem('company'))
+    // if (localStorage.getItem('selectedIndustries')) setSelectedIndustries(localStorage.getItem('selectedIndustries'))
+    // setWriteKey(localStorage.getItem('writeKey') ?? 'placeholder')
+    
   }, [])
 
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
@@ -334,6 +345,7 @@ const App = () => {
           />
           <Source 
             setWriteKey={setWriteKey}
+            writeKey={writeKey}
             analyticsSecondary={analyticsSecondary}
             algoliaIndex={algoliaIndex}
             setSelectedTags={setSelectedTags}
@@ -341,6 +353,7 @@ const App = () => {
             selectedTags={selectedTags}
             selectedIndustries={selectedIndustries}
             setCompany={setCompany}
+            company={company}
           />
         <div className="section">
           <CSVReader 
@@ -378,7 +391,7 @@ const App = () => {
               size='large' 
               appearance='primary'
               onClick={()=>{
-                if (csvLoaded && writeKey !== "placeholder") {
+                if (csvLoaded && company) {
                   analyticsSecondary.track({
                     anonymousId: generateSessionId(),
                     event: 'Begin Fired Events',

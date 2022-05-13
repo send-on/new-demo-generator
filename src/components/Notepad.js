@@ -56,6 +56,7 @@ function Notepad({ analyticsSecondary }) {
     <div style={{"marginLeft":"8px"}}>
       <SideSheet
         isShown={isShown}
+        
         onCloseComplete={() => setIsShown(false)}
         containerProps={{
           display: 'flex',
@@ -95,7 +96,7 @@ function Notepad({ analyticsSecondary }) {
           <div style={{textAlign: "right", display: "block"}} ><Button appearance="primary" style={{margin: "2em 1.5em 2em 1.5em"}} onClick={()=>saveToMemory()}className="button">Save Write Keys</Button></div>
         </Pane>
       </SideSheet>
-      <Button onClick={() => setIsShown(true)}>Show Write Key Notepad</Button>
+      <Button type="button" onClick={()=>setIsShown(true)} >Show Write Key Notepad</Button>
     </div>
   )
 }

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { TextInput, TagInput } from 'evergreen-ui'
+import { TextInput, Button, toaster } from 'evergreen-ui'
 import Industry from './IndustryInput';
 import Notepad from './Notepad';
 import Tags from './TagInput';
 
-const Source = ({ setWriteKey, analyticsSecondary, algoliaIndex, setSelectedTags, setSelectedIndustries, selectedTags, selectedIndustries, setCompany }) => {
+const Source = ({ setWriteKey, writeKey, analyticsSecondary, algoliaIndex, setSelectedTags, setSelectedIndustries, selectedTags, selectedIndustries, setCompany, company }) => {
   const [allTags, setAllTags] = useState([])
   const [allIndustries, setAllIndustries] = useState([])
 
@@ -20,14 +20,36 @@ const Source = ({ setWriteKey, analyticsSecondary, algoliaIndex, setSelectedTags
     })
   },[])
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    toaster.success("Workspace Details Saved", {description: "Details will persist if page is refreshed",id: 'single-toast'});
+    localStorage.setItem('company', company);
+    localStorage.setItem('selectedIndustries', selectedIndustries);
+    localStorage.setItem('selectedTags', JSON.stringify(selectedTags));
+    localStorage.setItem('writeKey', writeKey);
+  }
+
+  const clearWorkspaceDetails = (event) => {
+    event.preventDefault();
+    toaster.success("Workspace Details Cleared", {id: 'single-toast'});
+    localStorage.removeItem('company');
+    localStorage.removeItem('selectedIndustries');
+    localStorage.removeItem('selectedTags');
+    localStorage.removeItem('writeKey');
+    setCompany('');
+    setSelectedIndustries('-');
+    setSelectedTags([]);
+    setWriteKey('');
+  }
+
   return (
     <div className="section">
       <div className="header" style={{marginBottom: "12px"}}>Enter Workspace Details
       </div>
-      {/* <form> */}
+      <form onSubmit={handleSubmit}>
         <div className='header-source'> <label htmlFor="name">Company Name</label></div>
           <div className='input-box'>
-            <TextInput name="company" id="company" autoComplete="on" className="inputbox" type="text" placeholder="Name" onChange={e => setCompany(e.target.value || "placeholder")} /> 
+            <TextInput name="company" id="company" autoComplete="on" className="inputbox" type="text" defaultValue={company} placeholder="Name" onChange={(e) => {setCompany(e.target.value || "")}} /> 
           </div>
           <div></div>
 
@@ -48,18 +70,20 @@ const Source = ({ setWriteKey, analyticsSecondary, algoliaIndex, setSelectedTags
             selectedTags={selectedTags}
             />
           </div>
-          
-            
-
-
           <div className='header-source' style={{marginTop: "12px", marginBottom: "-8px"}}> <label htmlFor="source">Source Write Key</label></div>
           <div className='input-box'>
-            <TextInput name="source" id="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value || "placeholder")} /> 
+            <TextInput name="source" id="source" autoComplete="on" type="text" placeholder="Write Key" value={writeKey || ""}  onChange={e => setWriteKey(e.target.value)} /> 
             <div className='input-box'>
-              <Notepad analyticsSecondary={analyticsSecondary} />
-              </div>
+              <Notepad 
+              analyticsSecondary={analyticsSecondary} 
+              />
+            </div>
         </div>
-      {/* </form> */}
+        <div>
+          <Button type="submit" appearance="primary">Save</Button>
+          <Button type="reset" marginLeft={"12px"} onClick={clearWorkspaceDetails} appearance="default">Clear</Button>
+        </div>
+      </form>
       
       
     </div>
