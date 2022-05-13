@@ -25,7 +25,7 @@ export default ({setEventList, setIsLoading, setCsvLoaded, analyticsSecondary}) 
   return (
     <>
       <div className="header">Click or Drag Upload CSV Template</div>
-      <div className="note" style={{"marginBottom": "1em"}}>HINT: Drag CSV directly from the bottom Chrome downloads bar.</div>
+      <div className="description" style={{"marginBottom": "1em"}}>HINT: Drag CSV directly from the bottom Chrome downloads bar.</div>
       <div style={{width: "12em", textAlign: "left" }}>
       <CSVReader
         onDrop={handleOnDrop}

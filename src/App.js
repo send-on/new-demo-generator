@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import './App.css';
-import Tags from './components/TagInput';
 import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './components/CSVReader';
@@ -211,11 +210,9 @@ const App = () => {
   const [userButtonStatus, setUserButtonStatus] = useState("Click to Save Changes");
   const [isNode, setIsNode] = useState(true); // Node Analytics vs AJS
   const [eventTimeout, setEventTimeout] = useState(defaultEventTimeout) // Firing speed
-  const [selectedIndustries, setSelectedIndustries] = useState(localStorage.getItem('selectedIndustries') ?? '-');
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [company, setCompany] = useState([]);
-
-  // localStorage.getItem("keys") ?? [{name:"", value:"", index:0}]);
+  const [selectedIndustries, setSelectedIndustries] = useState(localStorage.getItem('selectedIndustries') ?? '-'); // Workspace Details
+  const [selectedTags, setSelectedTags] = useState(JSON.parse(localStorage.getItem('selectedTags')) ?? []); // Workspace Details
+  const [company, setCompany] = useState(localStorage.getItem('company') ?? ''); // Workspace Details
 
   // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
@@ -228,6 +225,7 @@ const App = () => {
     "Segment.io": { apiKey: writeKey, retryQueue: true, addBundledMetadata: true }
   };
 
+  // Used for tracking usage
   const metricSettings = {
     "Segment.io": { apiKey: usageTrackingWriteKey, retryQueue: true, addBundledMetadata: true }
   };
@@ -248,14 +246,7 @@ const App = () => {
       userAgent: window.navigator.userAgent,
       path: document.location.href
     })
-    
-    
-
-    if (localStorage.getItem('selectedTags')) setSelectedTags(JSON.parse(localStorage.getItem('selectedTags')))
-    if (localStorage.getItem('company')) setCompany(localStorage.getItem('company'))
-    // if (localStorage.getItem('selectedIndustries')) setSelectedIndustries(localStorage.getItem('selectedIndustries'))
-    // setWriteKey(localStorage.getItem('writeKey') ?? 'placeholder')
-    
+    metrics.reset();
   }, [])
 
   const lockUserList = (numOfUsers, setUserList, userList, setUserButtonStatus) => {
@@ -379,7 +370,6 @@ const App = () => {
               setIsNode(!isNode)}}>
                 Analytics Mode: {(isNode ? "Node" : "AJS")}
               </Button> 
-              
             </div> 
             <div className='input-box'>
               <TextInput style={{width: "300px"}} name="source" autoComplete="on" type="text" placeholder={`[Optional AJS] Speed: Default ${defaultEventTimeout}ms)`} onChange={e => setEventTimeout(e.target.value)} />
@@ -391,24 +381,26 @@ const App = () => {
               size='large' 
               appearance='primary'
               onClick={()=>{
-                if (csvLoaded && company) {
-                  analyticsSecondary.track({
-                    anonymousId: generateSessionId(),
-                    event: 'Begin Fired Events',
-                    properties: {
-                      numOfUsers: userList.length,
-                      numOfEvents: eventList.length,
-                      user: generateSessionId(),
-                      company: company,
-                      industry: selectedIndustries,
-                      tags: selectedTags,
-                      objectID: `${company}-${generateSessionId()}`,
-                      writeKey: writeKey,
-                      eventTimeout: eventTimeout,
-                      isNode: isNode, 
-                      schema: eventList
-                    }
-                  });
+                if (csvLoaded) {
+                  if (company) {
+                    analyticsSecondary.track({
+                      anonymousId: generateSessionId(),
+                      event: 'Begin Fired Events',
+                      properties: {
+                        numOfUsers: userList.length,
+                        numOfEvents: eventList.length,
+                        user: generateSessionId(),
+                        company: company,
+                        industry: selectedIndustries,
+                        tags: selectedTags,
+                        objectID: `${company}-${generateSessionId()}`,
+                        writeKey: writeKey,
+                        eventTimeout: eventTimeout,
+                        isNode: isNode, 
+                        schema: eventList
+                      }
+                    });
+                  }
                   launcher(
                     eventList, // array of events
                     userList, // array of all users
