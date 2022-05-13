@@ -22,15 +22,15 @@ const Source = ({ setWriteKey, analyticsSecondary, algoliaIndex, setSelectedTags
 
   return (
     <div className="section">
-      <div className="header">Enter Workspace Details
+      <div className="header" style={{marginBottom: "12px"}}>Enter Workspace Details
       </div>
       {/* <form> */}
         <div className='header-source'> <label htmlFor="name">Company Name</label></div>
           <div className='input-box'>
             <TextInput name="company" id="company" autoComplete="on" className="inputbox" type="text" placeholder="Name" onChange={e => setCompany(e.target.value || "placeholder")} /> 
           </div>
+          <div></div>
 
-          <div className='header-source'> <label htmlFor="name">Industry</label></div>
           <div className='input-box'>
             <Industry 
             allIndustries={allIndustries} 
@@ -39,8 +39,9 @@ const Source = ({ setWriteKey, analyticsSecondary, algoliaIndex, setSelectedTags
             />
           </div>
 
-          <div className='header-source'> <label htmlFor="name">Tags</label></div>
-          <div className='input-box'>
+          <div className='header-source' style={{marginTop: "-12px"}}> <label htmlFor="name">Tags</label></div>
+          <div className='description'>Enter your own tags, search for existing tags, or dropdown to select.</div>
+          <div className='input-box' >
             <Tags 
             allTags={allTags} 
             setSelectedTags={setSelectedTags}
@@ -51,7 +52,7 @@ const Source = ({ setWriteKey, analyticsSecondary, algoliaIndex, setSelectedTags
             
 
 
-          <div className='header-source'> <label htmlFor="source">Source Write Key</label></div>
+          <div className='header-source' style={{marginTop: "12px", marginBottom: "-8px"}}> <label htmlFor="source">Source Write Key</label></div>
           <div className='input-box'>
             <TextInput name="source" id="source" autoComplete="on" className="inputbox" type="text" placeholder="Write Key" onChange={e => setWriteKey(e.target.value || "placeholder")} /> 
             <div className='input-box'>
