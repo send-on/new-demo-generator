@@ -48,6 +48,7 @@ const Source = ({ setWriteKey, writeKey, analyticsSecondary, algoliaIndex, setSe
       </div>
       <form onSubmit={handleSubmit}>
         <div className='header-source'> <label htmlFor="name">Company Name</label></div>
+        <div className='description'>Leave blank if testing.</div>
           <div className='input-box'>
             <TextInput name="company" id="company" autoComplete="on" className="inputbox" type="text" defaultValue={company} placeholder="Name" onChange={(e) => {setCompany(e.target.value || "")}} /> 
           </div>
