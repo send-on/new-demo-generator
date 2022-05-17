@@ -388,7 +388,7 @@ const App = () => {
                       event: 'Begin Fired Events',
                       properties: {
                         numOfUsers: userList.length,
-                        numOfEvents: eventList.length,
+                        numOfEvents: eventList.length - 2,
                         user: generateSessionId(),
                         company: company,
                         industry: selectedIndustries,

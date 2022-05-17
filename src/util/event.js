@@ -316,20 +316,18 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     ? analyticsOptional.identify(userList[u_i].user_id, fireProperties, context)
     : analytics.identify(userList[u_i].user_id, fireProperties, context);
   }
-  
+  let pageName = (eventList[e_i][2] || fireProperties.title || fireProperties.name || "/")
   if (eventList[e_i][1] === "page") {
     (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
-    ? analyticsOptional.page(eventList[e_i][2], fireProperties, context)
-    : analytics.page(eventList[e_i][2], fireProperties, context);
+    ? analyticsOptional.page(pageName, fireProperties, context)
+    : analytics.page(pageName, fireProperties, context);
   }
 
-  
   if (eventList[e_i][1] === "track") {
     (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
     ? analyticsOptional.track(eventList[e_i][2], fireProperties, context)
     : analytics.track(eventList[e_i][2], fireProperties, context)     
   }
-
 }
 
 export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional) => {
@@ -368,11 +366,10 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
     if (!firedEvents['identify']) {
       delete payload.userId;
     }
-    
-    payload.name = (eventList[e_i][2].length > 0 ? eventList[e_i][2] : "Page Viewed")
+    payload.name = eventList[e_i][2] || payload.properties.name || payload.properties.title;
 
     if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
-      analyticsOptional.page({...payload, event: "Page Viewed"})
+      analyticsOptional.page({ ...payload, });
     } else {
       analytics.page({ ...payload });
     }
@@ -381,12 +378,10 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
   if (eventList[e_i][1] === "track") {
     Object.assign(payload, {properties: fireProperties})    
     if (!firedEvents['identify']) delete payload.userId;
-
     if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
       analyticsOptional.track({...payload, event: eventList[e_i][2]})
     } else {
       analytics.track({...payload, event: eventList[e_i][2]})
     }
   }
-  
 }
