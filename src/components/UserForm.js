@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Button } from 'evergreen-ui'
 // import { useEffect } from 'react-transition-group/node_modules/@types/react';
 
-const UserForm = ({userList, onSubmit, userButtonStatus, setUserButtonStatus}) => {  
+const UserForm = ({userList, onUserSubmit, userButtonStatus, setUserButtonStatus}) => {  
   const [text, setText] = useState(userList);
 
   useEffect(()=> {
@@ -15,7 +15,7 @@ const UserForm = ({userList, onSubmit, userButtonStatus, setUserButtonStatus}) =
   }
 
   return (
-    <form style={{width: "100%"}} onSubmit={onSubmit} key={userList}>
+    <form style={{width: "100%"}} onSubmit={onUserSubmit} key={userList}>
         <textarea onChange={handleChange}
         className="userinput" type="text" name="userList" value={text} />
         <div>

@@ -4,7 +4,7 @@ import Analytics from "@segment/analytics.js-core/build/analytics";
 import SegmentIntegration from "@segment/analytics.js-integration-segmentio";
 import CSVReader from './components/CSVReader';
 import { toaster, Button, TextInput, Tooltip, InfoSignIcon } from 'evergreen-ui'
-import { generateUsers, generateRandomValue } from './util/faker'
+import { generateUsers, generateRandomValue, generateGroups } from './util/faker'
 import { generateSessionId } from './util/common.js';
 import {
   firstEvent,
@@ -28,6 +28,7 @@ import {
 import { algoliaAppId, algoliaSearchKey } from './constants/config.js'
 
 import GenerateUsers from './components/GenerateUsers';
+import GenerateGroups from './components/GenerateGroups';
 import Source from './components/Source';
 import Header from './components/Header';
 
@@ -54,9 +55,14 @@ const launcher = async (
   setUserCounter, 
   isNode,
   eventTimeout=1, 
-  analyticsOptional
+  analyticsOptional,
+  showGroups,
+  groupList
   ) => {
   // reset ajs on new user
+  console.log('showGroups', showGroups);
+  console.log('groupList', groupList);
+  console.log('analyticsOptional', analyticsOptional);
   setIsLoading(true);
   // reset traits in localStorage on each user for ajs
   if (e_i < 3 && !isNode) {
@@ -88,14 +94,14 @@ const launcher = async (
         timestamp: timestamp,
         ...contextObj
       };
+
       
       let fireProperties = removeEventContext(properties); // remove properties to fire object
       Object.assign(fireProperties, propertiesWithObjects); // Handle nested objects
-
       (isNode) ? 
-      await fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional) // Bulk Node Mode
+      await fireNodeEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional, showGroups, groupList) // Bulk Node Mode
       : 
-      await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional) // AJS mode
+      await fireJSEvents(fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional, showGroups, groupList) // AJS mode
       
       properties.timestampUnix = timestampArr[1] // set unix time stamp before saving to memmory
       firedEvents[parseInt(eventList[e_i][0])] = properties; // save all properties incl context and timestamp
@@ -121,7 +127,9 @@ const launcher = async (
         setUserCounter, 
         isNode,
         eventTimeout, 
-        analyticsOptional
+        analyticsOptional,
+        showGroups,
+        groupList
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -138,7 +146,9 @@ const launcher = async (
         setUserCounter, 
         isNode,
         eventTimeout, 
-        analyticsOptional
+        analyticsOptional,
+        showGroups,
+        groupList
         ), eventTimeout ?? defaultEventTimeout);
     }
   } else if (userList[u_i+1]) {
@@ -157,6 +167,8 @@ const launcher = async (
         isNode, 
         eventTimeout, 
         analyticsOptional,
+        showGroups,
+        groupList
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -174,6 +186,8 @@ const launcher = async (
         isNode, 
         eventTimeout,
         analyticsOptional,
+        showGroups,
+        groupList
         ), eventTimeout ?? defaultEventTimeout);
     }
   } else {
@@ -213,6 +227,10 @@ const App = () => {
   const [selectedIndustries, setSelectedIndustries] = useState(localStorage.getItem('selectedIndustries') ?? '-'); // Workspace Details
   const [selectedTags, setSelectedTags] = useState(JSON.parse(localStorage.getItem('selectedTags')) ?? []); // Workspace Details
   const [company, setCompany] = useState(localStorage.getItem('company') ?? ''); // Workspace Details
+  const [showGroups, setShowGroups] = useState(false); 
+  const [numOfGroups, setNumOfGroups] = useState(1);
+  const [groupList, setGroupList] = useState([]);
+  const [groupButtonStatus, setGroupButtonStatus] = useState("Click to Save Changes");
 
   // Set primary and optional analytics clients
   const analyticsJS = new Analytics();
@@ -270,6 +288,27 @@ const App = () => {
     return
   }
 
+  const lockGroupList = (numOfGroups, setGroupList, groupList, setGroupButtonStatus) => {
+    analyticsSecondary.track({
+      anonymousId: generateSessionId(),
+      event: 'Generate Groups',
+      properties: {
+        numOfUsers: numOfUsers,
+      }
+    });
+
+    if (groupList.length > 0) { 
+      setGroupButtonStatus("Click to Save Changes")
+      setGroupList([])
+      toaster.success("Group list has been reset", {id: 'reset-toast'})
+    } else {
+      setGroupButtonStatus("Click to Save Changes ") // The space is required, do not remove.
+      setGroupList(generateGroups(numOfGroups));
+      toaster.success("Group list successfully generated", {description: "If you modify group properties, remember to hit save.",id: 'user-toast'})
+    }    
+    return
+  }
+
   const regenerateAnonymousId = (userList, setUserList) => {
     analyticsSecondary.track({
       anonymousId: generateSessionId(),
@@ -294,7 +333,7 @@ const App = () => {
     }
   }
 
-  const onSubmit = async(e) => {
+  const onUserSubmit = async(e) => {
     e.preventDefault();
     analyticsSecondary.track({
       anonymousId: generateSessionId(),
@@ -317,6 +356,30 @@ const App = () => {
       });
     }
   }
+
+  const onGroupSubmit = async(e) => {
+    e.preventDefault();
+    analyticsSecondary.track({
+      anonymousId: generateSessionId(),
+      event: 'Saved Group List'
+    });
+    try {
+      if (groupList.length > 0) {
+        setGroupList(JSON.parse(e.target.groupList.value));
+        toaster.success("Group List has been saved", {id: 'user-toast'})
+        setGroupButtonStatus("Click to Save Changes")
+      } else {
+        toaster.danger("No groups entered", {description: "Click generate groups or paste custom", id: 'user-toast'})
+      }
+    }
+    catch(e) {
+      toaster.danger(e.message, {id: 'single-toast'});
+      analyticsSecondary.track({
+        anonymousId: generateSessionId(),
+        event: 'Group List Error',
+      });
+    }
+  }
   
   return (
     <div className="App">
@@ -331,9 +394,21 @@ const App = () => {
             userList={userList}
             setUserButtonStatus={setUserButtonStatus}
             userButtonStatus={userButtonStatus}
-            onSubmit={onSubmit}
+            onUserSubmit={onUserSubmit}
             regenerateAnonymousId={regenerateAnonymousId}
+            showGroups={showGroups}
+            setShowGroups={setShowGroups}
           />
+          {showGroups ? <GenerateGroups
+            numOfGroups={numOfGroups}
+            setNumOfGroups={setNumOfGroups}
+            lockGroupList={lockGroupList}
+            setGroupList={setGroupList}
+            groupList={groupList}
+            setGroupButtonStatus={setGroupButtonStatus}
+            groupButtonStatus={groupButtonStatus}
+            onGroupSubmit={onGroupSubmit}
+          /> : ""}
           <Source 
             setWriteKey={setWriteKey}
             writeKey={writeKey}
@@ -377,7 +452,7 @@ const App = () => {
             <div>
             {(!isLoading && (userList.length > 0) && (eventList.length > 0)) ? 
             <Button 
-              isLoading={isLoading}
+            isLoading={isLoading}
               size='large' 
               appearance='primary'
               onClick={()=>{
@@ -414,8 +489,9 @@ const App = () => {
                     setUserCounter, 
                     isNode,
                     eventTimeout, 
-                    (isNode) ? analyticsNodeOptional : analyticsJSOptional
-                    )
+                    (isNode) ? analyticsNodeOptional : analyticsJSOptional),
+                    showGroups,
+                    groupList
                   }
                 }
               } 

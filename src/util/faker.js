@@ -21,14 +21,38 @@ export const generateUsers = (numOfUsers) => {
   return users 
 }
 
-export const generateGroups = (numofGroups=100) => {
+export const generateGroups = (numOfGroups) => {
   let groups = [];
-  for (let i = 0; i < numofGroups; i++) {
-    let companyName = faker.company.companyName();
+  for (let id=1; id <= numOfGroups; id++) {
+
+    let company_name = faker.company.companyName();
+    let group_id = faker.datatype.uuid();
+    let city = faker.address.city();
+    let zip_code = faker.address.zipCode();
+    let address = faker.address.streetAddress();
+    let state = faker.address.state();
+    let company_size = generateRandomValue('#int_between#5#5000');
+    let phone_number = generateRandomValue('#phone');
+    let company_logo = faker.image.avatar();
+    let company_description = faker.lorem.paragraph();
+
+    
+    
+
     groups.push({
-      "company_name": companyName,
-    })
+      company_name : company_name,
+      group_id: group_id,
+      city: city,
+      zip_code: zip_code,
+      address: address,
+      state: state,
+      company_size: company_size,
+      phone_number: phone_number,
+      company_logo: company_logo,
+      company_description: company_description
+    });
   }
+  return groups 
 }
 
 const formatter = new Intl.NumberFormat('en-US', {

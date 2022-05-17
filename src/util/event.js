@@ -237,7 +237,7 @@ export const createEventProps = (e, firedEvents) => {
       properties[temp[0]] = createMultipleProperty(temp[1], firedEvents, recallCell);
     } else if (temp[1].trim()[0] === '#') {
       properties[temp[0]] = generateRandomValue(temp[1]);
-      if (generateRandomValue(temp[1]) === "") toaster.warning(`Random value error on "${temp[1]}" - Invalid Phrase`)
+      if (generateRandomValue(temp[1]) === "") toaster.warning(`Random value error on "${temp[1]}" - Invalid Phrase`, {id: 'single-toast'})
     } else {
       if (temp[1].trim()[0] === "[") {
         // if pipes are used, split by pipes instead of commas
@@ -303,9 +303,20 @@ export const shouldDropEvent = (dropoff) => {
   return (parseFloat(dropoff) < (Math.floor(Math.random() * 101))) ? false : true;
 }
 
-export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional) => {
+export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, analyticsOptional, showGroups, groupList) => {
   if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
     analyticsOptional._integrations['Segment.io'].options.apiKey = eventList[e_i][writeKeyElement]
+  }
+
+  if (eventList[e_i][1] === "group") {
+    if (!showGroups) {
+      toaster.danger(`Enable groups to use groups in template`, {id: 'single-toast'})
+    } else {
+      
+      (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
+      ? analyticsOptional.group(groupList[getRandomInt(groupList.length-1)]['group_id'], fireProperties, context)
+      : analytics.group(groupList[getRandomInt(groupList.length-1)]['group_id'], fireProperties, context)
+    }
   }
 
   if (eventList[e_i][1] === "identify") {
@@ -328,9 +339,11 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     ? analyticsOptional.track(eventList[e_i][2], fireProperties, context)
     : analytics.track(eventList[e_i][2], fireProperties, context)     
   }
+
+  
 }
 
-export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional) => {
+export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional,  showGroups, groupList) => {
   let nodeContext = {};
   Object.assign(nodeContext, context);
   delete nodeContext.timestamp;

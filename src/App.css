@@ -77,6 +77,12 @@ a:hover {
   margin-bottom: 0.5em;
 }
 
+.groupinput {
+  width: 75%;
+  height: 15em;
+  margin-bottom: 0.5em;
+}
+
 .notepad {
   min-width: 350px; 
   margin-top: 2em;
