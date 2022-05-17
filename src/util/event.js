@@ -309,13 +309,14 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
   }
 
   if (eventList[e_i][1] === "group") {
-    if (!showGroups) {
-      toaster.danger(`Enable groups to use groups in template`, {id: 'single-toast'})
-    } else {
-      
+    let randomInt = getRandomInt(groupList.length)
+    Object.assign(fireProperties, groupList[randomInt]);
+    if (showGroups && groupList.length > 0) {
       (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":"))
-      ? analyticsOptional.group(groupList[getRandomInt(groupList.length-1)]['group_id'], fireProperties, context)
-      : analytics.group(groupList[getRandomInt(groupList.length-1)]['group_id'], fireProperties, context)
+      ? analyticsOptional.group(groupList[randomInt]['group_id'], fireProperties, context)
+      : analytics.group(groupList[randomInt]['group_id'], fireProperties, context)
+    } else {
+      toaster.danger(`Enable groups to use groups in template`, {id: 'group-toast'})
     }
   }
 
@@ -339,11 +340,9 @@ export const fireJSEvents = (fireProperties, eventList, e_i, userList, u_i, cont
     ? analyticsOptional.track(eventList[e_i][2], fireProperties, context)
     : analytics.track(eventList[e_i][2], fireProperties, context)     
   }
-
-  
 }
 
-export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional,  showGroups, groupList) => {
+export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u_i, context, analytics, timestamp, firedEvents, analyticsOptional, showGroups, groupList) => {
   let nodeContext = {};
   Object.assign(nodeContext, context);
   delete nodeContext.timestamp;
@@ -360,7 +359,28 @@ export const fireNodeEvents = async (fireProperties, eventList, e_i, userList, u
   if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
     analyticsOptional.writeKey = eventList[e_i][writeKeyElement]
   }
-    
+
+  if (eventList[e_i][1] === "group") {
+    if (showGroups && groupList.length > 0) {
+      let randomInt = getRandomInt(groupList.length)
+      let newFireProperties = groupList[randomInt];
+      Object.assign(newFireProperties, fireProperties)
+      if (!firedEvents['identify']) {
+        delete payload.userId;
+      }
+      payload.groupId = groupList[randomInt].group_id;
+      Object.assign(payload, {traits: newFireProperties})    
+      if (eventList[e_i][writeKeyElement].length === 32 && !eventList[e_i][writeKeyElement].includes(":")) {
+        analyticsOptional.group(payload)
+      } else {
+        analytics.group(payload)
+      }
+    } else {
+      toaster.danger(`Enable groups to use groups in template`, {id: 'group-toast'})
+    }
+  }
+
+
   if (eventList[e_i][1] === "identify") {
     Object.assign(fireProperties, userList[u_i]);  
     delete fireProperties.user_id;

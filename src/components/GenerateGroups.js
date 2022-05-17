@@ -5,7 +5,7 @@ const GenerateGroups = ({ numOfGroups, setNumOfGroups, lockGroupList, setGroupLi
   return (
     <div className="section">
       <div className="header">Enter Number of Groups to Generate or Import List</div>
-      <div className="description">Note: Click save after manually modifying values. </div>
+      <div className="description">Note: Your CSV Template must have groups in a row to activate the groups. </div>
       <div className="stepComponent">
         <div className="input-box">
           <TextInput type="text" placeholder="Number of Groups (i.e. 10)" onChange={e => setNumOfGroups(e.target.value)} />

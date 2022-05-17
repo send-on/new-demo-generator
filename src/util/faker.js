@@ -26,7 +26,7 @@ export const generateGroups = (numOfGroups) => {
   for (let id=1; id <= numOfGroups; id++) {
 
     let company_name = faker.company.companyName();
-    let group_id = faker.datatype.uuid();
+    let group_id = generateRandomValue('#short_id')
     let city = faker.address.city();
     let zip_code = faker.address.zipCode();
     let address = faker.address.streetAddress();

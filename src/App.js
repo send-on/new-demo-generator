@@ -55,14 +55,11 @@ const launcher = async (
   setUserCounter, 
   isNode,
   eventTimeout=1, 
-  analyticsOptional,
   showGroups,
-  groupList
+  groupList, 
+  analyticsOptional
   ) => {
   // reset ajs on new user
-  console.log('showGroups', showGroups);
-  console.log('groupList', groupList);
-  console.log('analyticsOptional', analyticsOptional);
   setIsLoading(true);
   // reset traits in localStorage on each user for ajs
   if (e_i < 3 && !isNode) {
@@ -127,9 +124,9 @@ const launcher = async (
         setUserCounter, 
         isNode,
         eventTimeout, 
-        analyticsOptional,
         showGroups,
-        groupList
+        groupList, 
+        analyticsOptional
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -146,9 +143,9 @@ const launcher = async (
         setUserCounter, 
         isNode,
         eventTimeout, 
-        analyticsOptional,
         showGroups,
-        groupList
+        groupList, 
+        analyticsOptional
         ), eventTimeout ?? defaultEventTimeout);
     }
   } else if (userList[u_i+1]) {
@@ -166,9 +163,9 @@ const launcher = async (
         setUserCounter, 
         isNode, 
         eventTimeout, 
-        analyticsOptional,
         showGroups,
-        groupList
+        groupList, 
+        analyticsOptional
         );
     } else {
       if (counter%100 === 0) setCounter(counter);
@@ -185,9 +182,9 @@ const launcher = async (
         setUserCounter, 
         isNode, 
         eventTimeout,
-        analyticsOptional,
         showGroups,
-        groupList
+        groupList, 
+        analyticsOptional
         ), eventTimeout ?? defaultEventTimeout);
     }
   } else {
@@ -472,7 +469,8 @@ const App = () => {
                         writeKey: writeKey,
                         eventTimeout: eventTimeout,
                         isNode: isNode, 
-                        schema: eventList
+                        schema: eventList,
+                        date: Math.floor(new Date().getTime() / 1000)
                       }
                     });
                   }
@@ -489,9 +487,9 @@ const App = () => {
                     setUserCounter, 
                     isNode,
                     eventTimeout, 
-                    (isNode) ? analyticsNodeOptional : analyticsJSOptional),
                     showGroups,
-                    groupList
+                    groupList, 
+                    (isNode) ? analyticsNodeOptional : analyticsJSOptional)
                   }
                 }
               } 
