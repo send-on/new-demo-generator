@@ -3,6 +3,9 @@
   "type":"module",
   "version": "3.01",
   "private": true,
+  "engines": {
+    "node" : "^17.8.0"
+  },
   "dependencies": {
     "@segment/analytics.js-core": "^4.1.11",
     "@segment/analytics.js-integration-segmentio": "^4.4.6",
