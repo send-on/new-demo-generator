@@ -101,7 +101,8 @@ export const generateRandomValue = (string) => {
   if (type === "latitude") value = faker.address.latitude();
   if (type === "longitude") value = faker.address.longitude();
   if (type === "ip") value = faker.internet.ip();
-  if (type === "full_name") value = faker.name.firstName() + faker.name.lastName();
+  if (type === "full_name") value = faker.name.firstName() + " " + faker.name.lastName();
+  if (type === "first_name") value = faker.name.firstName();
   if (type === "name") value = faker.name.firstName();
   if (type === "last_name") value = faker.name.lastName();
     
