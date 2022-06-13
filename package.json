@@ -4,7 +4,7 @@
   "version": "3.01",
   "private": true,
   "engines": {
-    "node" : "^17.8.0"
+    "node" : "^16.15.0"
   },
   "dependencies": {
     "@segment/analytics.js-core": "^4.1.11",
