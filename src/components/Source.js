@@ -50,7 +50,7 @@ const Source = ({ setWriteKey, writeKey, analyticsSecondary, algoliaIndex, setSe
         <div className='header-source'> <label htmlFor="name">Company Name</label></div>
         <div className='description'>Leave blank if testing or not for customer.</div>
           <div className='input-box'>
-            <TextInput name="company" id="company" autoComplete="on" className="inputbox" type="text" defaultValue={company} placeholder="Name" onChange={(e) => {setCompany(e.target.value || "")}} /> 
+            <TextInput name="company" id="company" autoComplete="on" className="inputbox" type="text" value={company} placeholder="Name" onChange={(e) => {setCompany(e.target.value || "")}} /> 
           </div>
           <div></div>
           <div className='input-box'>
