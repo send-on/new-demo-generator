@@ -110,9 +110,8 @@ export const createTimestamp = (e, firedEvents) => {
   let timestampUnix = 0;
   let recallNum = "0"
   let recallCell = "0"
-  recallNum = handleMultipleDependency[0]
-  recallCell = handleMultipleDependency[1]
-  
+  recallNum = handleMultipleDependency(e[dependencyElement])[0]
+  recallCell = handleMultipleDependency(e[dependencyElement])[1]
   if (e[dayElement].trim()[0] === "#") {
     // FIX LATER: bad practice to mutate
     e[dayElement] = e[dayElement].substring(1);
