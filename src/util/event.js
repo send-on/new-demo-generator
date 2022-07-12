@@ -85,16 +85,34 @@ export const createMultipleProperty = (val, firedEvents, recallCell ) => {
   return outputArr
 }
 
+const handleMultipleDependency = (cell) => {
+  // sanitizes recallCell to change any "&" and "|" into comma
+  // returns a tuple of the number and the sanitized cell
+  let recallNum = "0"
+  let recallCell = "0"
+  if (cell) {  
+    if (cell.includes("|")) {
+      recallCell = JSON.parse(cell.replaceAll("|", ","))
+    } else if (cell.includes("&")) {
+      recallCell = JSON.parse(cell.replaceAll("&", ","))
+    } else {
+      recallCell = JSON.parse(cell)
+    }
+    recallNum = parseInt(recallCell)
+  }
+  
+  return [recallNum, recallCell]
+}
+
 export const createTimestamp = (e, firedEvents) => {
   // if recall exists
   let timestamp = "";
   let timestampUnix = 0;
   let recallNum = "0"
   let recallCell = "0"
-  if (e[dependencyElement]) {
-    recallNum = parseInt(e[dependencyElement])
-    recallCell = JSON.parse(e[dependencyElement])
-  }  
+  recallNum = handleMultipleDependency[0]
+  recallCell = handleMultipleDependency[1]
+  
   if (e[dayElement].trim()[0] === "#") {
     // FIX LATER: bad practice to mutate
     e[dayElement] = e[dayElement].substring(1);
@@ -204,8 +222,8 @@ export const createEventProps = (e, firedEvents) => {
   let shouldReuseIndex = false; 
 
   if (e[dependencyElement]) {
-    recallNum = parseInt(e[dependencyElement])
-    recallCell = JSON.parse(e[dependencyElement])
+    recallNum = handleMultipleDependency(e[dependencyElement])[0]
+    recallCell = handleMultipleDependency(e[dependencyElement])[1]
   } 
   
   // set recallNum to existing value based on dependency
@@ -291,11 +309,28 @@ export const createEventProps = (e, firedEvents) => {
 }
 
 export const checkDependency = (dependentOn, firedEvents={}) => {
-  let parsedDependentOn = JSON.parse(dependentOn)
-  if (Array.isArray(parsedDependentOn)) { 
-    return checkIsArrayAndHasEvent(parsedDependentOn, firedEvents)
+  // dependentOn is the stringified version of cell from the template
+  //  parsedDependentOn is the parsed version of cell from the template (array or int)
+  let parsedDependentOn = handleMultipleDependency(dependentOn)[1];
+  if (dependentOn.includes("&")) {
+    // parsedDependentOn changed "&"" into "," and is parsed 
+    if (Array.isArray(parsedDependentOn)) { 
+      let hasAllEvents = true;
+      parsedDependentOn.forEach(el => {
+        if (!firedEvents[el]) hasAllEvents = false;
+      })
+      // if not all elements are in array, return false.  
+      // else return the event in the array with most recent timestamp
+      return (hasAllEvents ? checkIsArrayAndHasEvent(parsedDependentOn, firedEvents) : false);
+    } else {
+      return (dependentOn in firedEvents ? true : false);
+    }
   } else {
-    return (dependentOn in firedEvents ? true : false)
+    if (Array.isArray(parsedDependentOn)) { 
+      return checkIsArrayAndHasEvent(parsedDependentOn, firedEvents);
+    } else {
+      return (dependentOn in firedEvents ? true : false);
+    }
   }
 }
 
